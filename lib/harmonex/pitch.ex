@@ -3,11 +3,15 @@ defmodule Harmonex.Pitch do
   Provides functions for working with pitches on the Western dodecaphonic scale.
   """
 
-  defstruct name: nil, alteration: :natural
+  defstruct bare_name: nil, alteration: :natural
 
   @type t :: term
 
-  @type name :: :a | :b | :c | :d | :e | :f | :g
+  @type bare_name :: :a | :b | :c | :d | :e | :f | :g
+  @bare_names      ~w(a    b    c    d    e    f    g)a
+
+  @type alteration :: :natural | :flat | :sharp | :double_flat | :double_sharp
+  @alteration       ~w(natural    flat    sharp    double_flat    double_sharp)a
 
   @doc """
   Constructs a new `Harmonex.Pitch`.
@@ -15,25 +19,25 @@ defmodule Harmonex.Pitch do
   ## Examples
 
       iex> Harmonex.Pitch.new :a
-      %Harmonex.Pitch{name: :a, alteration: :natural}
+      %Harmonex.Pitch{bare_name: :a, alteration: :natural}
 
       iex> Harmonex.Pitch.new :h
-      {:error, "Invalid pitch name -- must be an atom between :a and :g"}
+      {:error, "Invalid pitch bare name -- must be an atom between :a and :g"}
 
       iex> Harmonex.Pitch.new :a, :out_of_tune
       {:error, "Invalid pitch alteration -- must be :natural, :flat, :sharp, :double_flat, or :double_sharp"}
   """
-  @spec new(name, PitchAlteration.t) :: t | {:error, binary}
-  def new(name, alteration \\ :natural) do
-    if name in ~w(a b c d e f g)a do
-      if alteration in ~w(natural flat sharp double_flat double_sharp)a do
-        __MODULE__ |> struct(name: name, alteration: alteration)
+  @spec new(bare_name, alteration) :: t | {:error, binary}
+  def new(bare_name, alteration \\ :natural) do
+    if bare_name in @bare_names do
+      if alteration in @alteration do
+        __MODULE__ |> struct(bare_name: bare_name, alteration: alteration)
       else
         {:error,
          "Invalid pitch alteration -- must be :natural, :flat, :sharp, :double_flat, or :double_sharp"}
       end
     else
-      {:error, "Invalid pitch name -- must be an atom between :a and :g"}
+      {:error, "Invalid pitch bare name -- must be an atom between :a and :g"}
     end
   end
 end
