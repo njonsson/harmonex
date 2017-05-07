@@ -3,7 +3,7 @@ defmodule Harmonex.Mixfile do
 
   def project do
     [app: :harmonex,
-     version: "0.1.0",
+     version: version(),
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -17,6 +17,8 @@ defmodule Harmonex.Mixfile do
     # Specify extra applications you'll use from Erlang/Elixir
     [extra_applications: [:logger]]
   end
+
+  def version, do: "0.1.0"
 
   # Dependencies can be Hex packages:
   #
