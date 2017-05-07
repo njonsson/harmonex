@@ -1,19 +1,15 @@
-# Harmonex
+# harmonex
 
-**TODO: Add description**
+This is a collection of tools for music theory called _harmonex_ (pronounced
+“harmonics”).
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `harmonex` to your list of dependencies in `mix.exs`:
+[The package](https://hex.pm/packages/harmonex) can be installed by adding
+`:harmonex` to the list of dependencies in your project’s _mix.exs_ file:
 
 ```elixir
 def deps do
   [{:harmonex, "~> 0.1.0"}]
 end
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/harmonex](https://hexdocs.pm/harmonex).
-
