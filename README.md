@@ -1,5 +1,7 @@
 # harmonex
 
+[![build status](https://travis-ci.org/njonsson/harmonex.svg?branch=master)](https://travis-ci.org/njonsson/harmonex)
+
 This is a collection of tools for music theory called _harmonex_ (pronounced
 “harmonics”).
 
