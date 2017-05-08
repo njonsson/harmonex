@@ -5,7 +5,7 @@ defmodule Harmonex.Pitch do
 
   defstruct bare_name: nil, alteration: :natural
 
-  @type t :: term
+  @type t :: %{bare_name: bare_name, alteration: alteration} | %{bare_name: bare_name} | atom
 
   @type bare_name :: :a | :b | :c | :d | :e | :f | :g
   @bare_names     ~w( a    b    c    d    e    f    g )a
@@ -17,6 +17,12 @@ defmodule Harmonex.Pitch do
                         sharp:        1,
                         double_sharp: 2}
   @alterations @alteration_offsets |> Map.keys
+
+  @type quality :: :perfect | :diminished | :augmented | :minor | :major
+
+  @type interval_diatonic :: {quality, 1..7}
+
+  @type semitones :: 0..11
 
   @doc """
   Constructs a new `Harmonex.Pitch`.
@@ -131,9 +137,11 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.enharmonic? :a_sharp, :a_natural
       false
   """
-  @spec enharmonic?(%{bare_name: bare_name, alteration: alteration} | atom, %{bare_name: bare_name, alteration: alteration} | atom) :: boolean
+  @spec enharmonic?(t, t) :: boolean
   def enharmonic?(pitch1, pitch2) do
-    index(full_name(pitch1)) == index(full_name(pitch2))
+    index1 = pitch1 |> full_name |> index_chromatic
+    index2 = pitch2 |> full_name |> index_chromatic
+    index1 == index2
   end
 
   @doc """
@@ -144,13 +152,16 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.full_name %{bare_name: :a, alteration: :flat}
       :a_flat
 
+      iex> Harmonex.Pitch.full_name %{bare_name: :a}
+      :a
+
       iex> Harmonex.Pitch.full_name :a
       :a
 
       iex> Harmonex.Pitch.full_name :a_flat
       :a_flat
   """
-  @spec full_name(%{bare_name: bare_name, alteration: alteration} | atom) :: atom
+  @spec full_name(t) :: atom
 
   for bare_name <- @bare_names do
     for alteration <- @alterations do
@@ -168,21 +179,110 @@ defmodule Harmonex.Pitch do
     def full_name(unquote(bare_name)), do: unquote(bare_name)
   end
 
-  @spec index(atom) :: integer
-  defp index(:c), do:  1
-  defp index(:d), do:  3
-  defp index(:e), do:  5
-  defp index(:f), do:  6
-  defp index(:g), do:  8
-  defp index(:a), do: 10
-  defp index(:b), do: 12
+  @doc """
+  Computes the quality and number of the interval between two pitches. Note that
+  `pitch1` is assumed to be lower than `pitch2`.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.interval_diatonic %{bare_name: :a, alteration: :sharp}, %{bare_name: :c}
+      {:diminished, 3}
+
+      iex> Harmonex.Pitch.interval_diatonic :b_flat, :c
+      {:major, 2}
+
+      iex> Harmonex.Pitch.interval_diatonic :d_double_sharp, :a_double_sharp
+      {:perfect, 5}
+
+      iex> Harmonex.Pitch.interval_diatonic :c_flat, :c_natural
+      {:augmented, 1}
+
+      iex> Harmonex.Pitch.interval_diatonic :a_flat, :e_sharp
+      {:error, "Not a diatonic interval"}
+  """
+  @spec interval_diatonic(t, t) :: interval_diatonic | {:error, binary}
+  def interval_diatonic(pitch1, pitch2) do
+    semitones = semitones(pitch1, pitch2)
+
+    staff_position1 = pitch1 |> bare_name |> staff_position
+    staff_position2 = pitch2 |> bare_name |> staff_position
+    number = Integer.mod(staff_position2 - staff_position1, 7) + 1
+
+    semitones_and_number_to_interval_diatonic semitones, number
+  end
+
+  @doc """
+  Computes the distance in half steps between two pitches. Note that `pitch1` is
+  assumed to be lower than `pitch2`.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.semitones %{bare_name: :a, alteration: :flat}, %{bare_name: :c, alteration: :sharp}
+      5
+
+      iex> Harmonex.Pitch.semitones :a_flat, :b_flat
+      2
+
+      iex> Harmonex.Pitch.semitones :d_double_sharp, :b_double_sharp
+      9
+  """
+  @spec semitones(t, t) :: semitones
+  def semitones(pitch1, pitch2) do
+    index1 = pitch1 |> full_name |> index_chromatic
+    index2 = pitch2 |> full_name |> index_chromatic
+    (index2 - index1) |> Integer.mod(12)
+  end
+
+  @spec index_chromatic(atom) :: semitones
+  defp index_chromatic(:c), do:  0
+  defp index_chromatic(:d), do:  2
+  defp index_chromatic(:e), do:  4
+  defp index_chromatic(:f), do:  5
+  defp index_chromatic(:g), do:  7
+  defp index_chromatic(:a), do:  9
+  defp index_chromatic(:b), do: 11
 
   for bare_name <- @bare_names do
     for {alteration, offset} <- @alteration_offsets do
       name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
-      defp index(unquote(name)) do
-        (index(unquote(bare_name)) + unquote(offset)) |> Integer.mod(12) |> abs
+      defp index_chromatic(unquote(name)) do
+        (index_chromatic(unquote(bare_name)) + unquote(offset)) |> Integer.mod(12)
       end
     end
   end
+
+  @spec semitones_and_number_to_interval_diatonic(semitones, 1..7) :: interval_diatonic | {:error, binary}
+  defp semitones_and_number_to_interval_diatonic( 0, 1), do: {:perfect,    1}
+  defp semitones_and_number_to_interval_diatonic( 1, 1), do: {:augmented,  1}
+  defp semitones_and_number_to_interval_diatonic( 0, 2), do: {:diminished, 2}
+  defp semitones_and_number_to_interval_diatonic( 1, 2), do: {:minor,      2}
+  defp semitones_and_number_to_interval_diatonic( 2, 2), do: {:major,      2}
+  defp semitones_and_number_to_interval_diatonic( 3, 2), do: {:augmented,  2}
+  defp semitones_and_number_to_interval_diatonic( 2, 3), do: {:diminished, 3}
+  defp semitones_and_number_to_interval_diatonic( 3, 3), do: {:minor,      3}
+  defp semitones_and_number_to_interval_diatonic( 4, 3), do: {:major,      3}
+  defp semitones_and_number_to_interval_diatonic( 5, 3), do: {:augmented,  3}
+  defp semitones_and_number_to_interval_diatonic( 4, 4), do: {:diminished, 4}
+  defp semitones_and_number_to_interval_diatonic( 5, 4), do: {:perfect,    4}
+  defp semitones_and_number_to_interval_diatonic( 6, 4), do: {:augmented,  4}
+  defp semitones_and_number_to_interval_diatonic( 6, 5), do: {:diminished, 5}
+  defp semitones_and_number_to_interval_diatonic( 7, 5), do: {:perfect,    5}
+  defp semitones_and_number_to_interval_diatonic( 8, 5), do: {:augmented,  5}
+  defp semitones_and_number_to_interval_diatonic( 7, 6), do: {:diminished, 6}
+  defp semitones_and_number_to_interval_diatonic( 8, 6), do: {:minor,      6}
+  defp semitones_and_number_to_interval_diatonic( 9, 6), do: {:major,      6}
+  defp semitones_and_number_to_interval_diatonic(10, 6), do: {:augmented,  6}
+  defp semitones_and_number_to_interval_diatonic( 9, 7), do: {:diminished, 7}
+  defp semitones_and_number_to_interval_diatonic(10, 7), do: {:minor,      7}
+  defp semitones_and_number_to_interval_diatonic(11, 7), do: {:major,      7}
+  defp semitones_and_number_to_interval_diatonic( 0, 7), do: {:augmented,  7}
+  defp semitones_and_number_to_interval_diatonic( _, _), do: {:error, "Not a diatonic interval"}
+
+  defp staff_position(:c), do: 0
+  defp staff_position(:d), do: 1
+  defp staff_position(:e), do: 2
+  defp staff_position(:f), do: 3
+  defp staff_position(:g), do: 4
+  defp staff_position(:a), do: 5
+  defp staff_position(:b), do: 6
 end
