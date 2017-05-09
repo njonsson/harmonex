@@ -52,7 +52,7 @@ defmodule Harmonex.Mixfile do
     [files:       ~w(History.md License.md README.md lib mix.exs),
      maintainers: ["Nils Jonsson <harmonex@nilsjonsson.com>"],
      licenses:    ["MIT"],
-     links:       %{# "Home"   => "https://njonsson.github.io/harmonex",
+     links:       %{"Home"   => "https://njonsson.github.io/harmonex",
                     "Source" => "https://github.com/njonsson/harmonex",
                     "Issues" => "https://github.com/njonsson/harmonex/issues"}]
   end
