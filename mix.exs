@@ -30,6 +30,7 @@ defmodule Harmonex.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:dialyze, "~> 0.2", only: :dev}]
+    [{:dialyze, "~> 0.2",  only: :dev},
+     {:ex_doc,  "~> 0.15", only: :dev}]
   end
 end
