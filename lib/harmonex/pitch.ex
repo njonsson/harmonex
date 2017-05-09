@@ -25,51 +25,60 @@ defmodule Harmonex.Pitch do
   @type semitones :: 0..11
 
   @doc """
-  Constructs a new `Harmonex.Pitch`.
+  Constructs a new `Harmonex.Pitch` with the specified `name`.
 
   ## Examples
 
       iex> Harmonex.Pitch.new :a
       %Harmonex.Pitch{bare_name: :a, alteration: :natural}
 
-      iex> Harmonex.Pitch.new :a, :flat
-      %Harmonex.Pitch{bare_name: :a, alteration: :flat}
-
       iex> Harmonex.Pitch.new :a_flat
       %Harmonex.Pitch{bare_name: :a, alteration: :flat}
 
       iex> Harmonex.Pitch.new :h
       {:error, "Invalid pitch name -- must be in #{inspect @bare_names} with an optional alteration (e.g, :a_flat)"}
-
-      iex> Harmonex.Pitch.new :a, :out_of_tune
-      {:error, "Invalid pitch alteration -- must be in #{inspect @alterations}"}
   """
-  @spec new(bare_name | atom) :: t | {:error, binary}
+  @spec new(atom) :: t | {:error, binary}
   @spec new(bare_name, alteration) :: t | {:error, binary}
   for bare_name <- @bare_names do
-    def new(unquote(bare_name)), do: new(unquote(bare_name), :natural)
+    def new(unquote(bare_name)=name), do: new(name, :natural)
 
     for alteration <- @alterations do
-      def new(unquote(bare_name), unquote(alteration)) do
-        __MODULE__ |> struct(bare_name: unquote(bare_name),
-                             alteration: unquote(alteration))
+      @doc """
+      Constructs a new `Harmonex.Pitch` with the specified `bare_name` and
+      `alteration`.
+
+      ## Examples
+
+          iex> Harmonex.Pitch.new :a, :flat
+          %Harmonex.Pitch{bare_name: :a, alteration: :flat}
+
+          iex> Harmonex.Pitch.new :a, :out_of_tune
+          {:error, "Invalid pitch alteration -- must be in #{inspect @alterations}"}
+      """
+      def new(unquote(bare_name)=bare_name, unquote(alteration)=alteration) do
+        __MODULE__ |> struct(bare_name: bare_name, alteration: alteration)
       end
 
-      name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
-      def new(unquote(name)), do: new(unquote(bare_name), unquote(alteration))
+      full_name = String.to_atom(to_string(bare_name) <>
+                                 "_"                  <>
+                                 to_string(alteration))
+      def new(unquote(full_name)=_full_name) do
+        new(unquote(bare_name), unquote(alteration))
+      end
     end
 
-    def new(unquote(bare_name), _) do
+    def new(unquote(bare_name)=_bare_name, _invalid_alteration) do
       {:error, "Invalid pitch alteration -- must be in #{inspect @alterations}"}
     end
   end
 
-  def new(_) do
+  def new(_invalid_name) do
     {:error, "Invalid pitch name -- must be in #{inspect @bare_names} with an optional alteration (e.g, :a_flat)"}
   end
 
   @doc """
-  Computes the alteration of a pitch.
+  Computes the alteration of the specified `pitch`.
 
   ## Examples
 
@@ -83,19 +92,19 @@ defmodule Harmonex.Pitch do
       :flat
   """
   @spec alteration(%{alteration: alteration} | atom) :: alteration
-  def alteration(%{alteration: alteration}), do: alteration
+  def alteration(%{alteration: alteration}=_pitch), do: alteration
 
   for bare_name <- @bare_names do
-    def alteration(unquote(bare_name)), do: :natural
+    def alteration(unquote(bare_name)=_pitch), do: :natural
 
     for alteration <- @alterations do
       name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
-      def alteration(unquote(name)), do: unquote(alteration)
+      def alteration(unquote(name)=_pitch), do: unquote(alteration)
     end
   end
 
   @doc """
-  Computes the bare name of a pitch.
+  Computes the bare name of the specified `pitch`.
 
   ## Examples
 
@@ -109,19 +118,20 @@ defmodule Harmonex.Pitch do
       :a
   """
   @spec bare_name(%{bare_name: bare_name} | atom) :: bare_name
-  def bare_name(%{bare_name: bare_name}), do: bare_name
+  def bare_name(%{bare_name: bare_name}=_pitch), do: bare_name
 
   for bare_name <- @bare_names do
-    def bare_name(unquote(bare_name)), do: unquote(bare_name)
+    def bare_name(unquote(bare_name)=pitch), do: pitch
 
     for alteration <- @alterations do
       name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
-      def bare_name(unquote(name)), do: unquote(bare_name)
+      def bare_name(unquote(name)=_pitch), do: unquote(bare_name)
     end
   end
 
   @doc """
-  Determines whether two pitches are enharmonically equivalent.
+  Determines whether the specified `pitch1` and `pitch2` are enharmonically
+  equivalent.
 
   ## Examples
 
@@ -145,7 +155,7 @@ defmodule Harmonex.Pitch do
   end
 
   @doc """
-  Computes the full name of a pitch.
+  Computes the full name of the specified `pitch`.
 
   ## Examples
 
@@ -167,21 +177,23 @@ defmodule Harmonex.Pitch do
     for alteration <- @alterations do
       name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
       def full_name(%{bare_name: unquote(bare_name),
-                      alteration: unquote(alteration)}) do
+                      alteration: unquote(alteration)}=_pitch) do
         unquote(name)
       end
 
-      def full_name(unquote(name)), do: unquote(name)
+      def full_name(unquote(name)=pitch), do: pitch
     end
 
-    def full_name(%{bare_name: unquote(bare_name)}), do: unquote(bare_name)
+    def full_name(%{bare_name: unquote(bare_name)}=_pitch) do
+      unquote(bare_name)
+    end
 
-    def full_name(unquote(bare_name)), do: unquote(bare_name)
+    def full_name(unquote(bare_name)=pitch), do: pitch
   end
 
   @doc """
-  Computes the quality and number of the interval between two pitches. Note that
-  `pitch1` is assumed to be lower than `pitch2`.
+  Computes the quality and number of the interval between the specified
+  `low_pitch` and `high_pitch`.
 
   ## Examples
 
@@ -201,19 +213,19 @@ defmodule Harmonex.Pitch do
       {:error, "Not a diatonic interval"}
   """
   @spec interval_diatonic(t, t) :: interval_diatonic | {:error, binary}
-  def interval_diatonic(pitch1, pitch2) do
-    semitones = semitones(pitch1, pitch2)
+  def interval_diatonic(low_pitch, high_pitch) do
+    semitones = semitones(low_pitch, high_pitch)
 
-    staff_position1 = pitch1 |> bare_name |> staff_position
-    staff_position2 = pitch2 |> bare_name |> staff_position
-    number = Integer.mod(staff_position2 - staff_position1, 7) + 1
+    low_staff_position  = low_pitch  |> bare_name |> staff_position
+    high_staff_position = high_pitch |> bare_name |> staff_position
+    number = Integer.mod(high_staff_position - low_staff_position, 7) + 1
 
     semitones_and_number_to_interval_diatonic semitones, number
   end
 
   @doc """
-  Computes the distance in half steps between two pitches. Note that `pitch1` is
-  assumed to be lower than `pitch2`.
+  Computes the distance in half steps between the specified `low_pitch` and
+  `high_pitch`.
 
   ## Examples
 
@@ -227,10 +239,10 @@ defmodule Harmonex.Pitch do
       9
   """
   @spec semitones(t, t) :: semitones
-  def semitones(pitch1, pitch2) do
-    index1 = pitch1 |> full_name |> index_chromatic
-    index2 = pitch2 |> full_name |> index_chromatic
-    (index2 - index1) |> Integer.mod(12)
+  def semitones(low_pitch, high_pitch) do
+    low_index  = low_pitch  |> full_name |> index_chromatic
+    high_index = high_pitch |> full_name |> index_chromatic
+    (high_index - low_index) |> Integer.mod(12)
   end
 
   @spec index_chromatic(atom) :: semitones
@@ -278,6 +290,7 @@ defmodule Harmonex.Pitch do
   defp semitones_and_number_to_interval_diatonic( 0, 7), do: {:augmented,  7}
   defp semitones_and_number_to_interval_diatonic( _, _), do: {:error, "Not a diatonic interval"}
 
+  @spec staff_position(bare_name) :: 0..6
   defp staff_position(:c), do: 0
   defp staff_position(:d), do: 1
   defp staff_position(:e), do: 2
