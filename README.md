@@ -6,11 +6,11 @@
 This is a collection of tools for music theory called _Harmonex_ (pronounced
 “harmonics”).
 
-**See what’s changed lately by reading the [project history][project-history].**
+**See what’s changed lately by reading [the project history][project-history].**
 
 ## Installation
 
-Install [the Hex package][Hex-package] by adding `:harmonex` to the list of
+Install [the Hex package][Hex-release] by adding `:harmonex` to the list of
 dependencies in your project’s _mix.exs_ file:
 
 ```elixir
@@ -41,7 +41,7 @@ To release a new version:
 
 1. Update [the “Installation” section](#installation) of this readme to reference
    the new version, and commit.
-2. Update the project history in _History.md_, and commit.
+2. Update [the project history in _History.md_][project-history], and commit.
 3. Update the version number in _mix.exs_, and commit.
 4. Tag the commit and push commits and tags.
 5. Build and publish [the Hex package][Hex-release] with `mix hex.publish`.
