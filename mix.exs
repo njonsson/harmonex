@@ -4,10 +4,20 @@ defmodule Harmonex.Mixfile do
   def project do
     [app: :harmonex,
      version: version(),
+     description: description(),
      elixir: "~> 1.4",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     deps: deps(),
+     package: package(),
+     docs: [extras: ["README.md":  [filename: "about",
+                                    title: "About Harmonex"],
+                     "License.md": [filename: "license",
+                                    title: "Project license"]],
+                     # TODO: Figure out why ExDoc chokes on this
+                     # "History.md": [filename: "history",
+                     #                title: "Project history"]],
+            main: "about"]]
   end
 
   # Configuration for the OTP application
@@ -32,5 +42,18 @@ defmodule Harmonex.Mixfile do
   defp deps do
     [{:dialyze, "~> 0.2",  only: :dev},
      {:ex_doc,  "~> 0.15", only: :dev}]
+  end
+
+  defp description do
+    "A collection of tools for music theory — pronounced “harmonics”"
+  end
+
+  defp package do
+    [files:       ~w(History.md License.md README.md lib mix.exs),
+     maintainers: ["Nils Jonsson <harmonex@nilsjonsson.com>"],
+     licenses:    ["MIT"],
+     links:       %{# "Home"   => "https://njonsson.github.io/harmonex",
+                    "Source" => "https://github.com/njonsson/harmonex",
+                    "Issues" => "https://github.com/njonsson/harmonex/issues"}]
   end
 end

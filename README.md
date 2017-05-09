@@ -1,8 +1,9 @@
-# harmonex
+# Harmonex
 
 [![build status](https://travis-ci.org/njonsson/harmonex.svg?branch=master)](https://travis-ci.org/njonsson/harmonex)
+[![Hex release](https://img.shields.io/hexpm/v/harmonex.svg)](https://hex.pm/packages/harmonex)
 
-This is a collection of tools for music theory called _harmonex_ (pronounced
+This is a collection of tools for music theory called _Harmonex_ (pronounced
 “harmonics”).
 
 ## Installation
