@@ -10,8 +10,8 @@ This is a collection of tools for music theory called _Harmonex_ (pronounced
 
 ## Installation
 
-[The package](https://hex.pm/packages/harmonex) can be installed by adding
-`:harmonex` to the list of dependencies in your project’s _mix.exs_ file:
+Install [the Hex package][Hex-package] by adding `:harmonex` to the list of
+dependencies in your project’s _mix.exs_ file:
 
 ```elixir
 # mix.exs
@@ -44,7 +44,7 @@ To release a new version:
 2. Update the project history in _History.md_, and commit.
 3. Update the version number in _mix.exs_, and commit.
 4. Tag the commit and push commits and tags.
-5. Build and publish the package on [Hex][Hex-release] with `mix hex.publish`.
+5. Build and publish [the Hex package][Hex-release] with `mix hex.publish`.
 
 ## License
 
