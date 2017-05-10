@@ -97,20 +97,27 @@ will allow you to experiment. To build this package, `mix hex.build`.
 
 To release a new version:
 
-1. Update [the “Installation” section](#installation) of this readme to reference
-   the new version, and commit.
-2. Update [the project history in _History.md_][project-history], and commit.
-3. Update the version number in _mix.exs_, and commit.
-4. Tag the commit and push commits and tags.
-5. Build and publish [the Hex package][Hex-release] with `mix hex.publish`.
+1. Update [the project history in _History.md_][project-history], and then
+   commit.
+2. Update the version number in [_mix.exs_][mix-dot-exs-file] respecting
+   [Semantic Versioning][Semantic-Versioning], update
+   [the “Installation” section](#installation) of
+   [this readme][readme-dot-md-file] to reference the new version, and then
+   commit.
+3. Build and publish [the Hex package][Hex-release] with `mix hex.publish`.
+4. Tag with a name like `vMAJOR.MINOR.PATCH` corresponding to the new version,
+   and then push commits and tags.
 
 ## License
 
 Released under the [MIT License][MIT-License].
 
-[Travis-CI-build-status]:      http://travis-ci.org/njonsson/harmonex                      "Travis CI build status for ‘Harmonex’"
-[Hex-release]:                 https://hex.pm/packages/harmonex                            "Hex release of ‘Harmonex’"
-[project-history]:             https://github.com/njonsson/harmonex/blob/master/History.md "‘Harmonex’ project history"
-[fork-project]:                https://github.com/njonsson/harmonex/fork                   "Fork the official repository of ‘Harmonex’"
-[compare-project-branches]:    https://github.com/njonsson/harmonex/compare                "Compare branches of ‘Harmonex’ repositories"
-[MIT-License]:                 http://github.com/njonsson/harmonex/blob/master/License.md  "MIT License claim for ‘Harmonex’"
+[Travis-CI-build-status]:   http://travis-ci.org/njonsson/harmonex                                  "Travis CI build status for ‘Harmonex’"
+[Hex-release]:              https://hex.pm/packages/harmonex                                        "Hex release of ‘Harmonex’"
+[project-history]:          https://github.com/njonsson/harmonex/blob/master/History.md             "‘Harmonex’ project history"
+[fork-project]:             https://github.com/njonsson/harmonex/fork                               "Fork the official repository of ‘Harmonex’"
+[compare-project-branches]: https://github.com/njonsson/harmonex/compare                            "Compare branches of ‘Harmonex’ repositories"
+[mix-dot-exs-file]:         https://github.com/njonsson/harmonex/blob/master/mix.exs                "‘Harmonex’ project ‘mix.exs’ file"
+[Semantic-Versioning]:      http://semver.org/
+[readme-dot-md-file]:       https://github.com/njonsson/harmonex/blob/master/README.md#installation "‘Harmonex’ project ‘README.md’ file"
+[MIT-License]:              http://github.com/njonsson/harmonex/blob/master/License.md              "MIT License claim for ‘Harmonex’"
