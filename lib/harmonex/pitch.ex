@@ -9,8 +9,9 @@ defmodule Harmonex.Pitch do
              %{bare_name: bare_name}                         |
              atom
 
-  @type bare_name :: :a | :b | :c | :d | :e | :f | :g
-  @bare_names     ~w( a    b    c    d    e    f    g )a
+  @type       bare_name :: :a  | :b  | :c  | :d  | :e  | :f  | :g
+  @indexes_by_bare_name    [a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10]
+  @bare_names @indexes_by_bare_name |> Keyword.keys
 
   @type alteration :: :natural | :flat | :sharp | :double_flat | :double_sharp
   @alteration_offsets %{double_flat: -2,
@@ -107,6 +108,38 @@ defmodule Harmonex.Pitch do
     index1 = pitch1 |> full_name |> index_chromatic
     index2 = pitch2 |> full_name |> index_chromatic
     index1 == index2
+  end
+
+  @doc """
+  Computes the enharmonic equivalents of the specified `pitch`.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.enharmonics :f_double_sharp
+      [:g_natural, :a_double_flat]
+
+      iex> Harmonex.Pitch.enharmonics %{bare_name: :g, alteration: :sharp}
+      [%Harmonex.Pitch{bare_name: :a, alteration: :flat}]
+
+      iex> Harmonex.Pitch.enharmonics :c_flat
+      [:a_double_sharp, :b_natural]
+
+      iex> Harmonex.Pitch.enharmonics :b_sharp
+      [:c_natural, :d_double_flat]
+
+      iex> Harmonex.Pitch.enharmonics :a_sharp
+      [:b_flat, :c_double_flat]
+  """
+  @spec enharmonics(t) :: [t]
+  def enharmonics(%{bare_name: _}=pitch) do
+    pitch |> full_name |> enharmonics |> Enum.map(&(new(&1)))
+  end
+
+  def enharmonics(pitch) do
+    pitch_full_name = pitch |> full_name
+    pitch_full_name |> index_chromatic
+                    |> full_names_at
+                    |> Enum.reject(&(&1 == pitch_full_name))
   end
 
   @doc """
@@ -257,13 +290,10 @@ defmodule Harmonex.Pitch do
   end
 
   @spec index_chromatic(atom) :: semitones
-  defp index_chromatic(:c), do:  0
-  defp index_chromatic(:d), do:  2
-  defp index_chromatic(:e), do:  4
-  defp index_chromatic(:f), do:  5
-  defp index_chromatic(:g), do:  7
-  defp index_chromatic(:a), do:  9
-  defp index_chromatic(:b), do: 11
+  indexes_by_bare_name = [c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11]
+  for {bare_name, index} <- indexes_by_bare_name do
+    defp index_chromatic(unquote(bare_name)), do: unquote(index)
+  end
 
   for bare_name <- @bare_names do
     for {alteration, offset} <- @alteration_offsets do
@@ -273,6 +303,25 @@ defmodule Harmonex.Pitch do
         (index_chromatic + unquote(offset)) |> Integer.mod(12)
       end
     end
+  end
+
+  @spec full_names_at(semitones) :: [atom]
+  full_name_lists_by_index = indexes_by_bare_name |> Enum.reduce(%{},
+                                                                 fn({bare_name,
+                                                                     index},
+                                                                    acc) ->
+    @alteration_offsets |> Enum.reduce(acc,
+                                       fn({alteration, offset}, inner_acc) ->
+      name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
+      altered_index = Integer.mod(index + offset, 12)
+      insert_at = if name == :b_flat, do: -1, else: 0
+      inner_acc |> Map.put_new(altered_index, [])
+                |> Map.update!(altered_index,
+                               &(&1 |> List.insert_at(insert_at, name)))
+    end)
+  end)
+  for {index, full_names} <- full_name_lists_by_index do
+    defp full_names_at(unquote(index)), do: unquote(Enum.reverse(full_names))
   end
 
   @spec semitones_and_number_to_interval_diatonic(semitones, 1..7) :: interval_diatonic |
