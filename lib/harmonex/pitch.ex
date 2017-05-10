@@ -54,7 +54,7 @@ defmodule Harmonex.Pitch do
     def alteration(unquote(bare_name)=_pitch), do: :natural
 
     for alteration <- @alterations do
-      name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
+      name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
       def alteration(unquote(name)=_pitch), do: unquote(alteration)
     end
   end
@@ -80,7 +80,7 @@ defmodule Harmonex.Pitch do
     def bare_name(unquote(bare_name)=pitch), do: pitch
 
     for alteration <- @alterations do
-      name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
+      name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
       def bare_name(unquote(name)=_pitch), do: unquote(bare_name)
     end
   end
@@ -163,7 +163,7 @@ defmodule Harmonex.Pitch do
 
   for bare_name <- @bare_names do
     for alteration <- @alterations do
-      name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
+      name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
       def full_name(%{bare_name: unquote(bare_name),
                       alteration: unquote(alteration)}=_pitch) do
         unquote(name)
@@ -250,9 +250,7 @@ defmodule Harmonex.Pitch do
         __MODULE__ |> struct(bare_name: bare_name, alteration: alteration)
       end
 
-      full_name = String.to_atom(to_string(bare_name) <>
-                                 "_"                  <>
-                                 to_string(alteration))
+      full_name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
       def new(unquote(full_name)=_full_name) do
         new(unquote(bare_name), unquote(alteration))
       end
@@ -297,7 +295,7 @@ defmodule Harmonex.Pitch do
 
   for bare_name <- @bare_names do
     for {alteration, offset} <- @alteration_offsets do
-      name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
+      name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
       defp index_chromatic(unquote(name)) do
         index_chromatic = index_chromatic(unquote(bare_name))
         (index_chromatic + unquote(offset)) |> Integer.mod(12)
@@ -312,7 +310,7 @@ defmodule Harmonex.Pitch do
                                                                     acc) ->
     @alteration_offsets |> Enum.reduce(acc,
                                        fn({alteration, offset}, inner_acc) ->
-      name = String.to_atom(to_string(bare_name) <> "_" <> to_string(alteration))
+      name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
       altered_index = Integer.mod(index + offset, 12)
       insert_at = if name == :b_flat, do: -1, else: 0
       inner_acc |> Map.put_new(altered_index, [])
