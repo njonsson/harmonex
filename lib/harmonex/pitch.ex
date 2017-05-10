@@ -166,14 +166,14 @@ defmodule Harmonex.Pitch do
       full_name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
       def full_name(%{bare_name: unquote(bare_name),
                       alteration: unquote(alteration)}=_pitch) do
-        unquote(full_name)
+        unquote full_name
       end
 
       def full_name(unquote(full_name)=pitch), do: pitch
     end
 
     def full_name(%{bare_name: unquote(bare_name)}=_pitch) do
-      unquote(bare_name)
+      unquote bare_name
     end
 
     def full_name(unquote(bare_name)=pitch), do: pitch
@@ -262,7 +262,8 @@ defmodule Harmonex.Pitch do
   end
 
   def new(_invalid_name) do
-    {:error, "Invalid pitch name -- must be in #{inspect @bare_names} with an optional alteration (e.g, :a_flat)"}
+    {:error,
+     "Invalid pitch name -- must be in #{inspect @bare_names} with an optional alteration (e.g, :a_flat)"}
   end
 
   @doc """
