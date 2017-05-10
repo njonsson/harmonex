@@ -151,10 +151,10 @@ defmodule Harmonex.Pitch do
       :a_flat
 
       iex> Harmonex.Pitch.full_name %{bare_name: :a}
-      :a
+      :a_natural
 
       iex> Harmonex.Pitch.full_name :a
-      :a
+      :a_natural
 
       iex> Harmonex.Pitch.full_name :a_flat
       :a_flat
@@ -173,10 +173,10 @@ defmodule Harmonex.Pitch do
     end
 
     def full_name(%{bare_name: unquote(bare_name)}=_pitch) do
-      unquote bare_name
+      unquote :"#{to_string bare_name}_natural"
     end
 
-    def full_name(unquote(bare_name)=pitch), do: pitch
+    def full_name(unquote(bare_name)=pitch), do: :"#{to_string pitch}_natural"
   end
 
   @doc """
