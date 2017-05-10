@@ -14,12 +14,12 @@ defmodule Harmonex.Pitch do
   @bare_names @indexes_by_bare_name |> Keyword.keys
 
   @type alteration :: :natural | :flat | :sharp | :double_flat | :double_sharp
-  @alteration_offsets %{double_flat: -2,
-                        flat:        -1,
-                        natural:      0,
-                        sharp:        1,
-                        double_sharp: 2}
-  @alterations @alteration_offsets |> Map.keys
+  @alteration_offsets [double_flat: -2,
+                       flat:        -1,
+                       natural:      0,
+                       sharp:        1,
+                       double_sharp: 2]
+  @alterations @alteration_offsets |> Keyword.keys
 
   @type quality :: :perfect           |
                    :doubly_diminished |
