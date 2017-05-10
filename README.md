@@ -1,5 +1,7 @@
 # Harmonex
 
+![logo](assets/logo.png)
+
 [<img alt="Travis CI build status" src="https://secure.travis-ci.org/njonsson/harmonex.svg?branch=master" />][Travis-CI-build-status]
 [<img alt="Hex release" src="https://img.shields.io/hexpm/v/harmonex.svg" />][Hex-release]
 

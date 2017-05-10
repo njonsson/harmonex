@@ -17,6 +17,7 @@ defmodule Harmonex.Mixfile do
                      # TODO: Figure out why ExDoc chokes on this
                      # "History.md": [filename: "history",
                      #                title: "Project history"]],
+            logo: "assets/logo.png",
             main: "about"]]
   end
 
