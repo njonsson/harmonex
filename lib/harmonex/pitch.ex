@@ -20,7 +20,13 @@ defmodule Harmonex.Pitch do
                         double_sharp: 2}
   @alterations @alteration_offsets |> Map.keys
 
-  @type quality :: :perfect | :diminished | :augmented | :minor | :major
+  @type quality :: :perfect           |
+                   :doubly_diminished |
+                   :diminished        |
+                   :augmented         |
+                   :doubly_augmented  |
+                   :minor             |
+                   :major
 
   @type interval_diatonic :: {quality, 1..7}
 
@@ -159,6 +165,9 @@ defmodule Harmonex.Pitch do
       {:augmented, 1}
 
       iex> Harmonex.Pitch.interval_diatonic :a_flat, :e_sharp
+      {:doubly_augmented, 5}
+
+      iex> Harmonex.Pitch.interval_diatonic :a_flat, :e_double_sharp
       {:error, "Not a diatonic interval"}
   """
   @spec interval_diatonic(t, t) :: interval_diatonic | {:error, binary}
@@ -268,30 +277,42 @@ defmodule Harmonex.Pitch do
 
   @spec semitones_and_number_to_interval_diatonic(semitones, 1..7) :: interval_diatonic |
                                                                       {:error, binary}
-  defp semitones_and_number_to_interval_diatonic( 0, 1), do: {:perfect,    1}
-  defp semitones_and_number_to_interval_diatonic( 1, 1), do: {:augmented,  1}
-  defp semitones_and_number_to_interval_diatonic( 0, 2), do: {:diminished, 2}
-  defp semitones_and_number_to_interval_diatonic( 1, 2), do: {:minor,      2}
-  defp semitones_and_number_to_interval_diatonic( 2, 2), do: {:major,      2}
-  defp semitones_and_number_to_interval_diatonic( 3, 2), do: {:augmented,  2}
-  defp semitones_and_number_to_interval_diatonic( 2, 3), do: {:diminished, 3}
-  defp semitones_and_number_to_interval_diatonic( 3, 3), do: {:minor,      3}
-  defp semitones_and_number_to_interval_diatonic( 4, 3), do: {:major,      3}
-  defp semitones_and_number_to_interval_diatonic( 5, 3), do: {:augmented,  3}
-  defp semitones_and_number_to_interval_diatonic( 4, 4), do: {:diminished, 4}
-  defp semitones_and_number_to_interval_diatonic( 5, 4), do: {:perfect,    4}
-  defp semitones_and_number_to_interval_diatonic( 6, 4), do: {:augmented,  4}
-  defp semitones_and_number_to_interval_diatonic( 6, 5), do: {:diminished, 5}
-  defp semitones_and_number_to_interval_diatonic( 7, 5), do: {:perfect,    5}
-  defp semitones_and_number_to_interval_diatonic( 8, 5), do: {:augmented,  5}
-  defp semitones_and_number_to_interval_diatonic( 7, 6), do: {:diminished, 6}
-  defp semitones_and_number_to_interval_diatonic( 8, 6), do: {:minor,      6}
-  defp semitones_and_number_to_interval_diatonic( 9, 6), do: {:major,      6}
-  defp semitones_and_number_to_interval_diatonic(10, 6), do: {:augmented,  6}
-  defp semitones_and_number_to_interval_diatonic( 9, 7), do: {:diminished, 7}
-  defp semitones_and_number_to_interval_diatonic(10, 7), do: {:minor,      7}
-  defp semitones_and_number_to_interval_diatonic(11, 7), do: {:major,      7}
-  defp semitones_and_number_to_interval_diatonic( 0, 7), do: {:augmented,  7}
+  defp semitones_and_number_to_interval_diatonic( 0, 1), do: {:perfect,           1}
+  defp semitones_and_number_to_interval_diatonic( 1, 1), do: {:augmented,         1}
+  defp semitones_and_number_to_interval_diatonic( 2, 1), do: {:doubly_augmented,  1}
+  defp semitones_and_number_to_interval_diatonic( 0, 2), do: {:diminished,        2}
+  defp semitones_and_number_to_interval_diatonic( 1, 2), do: {:minor,             2}
+  defp semitones_and_number_to_interval_diatonic( 2, 2), do: {:major,             2}
+  defp semitones_and_number_to_interval_diatonic( 3, 2), do: {:augmented,         2}
+  defp semitones_and_number_to_interval_diatonic( 4, 2), do: {:doubly_augmented,  2}
+  defp semitones_and_number_to_interval_diatonic( 1, 3), do: {:doubly_diminished, 3}
+  defp semitones_and_number_to_interval_diatonic( 2, 3), do: {:diminished,        3}
+  defp semitones_and_number_to_interval_diatonic( 3, 3), do: {:minor,             3}
+  defp semitones_and_number_to_interval_diatonic( 4, 3), do: {:major,             3}
+  defp semitones_and_number_to_interval_diatonic( 5, 3), do: {:augmented,         3}
+  defp semitones_and_number_to_interval_diatonic( 6, 3), do: {:doubly_augmented,  3}
+  defp semitones_and_number_to_interval_diatonic( 3, 4), do: {:doubly_diminished, 4}
+  defp semitones_and_number_to_interval_diatonic( 4, 4), do: {:diminished,        4}
+  defp semitones_and_number_to_interval_diatonic( 5, 4), do: {:perfect,           4}
+  defp semitones_and_number_to_interval_diatonic( 6, 4), do: {:augmented,         4}
+  defp semitones_and_number_to_interval_diatonic( 7, 4), do: {:doubly_augmented,  4}
+  defp semitones_and_number_to_interval_diatonic( 5, 5), do: {:doubly_diminished, 5}
+  defp semitones_and_number_to_interval_diatonic( 6, 5), do: {:diminished,        5}
+  defp semitones_and_number_to_interval_diatonic( 7, 5), do: {:perfect,           5}
+  defp semitones_and_number_to_interval_diatonic( 8, 5), do: {:augmented,         5}
+  defp semitones_and_number_to_interval_diatonic( 9, 5), do: {:doubly_augmented,  5}
+  defp semitones_and_number_to_interval_diatonic( 6, 6), do: {:doubly_diminished, 6}
+  defp semitones_and_number_to_interval_diatonic( 7, 6), do: {:diminished,        6}
+  defp semitones_and_number_to_interval_diatonic( 8, 6), do: {:minor,             6}
+  defp semitones_and_number_to_interval_diatonic( 9, 6), do: {:major,             6}
+  defp semitones_and_number_to_interval_diatonic(10, 6), do: {:augmented,         6}
+  defp semitones_and_number_to_interval_diatonic(11, 6), do: {:doubly_augmented,  6}
+  defp semitones_and_number_to_interval_diatonic( 8, 7), do: {:doubly_diminished, 7}
+  defp semitones_and_number_to_interval_diatonic( 9, 7), do: {:diminished,        7}
+  defp semitones_and_number_to_interval_diatonic(10, 7), do: {:minor,             7}
+  defp semitones_and_number_to_interval_diatonic(11, 7), do: {:major,             7}
+  defp semitones_and_number_to_interval_diatonic( 0, 7), do: {:augmented,         7}
+  defp semitones_and_number_to_interval_diatonic( 1, 7), do: {:doubly_augmented,  7}
   defp semitones_and_number_to_interval_diatonic( _, _), do: {:error, "Not a diatonic interval"}
 
   @spec staff_position(bare_name) :: 0..6
