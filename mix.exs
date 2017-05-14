@@ -29,7 +29,7 @@ defmodule Harmonex.Mixfile do
     [extra_applications: [:logger]]
   end
 
-  def version, do: "0.2.0"
+  def version, do: "0.3.0"
 
   # Dependencies can be Hex packages:
   #
