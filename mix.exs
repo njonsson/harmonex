@@ -18,7 +18,8 @@ defmodule Harmonex.Mixfile do
                      # "History.md": [filename: "history",
                      #                title: "Project history"]],
             logo: "assets/logo.png",
-            main: "about"]]
+            main: "about"],
+     test_coverage: [tool: ExCoveralls]]
   end
 
   # Configuration for the OTP application
@@ -41,8 +42,9 @@ defmodule Harmonex.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:dialyze, "~> 0.2",  only: :dev},
-     {:ex_doc,  "~> 0.15", only: :dev}]
+    [{:dialyze,     "~> 0.2",  only: :dev},
+     {:excoveralls, "~> 0.6",  only: :test},
+     {:ex_doc,      "~> 0.15", only: :dev}]
   end
 
   defp description do
