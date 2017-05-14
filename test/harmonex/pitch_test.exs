@@ -1,5 +1,5 @@
 defmodule Harmonex.PitchTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   doctest Harmonex.Pitch
 
   @invalid_name "Invalid pitch name -- must be in [:a, :b, :c, :d, :e, :f, :g]"
