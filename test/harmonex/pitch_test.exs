@@ -2,10 +2,43 @@ defmodule Harmonex.PitchTest do
   use ExUnit.Case, async: true
   doctest Harmonex.Pitch
 
-  @invalid_name "Invalid pitch name -- must be in [:a, :b, :c, :d, :e, :f, :g]"
-  @invalid_alteration "Invalid pitch alteration -- must be in [:double_flat, :flat, :natural, :sharp, :double_sharp]"
+  @bare_names  ~w(a b c d e f g)a
+  @alterations ~w(double_flat flat natural sharp double_sharp)a
+
+  @invalid_name "Invalid pitch name -- must be in #{inspect @bare_names}"
+  @invalid_alteration "Invalid pitch alteration -- must be in #{inspect @alterations}"
 
   describe ".alteration/1" do
+    test "accepts valid alterations" do
+      for bare_name <- @bare_names do
+        for alteration <- @alterations do
+          expected = alteration
+
+          actual = Harmonex.Pitch.alteration(%{bare_name: bare_name,
+                                               alteration: alteration})
+          assert actual == expected
+
+          full_name = :"#{to_string bare_name}_#{to_string alteration}"
+          actual = Harmonex.Pitch.alteration(full_name)
+          assert actual == expected
+        end
+
+        expected = :natural
+
+        actual = Harmonex.Pitch.alteration(%{bare_name: bare_name})
+        assert actual == expected
+
+        actual = Harmonex.Pitch.alteration(bare_name)
+        assert actual == expected
+      end
+
+      for alteration <- @alterations do
+        expected = alteration
+        actual = Harmonex.Pitch.alteration(%{alteration: alteration})
+        assert actual == expected
+      end
+    end
+
     test "rejects an invalid alteration" do
       expected = {:error, @invalid_alteration}
 
