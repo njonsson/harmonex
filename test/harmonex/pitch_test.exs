@@ -259,6 +259,46 @@ defmodule Harmonex.PitchTest do
     end
   end
 
+  describe ".new/1" do
+    test "accepts valid arguments" do
+      for bare_name <- @bare_names do
+        for alteration <- @alterations do
+          expected = %Harmonex.Pitch{bare_name: bare_name,
+                                     alteration: alteration}
+
+          actual = Harmonex.Pitch.new(%{bare_name: bare_name,
+                                        alteration: alteration})
+          assert actual == expected
+
+          full_name = :"#{to_string bare_name}_#{to_string alteration}"
+          actual = Harmonex.Pitch.new(full_name)
+          assert actual == expected
+        end
+
+        expected = %Harmonex.Pitch{bare_name: bare_name, alteration: :natural}
+
+        actual = Harmonex.Pitch.new(%{bare_name: bare_name})
+        assert actual == expected
+
+        actual = Harmonex.Pitch.new(bare_name)
+        assert actual == expected
+      end
+    end
+  end
+
+  describe ".new/2" do
+    test "accepts valid arguments" do
+      for bare_name <- @bare_names do
+        for alteration <- @alterations do
+          expected = %Harmonex.Pitch{bare_name: bare_name,
+                                     alteration: alteration}
+          actual = Harmonex.Pitch.new(bare_name, alteration)
+          assert actual == expected
+        end
+      end
+    end
+  end
+
   describe ".semitones/2" do
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_name}
