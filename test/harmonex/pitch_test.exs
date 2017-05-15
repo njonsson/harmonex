@@ -167,6 +167,29 @@ defmodule Harmonex.PitchTest do
   end
 
   describe ".full_name/1" do
+    test "accepts valid arguments" do
+      for bare_name <- @bare_names do
+        for alteration <- @alterations do
+          expected = :"#{to_string bare_name}_#{to_string alteration}"
+
+          actual = Harmonex.Pitch.full_name(%{bare_name: bare_name,
+                                              alteration: alteration})
+          assert actual == expected
+
+          actual = Harmonex.Pitch.full_name(expected)
+          assert actual == expected
+        end
+
+        expected = :"#{to_string bare_name}_natural"
+
+        actual = Harmonex.Pitch.full_name(%{bare_name: bare_name})
+        assert actual == expected
+
+        actual = Harmonex.Pitch.full_name(bare_name)
+        assert actual == expected
+      end
+    end
+
     test "rejects an invalid name" do
       expected = {:error, @invalid_name}
 
