@@ -435,11 +435,7 @@ defmodule Harmonex.Pitch do
   defp semitones_and_number_to_interval_diatonic( _, _), do: {:error, "Not a diatonic interval"}
 
   @spec staff_position(bare_name) :: 0..6
-  defp staff_position(:c), do: 0
-  defp staff_position(:d), do: 1
-  defp staff_position(:e), do: 2
-  defp staff_position(:f), do: 3
-  defp staff_position(:g), do: 4
-  defp staff_position(:a), do: 5
-  defp staff_position(:b), do: 6
+  for {bare_name, index} <- Enum.with_index(@bare_names) do
+    defp staff_position(unquote(bare_name)), do: unquote(index)
+  end
 end
