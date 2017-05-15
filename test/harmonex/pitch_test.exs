@@ -9,7 +9,7 @@ defmodule Harmonex.PitchTest do
   @invalid_alteration "Invalid pitch alteration -- must be in #{inspect @alterations}"
 
   describe ".alteration/1" do
-    test "accepts valid alterations" do
+    test "accepts valid arguments" do
       for bare_name <- @bare_names do
         for alteration <- @alterations do
           expected = alteration
@@ -58,6 +58,28 @@ defmodule Harmonex.PitchTest do
   end
 
   describe ".bare_name/1" do
+    test "accepts valid arguments" do
+      for bare_name <- @bare_names do
+        expected = bare_name
+
+        for alteration <- @alterations do
+          actual = Harmonex.Pitch.bare_name(%{bare_name: bare_name,
+                                              alteration: alteration})
+          assert actual == expected
+
+          full_name = :"#{to_string bare_name}_#{to_string alteration}"
+          actual = Harmonex.Pitch.bare_name(full_name)
+          assert actual == expected
+        end
+
+        actual = Harmonex.Pitch.bare_name(%{bare_name: bare_name})
+        assert actual == expected
+
+        actual = Harmonex.Pitch.bare_name(bare_name)
+        assert actual == expected
+      end
+    end
+
     test "rejects an invalid name" do
       expected = {:error, @invalid_name}
 
