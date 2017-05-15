@@ -115,6 +115,18 @@ defmodule Harmonex.PitchTest do
 
       actual = Harmonex.Pitch.enharmonic?(:h, :a)
       assert actual == expected
+
+      actual = Harmonex.Pitch.enharmonic?(:a_out_of_tune, :a)
+      assert actual == expected
+    end
+
+    test "rejects an invalid alteration in the first argument" do
+      expected = {:error, @invalid_alteration}
+
+      actual = Harmonex.Pitch.enharmonic?(%Harmonex.Pitch{bare_name: :a,
+                                                          alteration: :out_of_tune},
+                                          :a)
+      assert actual == expected
     end
 
     test "rejects an invalid name in the second argument" do
@@ -132,6 +144,18 @@ defmodule Harmonex.PitchTest do
       assert actual == expected
 
       actual = Harmonex.Pitch.enharmonic?(:a, :h)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.enharmonic?(:a, :a_out_of_tune)
+      assert actual == expected
+    end
+
+    test "rejects an invalid alteration in the second argument" do
+      expected = {:error, @invalid_alteration}
+
+      actual = Harmonex.Pitch.enharmonic?(:a,
+                                          %Harmonex.Pitch{bare_name: :a,
+                                                          alteration: :out_of_tune})
       assert actual == expected
     end
   end
@@ -316,6 +340,18 @@ defmodule Harmonex.PitchTest do
 
       actual = Harmonex.Pitch.semitones(:h, :a)
       assert actual == expected
+
+      actual = Harmonex.Pitch.semitones(:a_out_of_tune, :a)
+      assert actual == expected
+    end
+
+    test "rejects an invalid alteration in the first argument" do
+      expected = {:error, @invalid_alteration}
+
+      actual = Harmonex.Pitch.semitones(%Harmonex.Pitch{bare_name: :a,
+                                                        alteration: :out_of_tune},
+                                        :a)
+      assert actual == expected
     end
 
     test "rejects an invalid name in the second argument" do
@@ -333,6 +369,18 @@ defmodule Harmonex.PitchTest do
       assert actual == expected
 
       actual = Harmonex.Pitch.semitones(:a, :h)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.semitones(:a, :a_out_of_tune)
+      assert actual == expected
+    end
+
+    test "rejects an invalid alteration in the second argument" do
+      expected = {:error, @invalid_alteration}
+
+      actual = Harmonex.Pitch.semitones(:a,
+                                        %Harmonex.Pitch{bare_name: :a,
+                                                        alteration: :out_of_tune})
       assert actual == expected
     end
   end
