@@ -243,42 +243,40 @@ defmodule Harmonex.PitchTest do
     end
   end
 
-  describe ".interval_diatonic/2" do
+  describe ".interval/2" do
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.interval_diatonic(%Harmonex.Pitch{bare_name: :h,
-                                                                alteration: :flat},
-                                                :a)
+      actual = Harmonex.Pitch.interval(%Harmonex.Pitch{bare_name: :h,
+                                                       alteration: :flat},
+                                       :a)
       assert actual == expected
 
-      actual = Harmonex.Pitch.interval_diatonic(%Harmonex.Pitch{bare_name: :h},
-                                                :a)
+      actual = Harmonex.Pitch.interval(%Harmonex.Pitch{bare_name: :h}, :a)
       assert actual == expected
 
-      actual = Harmonex.Pitch.interval_diatonic(:h_flat, :a)
+      actual = Harmonex.Pitch.interval(:h_flat, :a)
       assert actual == expected
 
-      actual = Harmonex.Pitch.interval_diatonic(:h, :a)
+      actual = Harmonex.Pitch.interval(:h, :a)
       assert actual == expected
     end
 
     test "rejects an invalid name in the second argument" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.interval_diatonic(:a,
-                                                %Harmonex.Pitch{bare_name: :h,
-                                                                alteration: :flat})
+      actual = Harmonex.Pitch.interval(:a,
+                                       %Harmonex.Pitch{bare_name: :h,
+                                                       alteration: :flat})
       assert actual == expected
 
-      actual = Harmonex.Pitch.interval_diatonic(:a,
-                                                %Harmonex.Pitch{bare_name: :h})
+      actual = Harmonex.Pitch.interval(:a, %Harmonex.Pitch{bare_name: :h})
       assert actual == expected
 
-      actual = Harmonex.Pitch.interval_diatonic(:a, :h_flat)
+      actual = Harmonex.Pitch.interval(:a, :h_flat)
       assert actual == expected
 
-      actual = Harmonex.Pitch.interval_diatonic(:a, :h)
+      actual = Harmonex.Pitch.interval(:a, :h)
       assert actual == expected
     end
   end

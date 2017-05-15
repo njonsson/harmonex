@@ -29,7 +29,7 @@ defmodule Harmonex.Pitch do
                    :minor             |
                    :major
 
-  @type interval_diatonic :: {quality, 1..7}
+  @type interval :: {quality, 1..7}
 
   @type semitones :: 0..11
 
@@ -230,31 +230,31 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.interval_diatonic %{bare_name: :a, alteration: :sharp}, %{bare_name: :c}
+      iex> Harmonex.Pitch.interval %{bare_name: :a, alteration: :sharp}, %{bare_name: :c}
       {:diminished, 3}
 
-      iex> Harmonex.Pitch.interval_diatonic :b_flat, :c
+      iex> Harmonex.Pitch.interval :b_flat, :c
       {:major, 2}
 
-      iex> Harmonex.Pitch.interval_diatonic :d_double_sharp, :a_double_sharp
+      iex> Harmonex.Pitch.interval :d_double_sharp, :a_double_sharp
       {:perfect, 5}
 
-      iex> Harmonex.Pitch.interval_diatonic :c_flat, :c_natural
+      iex> Harmonex.Pitch.interval :c_flat, :c_natural
       {:augmented, 1}
 
-      iex> Harmonex.Pitch.interval_diatonic :a_flat, :e_sharp
+      iex> Harmonex.Pitch.interval :a_flat, :e_sharp
       {:doubly_augmented, 5}
 
-      iex> Harmonex.Pitch.interval_diatonic :a_flat, :e_double_sharp
-      {:error, "Not a diatonic interval"}
+      iex> Harmonex.Pitch.interval :a_flat, :e_double_sharp
+      {:error, "Invalid interval"}
   """
-  @spec interval_diatonic(t, t) :: interval_diatonic | {:error, binary}
-  def interval_diatonic(low_pitch, high_pitch) do
+  @spec interval(t, t) :: interval | {:error, binary}
+  def interval(low_pitch, high_pitch) do
     with semitones when is_integer(semitones) <- semitones(low_pitch, high_pitch) do
       low_staff_position  = low_pitch  |> bare_name |> staff_position
       high_staff_position = high_pitch |> bare_name |> staff_position
       number = Integer.mod(high_staff_position - low_staff_position, 7) + 1
-      semitones_and_number_to_interval_diatonic semitones, number
+      semitones_and_number_to_interval semitones, number
     end
   end
 
@@ -394,45 +394,45 @@ defmodule Harmonex.Pitch do
     defp full_names_at(unquote(index)), do: unquote(Enum.reverse(full_names))
   end
 
-  @spec semitones_and_number_to_interval_diatonic(semitones, 1..7) :: interval_diatonic |
-                                                                      {:error, binary}
-  defp semitones_and_number_to_interval_diatonic( 0, 1), do: {:perfect,           1}
-  defp semitones_and_number_to_interval_diatonic( 1, 1), do: {:augmented,         1}
-  defp semitones_and_number_to_interval_diatonic( 2, 1), do: {:doubly_augmented,  1}
-  defp semitones_and_number_to_interval_diatonic( 0, 2), do: {:diminished,        2}
-  defp semitones_and_number_to_interval_diatonic( 1, 2), do: {:minor,             2}
-  defp semitones_and_number_to_interval_diatonic( 2, 2), do: {:major,             2}
-  defp semitones_and_number_to_interval_diatonic( 3, 2), do: {:augmented,         2}
-  defp semitones_and_number_to_interval_diatonic( 4, 2), do: {:doubly_augmented,  2}
-  defp semitones_and_number_to_interval_diatonic( 1, 3), do: {:doubly_diminished, 3}
-  defp semitones_and_number_to_interval_diatonic( 2, 3), do: {:diminished,        3}
-  defp semitones_and_number_to_interval_diatonic( 3, 3), do: {:minor,             3}
-  defp semitones_and_number_to_interval_diatonic( 4, 3), do: {:major,             3}
-  defp semitones_and_number_to_interval_diatonic( 5, 3), do: {:augmented,         3}
-  defp semitones_and_number_to_interval_diatonic( 6, 3), do: {:doubly_augmented,  3}
-  defp semitones_and_number_to_interval_diatonic( 3, 4), do: {:doubly_diminished, 4}
-  defp semitones_and_number_to_interval_diatonic( 4, 4), do: {:diminished,        4}
-  defp semitones_and_number_to_interval_diatonic( 5, 4), do: {:perfect,           4}
-  defp semitones_and_number_to_interval_diatonic( 6, 4), do: {:augmented,         4}
-  defp semitones_and_number_to_interval_diatonic( 7, 4), do: {:doubly_augmented,  4}
-  defp semitones_and_number_to_interval_diatonic( 5, 5), do: {:doubly_diminished, 5}
-  defp semitones_and_number_to_interval_diatonic( 6, 5), do: {:diminished,        5}
-  defp semitones_and_number_to_interval_diatonic( 7, 5), do: {:perfect,           5}
-  defp semitones_and_number_to_interval_diatonic( 8, 5), do: {:augmented,         5}
-  defp semitones_and_number_to_interval_diatonic( 9, 5), do: {:doubly_augmented,  5}
-  defp semitones_and_number_to_interval_diatonic( 6, 6), do: {:doubly_diminished, 6}
-  defp semitones_and_number_to_interval_diatonic( 7, 6), do: {:diminished,        6}
-  defp semitones_and_number_to_interval_diatonic( 8, 6), do: {:minor,             6}
-  defp semitones_and_number_to_interval_diatonic( 9, 6), do: {:major,             6}
-  defp semitones_and_number_to_interval_diatonic(10, 6), do: {:augmented,         6}
-  defp semitones_and_number_to_interval_diatonic(11, 6), do: {:doubly_augmented,  6}
-  defp semitones_and_number_to_interval_diatonic( 8, 7), do: {:doubly_diminished, 7}
-  defp semitones_and_number_to_interval_diatonic( 9, 7), do: {:diminished,        7}
-  defp semitones_and_number_to_interval_diatonic(10, 7), do: {:minor,             7}
-  defp semitones_and_number_to_interval_diatonic(11, 7), do: {:major,             7}
-  defp semitones_and_number_to_interval_diatonic( 0, 7), do: {:augmented,         7}
-  defp semitones_and_number_to_interval_diatonic( 1, 7), do: {:doubly_augmented,  7}
-  defp semitones_and_number_to_interval_diatonic( _, _), do: {:error, "Not a diatonic interval"}
+  @spec semitones_and_number_to_interval(semitones, 1..7) :: interval |
+                                                             {:error, binary}
+  defp semitones_and_number_to_interval( 0, 1), do: {:perfect,           1}
+  defp semitones_and_number_to_interval( 1, 1), do: {:augmented,         1}
+  defp semitones_and_number_to_interval( 2, 1), do: {:doubly_augmented,  1}
+  defp semitones_and_number_to_interval( 0, 2), do: {:diminished,        2}
+  defp semitones_and_number_to_interval( 1, 2), do: {:minor,             2}
+  defp semitones_and_number_to_interval( 2, 2), do: {:major,             2}
+  defp semitones_and_number_to_interval( 3, 2), do: {:augmented,         2}
+  defp semitones_and_number_to_interval( 4, 2), do: {:doubly_augmented,  2}
+  defp semitones_and_number_to_interval( 1, 3), do: {:doubly_diminished, 3}
+  defp semitones_and_number_to_interval( 2, 3), do: {:diminished,        3}
+  defp semitones_and_number_to_interval( 3, 3), do: {:minor,             3}
+  defp semitones_and_number_to_interval( 4, 3), do: {:major,             3}
+  defp semitones_and_number_to_interval( 5, 3), do: {:augmented,         3}
+  defp semitones_and_number_to_interval( 6, 3), do: {:doubly_augmented,  3}
+  defp semitones_and_number_to_interval( 3, 4), do: {:doubly_diminished, 4}
+  defp semitones_and_number_to_interval( 4, 4), do: {:diminished,        4}
+  defp semitones_and_number_to_interval( 5, 4), do: {:perfect,           4}
+  defp semitones_and_number_to_interval( 6, 4), do: {:augmented,         4}
+  defp semitones_and_number_to_interval( 7, 4), do: {:doubly_augmented,  4}
+  defp semitones_and_number_to_interval( 5, 5), do: {:doubly_diminished, 5}
+  defp semitones_and_number_to_interval( 6, 5), do: {:diminished,        5}
+  defp semitones_and_number_to_interval( 7, 5), do: {:perfect,           5}
+  defp semitones_and_number_to_interval( 8, 5), do: {:augmented,         5}
+  defp semitones_and_number_to_interval( 9, 5), do: {:doubly_augmented,  5}
+  defp semitones_and_number_to_interval( 6, 6), do: {:doubly_diminished, 6}
+  defp semitones_and_number_to_interval( 7, 6), do: {:diminished,        6}
+  defp semitones_and_number_to_interval( 8, 6), do: {:minor,             6}
+  defp semitones_and_number_to_interval( 9, 6), do: {:major,             6}
+  defp semitones_and_number_to_interval(10, 6), do: {:augmented,         6}
+  defp semitones_and_number_to_interval(11, 6), do: {:doubly_augmented,  6}
+  defp semitones_and_number_to_interval( 8, 7), do: {:doubly_diminished, 7}
+  defp semitones_and_number_to_interval( 9, 7), do: {:diminished,        7}
+  defp semitones_and_number_to_interval(10, 7), do: {:minor,             7}
+  defp semitones_and_number_to_interval(11, 7), do: {:major,             7}
+  defp semitones_and_number_to_interval( 0, 7), do: {:augmented,         7}
+  defp semitones_and_number_to_interval( 1, 7), do: {:doubly_augmented,  7}
+  defp semitones_and_number_to_interval( _, _), do: {:error, "Invalid interval"}
 
   @spec staff_position(bare_name) :: 0..6
   for {bare_name, index} <- Enum.with_index(@bare_names) do
