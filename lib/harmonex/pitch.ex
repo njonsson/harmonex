@@ -31,8 +31,6 @@ defmodule Harmonex.Pitch do
 
   @type interval :: {quality, 1..7}
 
-  @type semitones :: 0..11
-
   @invalid_name "Invalid pitch name -- must be in #{inspect @bare_names}"
   @invalid_alteration "Invalid pitch alteration -- must be in #{inspect @alterations}"
 
@@ -383,7 +381,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.semitones :d_double_sharp, :b_double_sharp
       9
   """
-  @spec semitones(t, t) :: semitones
+  @spec semitones(t, t) :: 0..11
   def semitones(low_pitch, high_pitch) do
     with low_full when is_atom(low_full)   <- full_name(low_pitch),
          low_index                         <- index_chromatic(low_full),
@@ -405,7 +403,7 @@ defmodule Harmonex.Pitch do
     defp complexity_score(unquote(:"#{bare_name}_double_sharp")), do: 2
   end
 
-  @spec index_chromatic(atom) :: semitones
+  @spec index_chromatic(atom) :: 0..11
   indexes_by_bare_name = [c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11]
   for {bare_name, index} <- indexes_by_bare_name do
     defp index_chromatic(unquote(bare_name)), do: unquote(index)
@@ -418,7 +416,7 @@ defmodule Harmonex.Pitch do
     end
   end
 
-  @spec full_names_at(semitones) :: [atom]
+  @spec full_names_at(0..11) :: [atom]
   full_name_lists_by_index = indexes_by_bare_name |> Enum.reduce(%{},
                                                                  fn({bare_name,
                                                                      index},
@@ -437,8 +435,8 @@ defmodule Harmonex.Pitch do
     defp full_names_at(unquote(index)), do: unquote(Enum.reverse(full_names))
   end
 
-  @spec semitones_and_number_to_interval(semitones, 1..7) :: interval |
-                                                             {:error, binary}
+  @spec semitones_and_number_to_interval(0..11, 1..7) :: interval |
+                                                         {:error, binary}
   defp semitones_and_number_to_interval( 0, 1), do: {:perfect,           1}
   defp semitones_and_number_to_interval( 1, 1), do: {:augmented,         1}
   defp semitones_and_number_to_interval( 2, 1), do: {:doubly_augmented,  1}
