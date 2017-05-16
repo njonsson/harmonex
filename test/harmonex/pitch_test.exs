@@ -8,6 +8,60 @@ defmodule Harmonex.PitchTest do
   @invalid_name "Invalid pitch name -- must be in #{inspect @bare_names}"
   @invalid_alteration "Invalid pitch alteration -- must be in #{inspect @alterations}"
 
+  describe ".adjust_by_semitones/1" do
+    test "accepts valid arguments" do
+      for bare_name <- @bare_names do
+        for alteration <- @alterations do
+          actual = Harmonex.Pitch.adjust_by_semitones(%{bare_name: bare_name,
+                                                        alteration: alteration},
+                                                      1)
+          assert is_map(actual)
+
+          full_name = :"#{to_string bare_name}_#{to_string alteration}"
+          actual = Harmonex.Pitch.adjust_by_semitones(full_name, 1)
+          assert is_atom(actual)
+        end
+
+        actual = Harmonex.Pitch.adjust_by_semitones(%{bare_name: bare_name}, 1)
+        assert is_map(actual)
+
+        actual = Harmonex.Pitch.adjust_by_semitones(bare_name, 1)
+        assert is_atom(actual)
+      end
+    end
+
+    test "rejects an invalid name" do
+      expected = {:error, @invalid_name}
+
+      actual = Harmonex.Pitch.adjust_by_semitones(%Harmonex.Pitch{bare_name: :h,
+                                                                  alteration: :flat},
+                                                  1)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.adjust_by_semitones(%Harmonex.Pitch{bare_name: :h},
+                                                  1)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.adjust_by_semitones(:h_flat, 1)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.adjust_by_semitones(:h, 1)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.adjust_by_semitones(:a_out_of_tune, 1)
+      assert actual == expected
+    end
+
+    test "rejects an invalid alteration" do
+      expected = {:error, @invalid_alteration}
+
+      actual = Harmonex.Pitch.adjust_by_semitones(%Harmonex.Pitch{bare_name: :a,
+                                                                  alteration: :out_of_tune},
+                                                  1)
+      assert actual == expected
+    end
+  end
+
   describe ".alteration/1" do
     test "accepts valid arguments" do
       for bare_name <- @bare_names do

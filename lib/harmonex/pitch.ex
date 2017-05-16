@@ -37,6 +37,37 @@ defmodule Harmonex.Pitch do
   @invalid_alteration "Invalid pitch alteration -- must be in #{inspect @alterations}"
 
   @doc """
+  Computes a pitch that is the sum of the specified `pitch` and the specified
+  `adjustment` in semitones.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.adjust_by_semitones %{bare_name: :a, alteration: :sharp}, 14
+      %Harmonex.Pitch{bare_name: :c, alteration: :natural}
+
+      iex> Harmonex.Pitch.adjust_by_semitones :b_flat, -2
+      :g_sharp
+
+      iex> Harmonex.Pitch.adjust_by_semitones :c, 0
+      :c_natural
+  """
+  @spec adjust_by_semitones(t, integer) :: t
+  def adjust_by_semitones(%{bare_name: _}=pitch, adjustment) do
+    with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
+      pitch_full_name |> adjust_by_semitones(adjustment) |> new
+    end
+  end
+
+  def adjust_by_semitones(pitch, adjustment) do
+    with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
+      (index_chromatic(pitch_full_name) + adjustment) |> Integer.mod(12)
+                                                      |> full_names_at
+                                                      |> Enum.sort_by(&complexity_score/1)
+                                                      |> List.first
+    end
+  end
+
+  @doc """
   Computes the alteration of the specified `pitch`.
 
   ## Examples
@@ -360,6 +391,18 @@ defmodule Harmonex.Pitch do
          high_index                        <- index_chromatic(high_full) do
       (high_index - low_index) |> Integer.mod(12)
     end
+  end
+
+  @spec complexity_score(atom) :: 0..2
+  for bare_name <- @bare_names do
+    defp complexity_score(unquote(bare_name)),               do: 0
+    defp complexity_score(unquote(:"#{bare_name}_natural")), do: 0
+
+    defp complexity_score(unquote(:"#{bare_name}_flat")),  do: 1
+    defp complexity_score(unquote(:"#{bare_name}_sharp")), do: 1
+
+    defp complexity_score(unquote(:"#{bare_name}_double_flat")),  do: 2
+    defp complexity_score(unquote(:"#{bare_name}_double_sharp")), do: 2
   end
 
   @spec index_chromatic(atom) :: semitones
