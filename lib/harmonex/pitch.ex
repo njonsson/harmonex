@@ -177,11 +177,11 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.enharmonics :f_double_sharp
-      [:g_natural, :a_double_flat]
-
       iex> Harmonex.Pitch.enharmonics %{bare_name: :g, alteration: :sharp}
       [%Harmonex.Pitch{bare_name: :a, alteration: :flat}]
+
+      iex> Harmonex.Pitch.enharmonics :f_double_sharp
+      [:g_natural, :a_double_flat]
 
       iex> Harmonex.Pitch.enharmonics :g
       [:f_double_sharp, :a_double_flat]
@@ -294,8 +294,8 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.new :a
-      %Harmonex.Pitch{bare_name: :a, alteration: :natural}
+      iex> Harmonex.Pitch.new %{bare_name: :a, alteration: :flat}
+      %Harmonex.Pitch{bare_name: :a, alteration: :flat}
 
       iex> Harmonex.Pitch.new %{bare_name: :a}
       %Harmonex.Pitch{bare_name: :a, alteration: :natural}
@@ -303,8 +303,8 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.new :a_flat
       %Harmonex.Pitch{bare_name: :a, alteration: :flat}
 
-      iex> Harmonex.Pitch.new %{bare_name: :a, alteration: :flat}
-      %Harmonex.Pitch{bare_name: :a, alteration: :flat}
+      iex> Harmonex.Pitch.new :a
+      %Harmonex.Pitch{bare_name: :a, alteration: :natural}
 
       iex> Harmonex.Pitch.new %{bare_name: :h}
       {:error, #{inspect @invalid_name}}
