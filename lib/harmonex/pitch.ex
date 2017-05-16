@@ -404,8 +404,7 @@ defmodule Harmonex.Pitch do
   end
 
   @spec index_chromatic(atom) :: 0..11
-  indexes_by_bare_name = [c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11]
-  for {bare_name, index} <- indexes_by_bare_name do
+  for {bare_name, index} <- @indexes_by_bare_name do
     defp index_chromatic(unquote(bare_name)), do: unquote(index)
 
     for {alteration, offset} <- @alteration_offsets do
@@ -417,15 +416,24 @@ defmodule Harmonex.Pitch do
   end
 
   @spec full_names_at(0..11) :: [atom]
-  full_name_lists_by_index = indexes_by_bare_name |> Enum.reduce(%{},
-                                                                 fn({bare_name,
-                                                                     index},
-                                                                    acc) ->
+  full_name_lists_by_index = @indexes_by_bare_name |> Enum.reduce(%{},
+                                                                  fn({bare_name,
+                                                                      index},
+                                                                     acc) ->
     @alteration_offsets |> Enum.reduce(acc,
                                        fn({alteration, offset}, inner_acc) ->
       full_name = :"#{to_string bare_name}_#{to_string alteration}"
       altered_index = Integer.mod(index + offset, 12)
-      insert_at = if full_name == :b_flat, do: -1, else: 0
+
+      # Tweak the order of enharmonic groups that wrap around G-A.
+      insert_at = case full_name do
+                    :g_natural      ->  1
+                    :g_sharp        -> -1
+                    :f_double_sharp -> -1
+                    :g_double_sharp -> -1
+                    _               ->  0
+                  end
+
       inner_acc |> Map.put_new(altered_index, [])
                 |> Map.update!(altered_index,
                                &(&1 |> List.insert_at(insert_at, full_name)))
