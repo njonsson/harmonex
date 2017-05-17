@@ -313,14 +313,14 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.new %{bare_name: :a, alteration: :out_of_tune}
       {:error, #{inspect @invalid_alteration}}
   """
-  @spec new(atom) :: t | {:error, binary}
+  @spec new(t) :: t | {:error, binary}
   @spec new(bare_name, alteration) :: t | {:error, binary}
   for bare_name <- @bare_names do
-    def new(unquote(bare_name)=bare_name), do: new(bare_name, :natural)
+    def new(unquote(bare_name)=name), do: new(name, :natural)
 
     for alteration <- @alterations do
       def new(%{bare_name: unquote(bare_name)=bare_name,
-                alteration: unquote(alteration)=alteration}) do
+                alteration: unquote(alteration)=alteration}=_name) do
         new bare_name, alteration
       end
 
@@ -344,16 +344,16 @@ defmodule Harmonex.Pitch do
       end
 
       full_name = :"#{to_string bare_name}_#{to_string alteration}"
-      def new(unquote(full_name)=_full_name) do
+      def new(unquote(full_name)=_name) do
         new unquote(bare_name), unquote(alteration)
       end
     end
 
-    def new(%{bare_name: unquote(bare_name), alteration: _}) do
+    def new(%{bare_name: unquote(bare_name), alteration: _}=_name) do
       {:error, @invalid_alteration}
     end
 
-    def new(%{bare_name: unquote(bare_name)=bare_name}) do
+    def new(%{bare_name: unquote(bare_name)=bare_name}=_name) do
       new bare_name, :natural
     end
 
@@ -362,9 +362,9 @@ defmodule Harmonex.Pitch do
     end
   end
 
-  def new(_invalid_name, _alteration), do: {:error, @invalid_name}
+  def new(_name), do: {:error, @invalid_name}
 
-  def new(_invalid_name), do: {:error, @invalid_name}
+  def new(_name, _alteration), do: {:error, @invalid_name}
 
   @doc """
   Computes the distance in half steps between the specified `low_pitch` and
