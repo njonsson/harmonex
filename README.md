@@ -29,8 +29,8 @@ questions such as:
   B𝄫?**  
   _Answer:_
   `Harmonex.Pitch.interval_diatonic(:f, :b_double_flat) == {:diminished, 4}`
-* [ ] **What is the key signature of the modal key G Locrian?**  
-  _Answer: four flats — B♭, E♭, A♭, and D♭._
+* [ ] **What is the key signature of G harmonic minor?**  
+  _Answer: two flats, one sharp — B♭, E♭, and F♯._
 * [ ] **What keys and modes have the signature of three sharps?**  
   _Answer: A major/Ionian, B Dorian, C♯ Phrygian, D Lydian, E Mixolydian, F♯
   minor/Aeolian, and G♯ Locrian._
