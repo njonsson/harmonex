@@ -1,8 +1,5 @@
 defmodule Harmonex.Ordinal do
-  @moduledoc """
-  Provides functions for converting between integers and the English ordinal
-  forms of common interval sizes.
-  """
+  @moduledoc false
 
   @string_negative "negative"
   @regex_negative "^#{@string_negative} " |> Regex.compile!([:caseless])
