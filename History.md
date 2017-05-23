@@ -1,5 +1,10 @@
 # Version history for the _Harmonex_ project
 
+## <a name="v0.4.0"></a>v0.4.0, Mon 5/22/2017
+
+* Extract _Interval_ and reimplement *Pitch.interval_diatonic/2* as
+  *Interval.between_pitches/2* and _Pitch.interval/2_
+
 ## <a name="v0.3.0"></a>v0.3.0, Sun 5/14/2017
 
 * Implement error handling in all _Pitch_ functions
