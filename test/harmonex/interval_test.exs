@@ -53,6 +53,59 @@ defmodule Harmonex.IntervalTest do
                       perfect:           6,
                       perfect:           7]
 
+  @invalid_pitch_name "Invalid pitch name -- must be in [:a, :b, :c, :d, :e, :f, :g]"
+
+  describe ".between_pitches/2" do
+    test "accepts valid arguments" do
+      expected = %Harmonex.Interval{quality: :diminished, size: 3}
+
+      actual = Harmonex.Interval.between_pitches(%{bare_name: :a,
+                                                   alteration: :sharp},
+                                                 :c)
+      assert actual == expected
+
+      actual = Harmonex.Interval.between_pitches(:a_sharp, %{bare_name: :c})
+      assert actual == expected
+    end
+
+    test "rejects an invalid name in the first argument" do
+      expected = {:error, @invalid_pitch_name}
+
+      actual = Harmonex.Interval.between_pitches(%Harmonex.Pitch{bare_name: :h,
+                                                                 alteration: :flat},
+                                                 :a)
+      assert actual == expected
+
+      actual = Harmonex.Interval.between_pitches(%Harmonex.Pitch{bare_name: :h},
+                                                 :a)
+      assert actual == expected
+
+      actual = Harmonex.Interval.between_pitches(:h_flat, :a)
+      assert actual == expected
+
+      actual = Harmonex.Interval.between_pitches(:h, :a)
+      assert actual == expected
+    end
+
+    test "rejects an invalid name in the second argument" do
+      expected = {:error, @invalid_pitch_name}
+
+      actual = Harmonex.Interval.between_pitches(:a,
+                                                 %Harmonex.Pitch{bare_name: :h,
+                                                                 alteration: :flat})
+      assert actual == expected
+
+      actual = Harmonex.Interval.between_pitches(:a, %Harmonex.Pitch{bare_name: :h})
+      assert actual == expected
+
+      actual = Harmonex.Interval.between_pitches(:a, :h_flat)
+      assert actual == expected
+
+      actual = Harmonex.Interval.between_pitches(:a, :h)
+      assert actual == expected
+    end
+  end
+
   describe ".new/1" do
     test "accepts valid arguments" do
       for {quality, size} <- @intervals do

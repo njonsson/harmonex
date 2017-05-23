@@ -298,6 +298,16 @@ defmodule Harmonex.PitchTest do
   end
 
   describe ".interval/2" do
+    test "accepts valid arguments" do
+      expected = %Harmonex.Interval{quality: :diminished, size: 3}
+
+      actual = Harmonex.Pitch.interval(%{bare_name: :a, alteration: :sharp}, :c)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.interval(:a_sharp, %{bare_name: :c})
+      assert actual == expected
+    end
+
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_name}
 

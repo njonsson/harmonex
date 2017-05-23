@@ -4,7 +4,7 @@ defmodule Harmonex.Interval do
   dodecaphonic scale.
   """
 
-  alias Harmonex.Ordinal
+  alias Harmonex.{Ordinal,Pitch}
 
   defstruct quality: nil, size: nil
 
@@ -62,6 +62,45 @@ defmodule Harmonex.Interval do
                                                                               &1})),
                                                             &({quality, &1}))
                                    end)
+
+  @pitch_indexes_by_bare_name ~w(a b c d e f g)a |> Stream.with_index |> Map.new
+
+  @doc """
+  Computes the `Interval` between the specified `low_pitch` and `high_pitch`.
+
+  ## Examples
+
+      iex> Harmonex.Interval.between_pitches %{bare_name: :a, alteration: :sharp}, %{bare_name: :c}
+      %Harmonex.Interval{quality: :diminished, size: 3}
+
+      iex> Harmonex.Interval.between_pitches :b_flat, :c
+      %Harmonex.Interval{quality: :major, size: 2}
+
+      iex> Harmonex.Interval.between_pitches :d_double_sharp, :a_double_sharp
+      %Harmonex.Interval{quality: :perfect, size: 5}
+
+      iex> Harmonex.Interval.between_pitches :c_flat, :c_natural
+      %Harmonex.Interval{quality: :augmented, size: 1}
+
+      iex> Harmonex.Interval.between_pitches :a_flat, :e_sharp
+      %Harmonex.Interval{quality: :doubly_augmented, size: 5}
+
+      iex> Harmonex.Interval.between_pitches :a_flat, :e_double_sharp
+      {:error, "Invalid interval"}
+  """
+  @spec between_pitches(Pitch.t, Pitch.t) :: t | {:error, binary}
+  def between_pitches(low_pitch, high_pitch) do
+    with semitones when is_integer(semitones) <- Pitch.semitones(low_pitch, high_pitch) do
+      low_staff_pos  = @pitch_indexes_by_bare_name |> Map.fetch!(Pitch.bare_name(low_pitch))
+      high_staff_pos = @pitch_indexes_by_bare_name |> Map.fetch!(Pitch.bare_name(high_pitch))
+      number = Integer.mod(high_staff_pos - low_staff_pos, 7) + 1
+      case @intervals_by_semitones_and_number |> Map.get({semitones, number},
+                                                         {:error, "Invalid interval"}) do
+        {:error, _}=error -> error
+        {quality, size}   -> new(%{quality: quality, size: size})
+      end
+    end
+  end
 
   @doc """
   Constructs a new `Harmonex.Interval` with the specified `definition`.

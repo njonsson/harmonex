@@ -3,6 +3,8 @@ defmodule Harmonex.Pitch do
   Provides functions for working with pitches on the Western dodecaphonic scale.
   """
 
+  alias Harmonex.Interval
+
   defstruct bare_name: nil, alteration: :natural
 
   @type t :: %{bare_name: bare_name, alteration: alteration} |
@@ -20,16 +22,6 @@ defmodule Harmonex.Pitch do
                        sharp:        1,
                        double_sharp: 2]
   @alterations @alteration_offsets |> Keyword.keys
-
-  @type quality :: :perfect           |
-                   :doubly_diminished |
-                   :diminished        |
-                   :augmented         |
-                   :doubly_augmented  |
-                   :minor             |
-                   :major
-
-  @type interval :: {quality, 1..7}
 
   @invalid_name "Invalid pitch name -- must be in #{inspect @bare_names}"
   @invalid_alteration "Invalid pitch alteration -- must be in #{inspect @alterations}"
@@ -260,31 +252,26 @@ defmodule Harmonex.Pitch do
   ## Examples
 
       iex> Harmonex.Pitch.interval %{bare_name: :a, alteration: :sharp}, %{bare_name: :c}
-      {:diminished, 3}
+      %Harmonex.Interval{quality: :diminished, size: 3}
 
       iex> Harmonex.Pitch.interval :b_flat, :c
-      {:major, 2}
+      %Harmonex.Interval{quality: :major, size: 2}
 
       iex> Harmonex.Pitch.interval :d_double_sharp, :a_double_sharp
-      {:perfect, 5}
+      %Harmonex.Interval{quality: :perfect, size: 5}
 
       iex> Harmonex.Pitch.interval :c_flat, :c_natural
-      {:augmented, 1}
+      %Harmonex.Interval{quality: :augmented, size: 1}
 
       iex> Harmonex.Pitch.interval :a_flat, :e_sharp
-      {:doubly_augmented, 5}
+      %Harmonex.Interval{quality: :doubly_augmented, size: 5}
 
       iex> Harmonex.Pitch.interval :a_flat, :e_double_sharp
       {:error, "Invalid interval"}
   """
-  @spec interval(t, t) :: interval | {:error, binary}
+  @spec interval(t, t) :: Interval.t | {:error, binary}
   def interval(low_pitch, high_pitch) do
-    with semitones when is_integer(semitones) <- semitones(low_pitch, high_pitch) do
-      low_staff_position  = low_pitch  |> bare_name |> staff_position
-      high_staff_position = high_pitch |> bare_name |> staff_position
-      number = Integer.mod(high_staff_position - low_staff_position, 7) + 1
-      semitones_and_number_to_interval semitones, number
-    end
+    Interval.between_pitches low_pitch, high_pitch
   end
 
   @doc """
@@ -441,50 +428,5 @@ defmodule Harmonex.Pitch do
   end)
   for {index, full_names} <- full_name_lists_by_index do
     defp full_names_at(unquote(index)), do: unquote(Enum.reverse(full_names))
-  end
-
-  @spec semitones_and_number_to_interval(0..11, 1..7) :: interval |
-                                                         {:error, binary}
-  defp semitones_and_number_to_interval( 0, 1), do: {:perfect,           1}
-  defp semitones_and_number_to_interval( 1, 1), do: {:augmented,         1}
-  defp semitones_and_number_to_interval( 2, 1), do: {:doubly_augmented,  1}
-  defp semitones_and_number_to_interval( 0, 2), do: {:diminished,        2}
-  defp semitones_and_number_to_interval( 1, 2), do: {:minor,             2}
-  defp semitones_and_number_to_interval( 2, 2), do: {:major,             2}
-  defp semitones_and_number_to_interval( 3, 2), do: {:augmented,         2}
-  defp semitones_and_number_to_interval( 4, 2), do: {:doubly_augmented,  2}
-  defp semitones_and_number_to_interval( 1, 3), do: {:doubly_diminished, 3}
-  defp semitones_and_number_to_interval( 2, 3), do: {:diminished,        3}
-  defp semitones_and_number_to_interval( 3, 3), do: {:minor,             3}
-  defp semitones_and_number_to_interval( 4, 3), do: {:major,             3}
-  defp semitones_and_number_to_interval( 5, 3), do: {:augmented,         3}
-  defp semitones_and_number_to_interval( 6, 3), do: {:doubly_augmented,  3}
-  defp semitones_and_number_to_interval( 3, 4), do: {:doubly_diminished, 4}
-  defp semitones_and_number_to_interval( 4, 4), do: {:diminished,        4}
-  defp semitones_and_number_to_interval( 5, 4), do: {:perfect,           4}
-  defp semitones_and_number_to_interval( 6, 4), do: {:augmented,         4}
-  defp semitones_and_number_to_interval( 7, 4), do: {:doubly_augmented,  4}
-  defp semitones_and_number_to_interval( 5, 5), do: {:doubly_diminished, 5}
-  defp semitones_and_number_to_interval( 6, 5), do: {:diminished,        5}
-  defp semitones_and_number_to_interval( 7, 5), do: {:perfect,           5}
-  defp semitones_and_number_to_interval( 8, 5), do: {:augmented,         5}
-  defp semitones_and_number_to_interval( 9, 5), do: {:doubly_augmented,  5}
-  defp semitones_and_number_to_interval( 6, 6), do: {:doubly_diminished, 6}
-  defp semitones_and_number_to_interval( 7, 6), do: {:diminished,        6}
-  defp semitones_and_number_to_interval( 8, 6), do: {:minor,             6}
-  defp semitones_and_number_to_interval( 9, 6), do: {:major,             6}
-  defp semitones_and_number_to_interval(10, 6), do: {:augmented,         6}
-  defp semitones_and_number_to_interval(11, 6), do: {:doubly_augmented,  6}
-  defp semitones_and_number_to_interval( 8, 7), do: {:doubly_diminished, 7}
-  defp semitones_and_number_to_interval( 9, 7), do: {:diminished,        7}
-  defp semitones_and_number_to_interval(10, 7), do: {:minor,             7}
-  defp semitones_and_number_to_interval(11, 7), do: {:major,             7}
-  defp semitones_and_number_to_interval( 0, 7), do: {:augmented,         7}
-  defp semitones_and_number_to_interval( 1, 7), do: {:doubly_augmented,  7}
-  defp semitones_and_number_to_interval( _, _), do: {:error, "Invalid interval"}
-
-  @spec staff_position(bare_name) :: 0..6
-  for {bare_name, index} <- Enum.with_index(@bare_names) do
-    defp staff_position(unquote(bare_name)), do: unquote(index)
   end
 end

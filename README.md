@@ -25,10 +25,13 @@ questions such as:
   `Harmonex.Pitch.enharmonics(:f_double_sharp) == [:g_natural, :a_double_flat]`
 * [x] **How far apart, in semitones, are the pitches A♭ and D♯?**  
   _Answer:_ `Harmonex.Pitch.semitones(:a_flat, :d_sharp) == 7`
-* [x] **What is the quality and number of the interval between the pitches F♮ and
-  B𝄫?**  
+* [x] **What is the interval between the pitches F♮ and B𝄫?**  
   _Answer:_
-  `Harmonex.Pitch.interval_diatonic(:f, :b_double_flat) == {:diminished, 4}`
+  `Harmonex.Pitch.interval(:f, :b_double_flat) == %Harmonex.Interval{quality:
+  :diminished, size: 4}`  
+  _Answer:_
+  `Harmonex.Interval.between_pitches(:f, :b_double_flat) ==
+  %Harmonex.Interval{quality: :diminished, size: 4}`
 * [ ] **What is the key signature of G harmonic minor?**  
   _Answer: two flats, one sharp — B♭, E♭, and F♯._
 * [ ] **What keys and modes have the signature of three sharps?**  
