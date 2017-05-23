@@ -1,7 +1,7 @@
 defmodule Harmonex.Ordinal do
   @moduledoc """
-  Provides functions for converting between integers and English names of
-  intervals of such sizes.
+  Provides functions for converting between integers and the English ordinal
+  forms of common interval sizes.
   """
 
   @string_negative "negative"
