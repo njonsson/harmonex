@@ -54,7 +54,7 @@ defmodule Harmonex.Interval do
                                        { 0, 7} => {:augmented,         7},
                                        { 1, 7} => {:doubly_augmented,  7}}
   @intervals @intervals_by_semitones_and_number |> Map.values
-  @qualities @intervals |> Enum.map(fn({quality, _}) -> quality end) |> Enum.uniq
+  @qualities @intervals |> Stream.map(&(elem(&1, 0))) |> Enum.uniq
   @intervals_invalid @qualities |> Enum.reduce([], fn(quality, acc) ->
                                      acc ++ Enum.filter_map(1..7,
                                                             &(! Enum.member?(@intervals,
