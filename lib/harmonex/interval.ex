@@ -94,10 +94,10 @@ defmodule Harmonex.Interval do
       low_staff_pos  = @pitch_indexes_by_bare_name |> Map.fetch!(Pitch.bare_name(low_pitch))
       high_staff_pos = @pitch_indexes_by_bare_name |> Map.fetch!(Pitch.bare_name(high_pitch))
       number = Integer.mod(high_staff_pos - low_staff_pos, 7) + 1
-      case @intervals_by_semitones_and_number |> Map.get({semitones, number},
-                                                         {:error, "Invalid interval"}) do
-        {:error, _}=error -> error
-        {quality, size}   -> new(%{quality: quality, size: size})
+      with {quality, size} when is_integer(size) <- Map.get(@intervals_by_semitones_and_number,
+                                                            {semitones, number},
+                                                            {:error, "Invalid interval"}) do
+        new %{quality: quality, size: size}
       end
     end
   end
