@@ -10,18 +10,18 @@ defmodule Harmonex.PitchTest do
 
   describe ".adjust_by_semitones/1" do
     test "accepts valid arguments" do
+      for bare_name <- @bare_names, alteration <- @alterations do
+        actual = Harmonex.Pitch.adjust_by_semitones(%{bare_name: bare_name,
+                                                      alteration: alteration},
+                                                    1)
+        assert is_map(actual)
+
+        full_name = :"#{to_string bare_name}_#{to_string alteration}"
+        actual = Harmonex.Pitch.adjust_by_semitones(full_name, 1)
+        assert is_atom(actual)
+      end
+
       for bare_name <- @bare_names do
-        for alteration <- @alterations do
-          actual = Harmonex.Pitch.adjust_by_semitones(%{bare_name: bare_name,
-                                                        alteration: alteration},
-                                                      1)
-          assert is_map(actual)
-
-          full_name = :"#{to_string bare_name}_#{to_string alteration}"
-          actual = Harmonex.Pitch.adjust_by_semitones(full_name, 1)
-          assert is_atom(actual)
-        end
-
         actual = Harmonex.Pitch.adjust_by_semitones(%{bare_name: bare_name}, 1)
         assert is_map(actual)
 
@@ -64,19 +64,19 @@ defmodule Harmonex.PitchTest do
 
   describe ".alteration/1" do
     test "accepts valid arguments" do
+      for bare_name <- @bare_names, alteration <- @alterations do
+        expected = alteration
+
+        actual = Harmonex.Pitch.alteration(%{bare_name: bare_name,
+                                             alteration: alteration})
+        assert actual == expected
+
+        full_name = :"#{to_string bare_name}_#{to_string alteration}"
+        actual = Harmonex.Pitch.alteration(full_name)
+        assert actual == expected
+      end
+
       for bare_name <- @bare_names do
-        for alteration <- @alterations do
-          expected = alteration
-
-          actual = Harmonex.Pitch.alteration(%{bare_name: bare_name,
-                                               alteration: alteration})
-          assert actual == expected
-
-          full_name = :"#{to_string bare_name}_#{to_string alteration}"
-          actual = Harmonex.Pitch.alteration(full_name)
-          assert actual == expected
-        end
-
         expected = :natural
 
         actual = Harmonex.Pitch.alteration(%{bare_name: bare_name})
@@ -113,18 +113,20 @@ defmodule Harmonex.PitchTest do
 
   describe ".bare_name/1" do
     test "accepts valid arguments" do
-      for bare_name <- @bare_names do
+      for bare_name <- @bare_names, alteration <- @alterations do
         expected = bare_name
 
-        for alteration <- @alterations do
-          actual = Harmonex.Pitch.bare_name(%{bare_name: bare_name,
-                                              alteration: alteration})
-          assert actual == expected
+        actual = Harmonex.Pitch.bare_name(%{bare_name: bare_name,
+                                            alteration: alteration})
+        assert actual == expected
 
-          full_name = :"#{to_string bare_name}_#{to_string alteration}"
-          actual = Harmonex.Pitch.bare_name(full_name)
-          assert actual == expected
-        end
+        full_name = :"#{to_string bare_name}_#{to_string alteration}"
+        actual = Harmonex.Pitch.bare_name(full_name)
+        assert actual == expected
+      end
+
+      for bare_name <- @bare_names do
+        expected = bare_name
 
         actual = Harmonex.Pitch.bare_name(%{bare_name: bare_name})
         assert actual == expected
@@ -246,18 +248,18 @@ defmodule Harmonex.PitchTest do
 
   describe ".full_name/1" do
     test "accepts valid arguments" do
+      for bare_name <- @bare_names, alteration <- @alterations do
+        expected = :"#{to_string bare_name}_#{to_string alteration}"
+
+        actual = Harmonex.Pitch.full_name(%{bare_name: bare_name,
+                                            alteration: alteration})
+        assert actual == expected
+
+        actual = Harmonex.Pitch.full_name(expected)
+        assert actual == expected
+      end
+
       for bare_name <- @bare_names do
-        for alteration <- @alterations do
-          expected = :"#{to_string bare_name}_#{to_string alteration}"
-
-          actual = Harmonex.Pitch.full_name(%{bare_name: bare_name,
-                                              alteration: alteration})
-          assert actual == expected
-
-          actual = Harmonex.Pitch.full_name(expected)
-          assert actual == expected
-        end
-
         expected = :"#{to_string bare_name}_natural"
 
         actual = Harmonex.Pitch.full_name(%{bare_name: bare_name})
@@ -347,20 +349,20 @@ defmodule Harmonex.PitchTest do
 
   describe ".new/1" do
     test "accepts valid arguments" do
+      for bare_name <- @bare_names, alteration <- @alterations do
+        expected = %Harmonex.Pitch{bare_name: bare_name,
+                                   alteration: alteration}
+
+        actual = Harmonex.Pitch.new(%{bare_name: bare_name,
+                                      alteration: alteration})
+        assert actual == expected
+
+        full_name = :"#{to_string bare_name}_#{to_string alteration}"
+        actual = Harmonex.Pitch.new(full_name)
+        assert actual == expected
+      end
+
       for bare_name <- @bare_names do
-        for alteration <- @alterations do
-          expected = %Harmonex.Pitch{bare_name: bare_name,
-                                     alteration: alteration}
-
-          actual = Harmonex.Pitch.new(%{bare_name: bare_name,
-                                        alteration: alteration})
-          assert actual == expected
-
-          full_name = :"#{to_string bare_name}_#{to_string alteration}"
-          actual = Harmonex.Pitch.new(full_name)
-          assert actual == expected
-        end
-
         expected = %Harmonex.Pitch{bare_name: bare_name, alteration: :natural}
 
         actual = Harmonex.Pitch.new(%{bare_name: bare_name})
@@ -374,13 +376,11 @@ defmodule Harmonex.PitchTest do
 
   describe ".new/2" do
     test "accepts valid arguments" do
-      for bare_name <- @bare_names do
-        for alteration <- @alterations do
-          expected = %Harmonex.Pitch{bare_name: bare_name,
-                                     alteration: alteration}
-          actual = Harmonex.Pitch.new(bare_name, alteration)
-          assert actual == expected
-        end
+      for bare_name <- @bare_names, alteration <- @alterations do
+        expected = %Harmonex.Pitch{bare_name: bare_name,
+                                   alteration: alteration}
+        actual = Harmonex.Pitch.new(bare_name, alteration)
+        assert actual == expected
       end
     end
   end

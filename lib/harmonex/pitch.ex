@@ -87,12 +87,12 @@ defmodule Harmonex.Pitch do
 
   def alteration(%{alteration: _}=_pitch), do: {:error, @invalid_alteration}
 
-  for bare_name <- @bare_names do
-    for alteration <- @alterations do
-      full_name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
-      def alteration(unquote(full_name)=_pitch), do: unquote(alteration)
-    end
+  for bare_name <- @bare_names, alteration <- @alterations do
+    full_name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
+    def alteration(unquote(full_name)=_pitch), do: unquote(alteration)
+  end
 
+  for bare_name <- @bare_names do
     def alteration(%{bare_name: unquote(bare_name)}=_pitch), do: :natural
 
     def alteration(unquote(bare_name)=_pitch), do: :natural
@@ -127,11 +127,9 @@ defmodule Harmonex.Pitch do
 
   def bare_name(%{bare_name: _}), do: {:error, @invalid_name}
 
-  for bare_name <- @bare_names do
-    for alteration <- @alterations do
-      full_name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
-      def bare_name(unquote(full_name)=_pitch), do: unquote(bare_name)
-    end
+  for bare_name <- @bare_names, alteration <- @alterations do
+    full_name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
+    def bare_name(unquote(full_name)=_pitch), do: unquote(bare_name)
   end
 
   def bare_name(_pitch), do: {:error, @invalid_name}
@@ -219,17 +217,17 @@ defmodule Harmonex.Pitch do
   """
   @spec full_name(t) :: atom
 
-  for bare_name <- @bare_names do
-    for alteration <- @alterations do
-      full_name = :"#{to_string bare_name}_#{to_string alteration}"
-      def full_name(%{bare_name: unquote(bare_name),
-                      alteration: unquote(alteration)}=_pitch) do
-        unquote full_name
-      end
-
-      def full_name(unquote(full_name)=pitch), do: pitch
+  for bare_name <- @bare_names, alteration <- @alterations do
+    full_name = :"#{to_string bare_name}_#{to_string alteration}"
+    def full_name(%{bare_name: unquote(bare_name),
+                    alteration: unquote(alteration)}=_pitch) do
+      unquote full_name
     end
 
+    def full_name(unquote(full_name)=pitch), do: pitch
+  end
+
+  for bare_name <- @bare_names do
     def full_name(%{bare_name: unquote(bare_name), alteration: _}=_pitch) do
       {:error, @invalid_alteration}
     end
@@ -302,39 +300,40 @@ defmodule Harmonex.Pitch do
   """
   @spec new(t) :: t | {:error, binary}
   @spec new(bare_name, alteration) :: t | {:error, binary}
+
+  for bare_name <- @bare_names, alteration <- @alterations do
+    def new(%{bare_name: unquote(bare_name)=bare_name,
+              alteration: unquote(alteration)=alteration}=_name) do
+      new bare_name, alteration
+    end
+
+    @doc """
+    Constructs a new `Harmonex.Pitch` with the specified `bare_name` and
+    `alteration`.
+
+    ## Examples
+
+        iex> Harmonex.Pitch.new :a, :flat
+        %Harmonex.Pitch{bare_name: :a, alteration: :flat}
+
+        iex> Harmonex.Pitch.new :h, :flat
+        {:error, #{inspect @invalid_name}}
+
+        iex> Harmonex.Pitch.new :a, :out_of_tune
+        {:error, #{inspect @invalid_alteration}}
+    """
+    def new(unquote(bare_name)=bare_name, unquote(alteration)=alteration) do
+      __MODULE__ |> struct(bare_name: bare_name, alteration: alteration)
+    end
+
+    full_name = :"#{to_string bare_name}_#{to_string alteration}"
+    def new(unquote(full_name)=_name) do
+      new unquote(bare_name), unquote(alteration)
+    end
+  end
+
   for bare_name <- @bare_names do
     def new(unquote(bare_name)=name), do: new(name, :natural)
-
-    for alteration <- @alterations do
-      def new(%{bare_name: unquote(bare_name)=bare_name,
-                alteration: unquote(alteration)=alteration}=_name) do
-        new bare_name, alteration
-      end
-
-      @doc """
-      Constructs a new `Harmonex.Pitch` with the specified `bare_name` and
-      `alteration`.
-
-      ## Examples
-
-          iex> Harmonex.Pitch.new :a, :flat
-          %Harmonex.Pitch{bare_name: :a, alteration: :flat}
-
-          iex> Harmonex.Pitch.new :h, :flat
-          {:error, #{inspect @invalid_name}}
-
-          iex> Harmonex.Pitch.new :a, :out_of_tune
-          {:error, #{inspect @invalid_alteration}}
-      """
-      def new(unquote(bare_name)=bare_name, unquote(alteration)=alteration) do
-        __MODULE__ |> struct(bare_name: bare_name, alteration: alteration)
-      end
-
-      full_name = :"#{to_string bare_name}_#{to_string alteration}"
-      def new(unquote(full_name)=_name) do
-        new unquote(bare_name), unquote(alteration)
-      end
-    end
 
     def new(%{bare_name: unquote(bare_name), alteration: _}=_name) do
       {:error, @invalid_alteration}
@@ -393,12 +392,13 @@ defmodule Harmonex.Pitch do
   @spec index_chromatic(atom) :: 0..11
   for {bare_name, index} <- @indexes_by_bare_name do
     defp index_chromatic(unquote(bare_name)), do: unquote(index)
+  end
 
-    for {alteration, offset} <- @alteration_offsets do
-      full_name = :"#{to_string bare_name}_#{to_string alteration}"
-      defp index_chromatic(unquote(full_name)) do
-        unquote(index + offset) |> Integer.mod(12)
-      end
+  for {bare_name, index} <- @indexes_by_bare_name,
+      {alteration, offset} <- @alteration_offsets do
+    full_name = :"#{to_string bare_name}_#{to_string alteration}"
+    defp index_chromatic(unquote(full_name)) do
+      unquote(index + offset) |> Integer.mod(12)
     end
   end
 
