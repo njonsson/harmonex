@@ -65,8 +65,6 @@ defmodule Harmonex.Interval do
                                                             &({quality, &1}))
                                    end)
 
-  @pitch_index_by_bare_name ~w(a b c d e f g)a |> Stream.with_index |> Map.new
-
   @doc """
   Computes the `Interval` between the specified `low_pitch` and `high_pitch`.
 
@@ -93,9 +91,9 @@ defmodule Harmonex.Interval do
   @spec between_pitches(Pitch.t, Pitch.t) :: t | {:error, binary}
   def between_pitches(low_pitch, high_pitch) do
     with semitones when is_integer(semitones) <- Pitch.semitones(low_pitch, high_pitch) do
-      low_index  = @pitch_index_by_bare_name |> Map.fetch!(Pitch.bare_name(low_pitch))
-      high_index = @pitch_index_by_bare_name |> Map.fetch!(Pitch.bare_name(high_pitch))
-      interval_size = Integer.mod(high_index - low_index, 7) + 1
+      low  = low_pitch  |> Pitch.bare_name |> to_charlist |> List.first
+      high = high_pitch |> Pitch.bare_name |> to_charlist |> List.first
+      interval_size = Integer.mod(high - low, 7) + 1
       with interval_quality when is_atom(interval_quality) <- Map.get(@quality_by_semitones_and_size,
                                                                       {semitones, interval_size},
                                                                       {:error, "Invalid interval"}) do
