@@ -11,17 +11,17 @@ defmodule Harmonex.Pitch do
              %{bare_name: bare_name}                         |
              atom
 
-  @type       bare_name :: :a  | :b  | :c  | :d  | :e  | :f  | :g
-  @indexes_by_bare_name    [a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10]
-  @bare_names @indexes_by_bare_name |> Keyword.keys
+  @type            bare_name :: :a  | :b  | :c  | :d  | :e  | :f  | :g
+  @position_by_bare_name [a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10]
+  @bare_names @position_by_bare_name |> Keyword.keys
 
   @type alteration :: :natural | :flat | :sharp | :double_flat | :double_sharp
-  @alteration_offsets [double_flat: -2,
-                       flat:        -1,
-                       natural:      0,
-                       sharp:        1,
-                       double_sharp: 2]
-  @alterations @alteration_offsets |> Keyword.keys
+  @alteration_by_offset [double_flat: -2,
+                         flat:        -1,
+                         natural:      0,
+                         sharp:        1,
+                         double_sharp: 2]
+  @alterations @alteration_by_offset |> Keyword.keys
 
   @invalid_name "Invalid pitch name -- must be in #{inspect @bare_names}"
   @invalid_alteration "Invalid pitch alteration -- must be in #{inspect @alterations}"
@@ -50,7 +50,7 @@ defmodule Harmonex.Pitch do
 
   def adjust_by_semitones(pitch, adjustment) do
     with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
-      (index_chromatic(pitch_full_name) + adjustment) |> Integer.mod(12)
+      (position(pitch_full_name) + adjustment) |> Integer.mod(12)
                                                       |> full_names_at
                                                       |> Enum.sort_by(&complexity_score/1)
                                                       |> List.first
@@ -156,7 +156,7 @@ defmodule Harmonex.Pitch do
   def enharmonic?(pitch1, pitch2) do
     with pitch1_full_name when is_atom(pitch1_full_name) <- full_name(pitch1),
          pitch2_full_name when is_atom(pitch2_full_name) <- full_name(pitch2) do
-      index_chromatic(pitch1_full_name) == index_chromatic(pitch2_full_name)
+      position(pitch1_full_name) == position(pitch2_full_name)
     end
   end
 
@@ -192,7 +192,7 @@ defmodule Harmonex.Pitch do
 
   def enharmonics(pitch) do
     with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
-      pitch_full_name |> index_chromatic
+      pitch_full_name |> position
                       |> full_names_at
                       |> Enum.reject(&(&1 == pitch_full_name))
     end
@@ -369,11 +369,11 @@ defmodule Harmonex.Pitch do
   """
   @spec semitones(t, t) :: 0..11
   def semitones(low_pitch, high_pitch) do
-    with low_full when is_atom(low_full)   <- full_name(low_pitch),
-         low_index                         <- index_chromatic(low_full),
-         high_full when is_atom(high_full) <- full_name(high_pitch),
-         high_index                        <- index_chromatic(high_full) do
-      (high_index - low_index) |> Integer.mod(12)
+    with low_full_name when is_atom(low_full_name)   <- full_name(low_pitch),
+         low_position                                <- position(low_full_name),
+         high_full_name when is_atom(high_full_name) <- full_name(high_pitch),
+         high_position                               <- position(high_full_name) do
+      (high_position - low_position) |> Integer.mod(12)
     end
   end
 
@@ -389,28 +389,14 @@ defmodule Harmonex.Pitch do
     defp complexity_score(unquote(:"#{bare_name}_double_sharp")), do: 2
   end
 
-  @spec index_chromatic(atom) :: 0..11
-  for {bare_name, index} <- @indexes_by_bare_name do
-    defp index_chromatic(unquote(bare_name)), do: unquote(index)
-  end
-
-  for {bare_name, index} <- @indexes_by_bare_name,
-      {alteration, offset} <- @alteration_offsets do
-    full_name = :"#{to_string bare_name}_#{to_string alteration}"
-    defp index_chromatic(unquote(full_name)) do
-      unquote(index + offset) |> Integer.mod(12)
-    end
-  end
-
   @spec full_names_at(0..11) :: [atom]
-  full_name_lists_by_index = @indexes_by_bare_name |> Enum.reduce(%{},
-                                                                  fn({bare_name,
-                                                                      index},
-                                                                     acc) ->
-    @alteration_offsets |> Enum.reduce(acc,
-                                       fn({alteration, offset}, inner_acc) ->
+  full_name_list_by_position = @position_by_bare_name |> Enum.reduce(%{},
+                                                                     fn({bare_name, position},
+                                                                        acc) ->
+    @alteration_by_offset |> Enum.reduce(acc,
+                                         fn({alteration, offset}, inner_acc) ->
       full_name = :"#{to_string bare_name}_#{to_string alteration}"
-      altered_index = Integer.mod(index + offset, 12)
+      altered_position = Integer.mod(position + offset, 12)
 
       # Tweak the order of enharmonic groups that wrap around G-A.
       insert_at = case full_name do
@@ -421,12 +407,25 @@ defmodule Harmonex.Pitch do
                     _               ->  0
                   end
 
-      inner_acc |> Map.put_new(altered_index, [])
-                |> Map.update!(altered_index,
+      inner_acc |> Map.put_new(altered_position, [])
+                |> Map.update!(altered_position,
                                &(&1 |> List.insert_at(insert_at, full_name)))
     end)
   end)
-  for {index, full_names} <- full_name_lists_by_index do
-    defp full_names_at(unquote(index)), do: unquote(Enum.reverse(full_names))
+  for {position, full_names} <- full_name_list_by_position do
+    defp full_names_at(unquote(position)), do: unquote(Enum.reverse(full_names))
+  end
+
+  @spec position(atom) :: 0..11
+  for {bare_name, position} <- @position_by_bare_name do
+    defp position(unquote(bare_name)), do: unquote(position)
+  end
+
+  for {bare_name, position} <- @position_by_bare_name,
+      {alteration, offset} <- @alteration_by_offset do
+    full_name = :"#{to_string bare_name}_#{to_string alteration}"
+    defp position(unquote(full_name)) do
+      unquote(position + offset) |> Integer.mod(12)
+    end
   end
 end
