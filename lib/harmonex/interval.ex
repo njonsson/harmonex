@@ -59,9 +59,8 @@ defmodule Harmonex.Interval do
   @qualities @quality_by_semitones_and_size |> Map.values |> Enum.uniq
   @intervals_invalid @qualities |> Enum.reduce([], fn(quality, acc) ->
                                      acc ++ Enum.filter_map(1..7,
-                                                            &(! Enum.member?(@intervals,
-                                                                             {quality,
-                                                                              &1})),
+                                                            &(!Enum.member?(@intervals,
+                                                                            {quality, &1})),
                                                             &({quality, &1}))
                                    end)
 
