@@ -17,43 +17,45 @@ defmodule Harmonex.Interval do
                    :doubly_augmented  |
                    :minor             |
                    :major
-  @intervals_by_semitones_and_number %{{ 0, 1} => {:perfect,           1},
-                                       { 1, 1} => {:augmented,         1},
-                                       { 2, 1} => {:doubly_augmented,  1},
-                                       { 0, 2} => {:diminished,        2},
-                                       { 1, 2} => {:minor,             2},
-                                       { 2, 2} => {:major,             2},
-                                       { 3, 2} => {:augmented,         2},
-                                       { 4, 2} => {:doubly_augmented,  2},
-                                       { 1, 3} => {:doubly_diminished, 3},
-                                       { 2, 3} => {:diminished,        3},
-                                       { 3, 3} => {:minor,             3},
-                                       { 4, 3} => {:major,             3},
-                                       { 5, 3} => {:augmented,         3},
-                                       { 6, 3} => {:doubly_augmented,  3},
-                                       { 3, 4} => {:doubly_diminished, 4},
-                                       { 4, 4} => {:diminished,        4},
-                                       { 5, 4} => {:perfect,           4},
-                                       { 6, 4} => {:augmented,         4},
-                                       { 7, 4} => {:doubly_augmented,  4},
-                                       { 5, 5} => {:doubly_diminished, 5},
-                                       { 6, 5} => {:diminished,        5},
-                                       { 7, 5} => {:perfect,           5},
-                                       { 8, 5} => {:augmented,         5},
-                                       { 9, 5} => {:doubly_augmented,  5},
-                                       { 6, 6} => {:doubly_diminished, 6},
-                                       { 7, 6} => {:diminished,        6},
-                                       { 8, 6} => {:minor,             6},
-                                       { 9, 6} => {:major,             6},
-                                       {10, 6} => {:augmented,         6},
-                                       {11, 6} => {:doubly_augmented,  6},
-                                       { 8, 7} => {:doubly_diminished, 7},
-                                       { 9, 7} => {:diminished,        7},
-                                       {10, 7} => {:minor,             7},
-                                       {11, 7} => {:major,             7},
-                                       { 0, 7} => {:augmented,         7},
-                                       { 1, 7} => {:doubly_augmented,  7}}
-  @intervals @intervals_by_semitones_and_number |> Map.values
+  @interval_qualities_by_semitones_and_interval_size %{{ 0, 1} => :perfect,
+                                                       { 1, 1} => :augmented,
+                                                       { 2, 1} => :doubly_augmented,
+                                                       { 0, 2} => :diminished,
+                                                       { 1, 2} => :minor,
+                                                       { 2, 2} => :major,
+                                                       { 3, 2} => :augmented,
+                                                       { 4, 2} => :doubly_augmented,
+                                                       { 1, 3} => :doubly_diminished,
+                                                       { 2, 3} => :diminished,
+                                                       { 3, 3} => :minor,
+                                                       { 4, 3} => :major,
+                                                       { 5, 3} => :augmented,
+                                                       { 6, 3} => :doubly_augmented,
+                                                       { 3, 4} => :doubly_diminished,
+                                                       { 4, 4} => :diminished,
+                                                       { 5, 4} => :perfect,
+                                                       { 6, 4} => :augmented,
+                                                       { 7, 4} => :doubly_augmented,
+                                                       { 5, 5} => :doubly_diminished,
+                                                       { 6, 5} => :diminished,
+                                                       { 7, 5} => :perfect,
+                                                       { 8, 5} => :augmented,
+                                                       { 9, 5} => :doubly_augmented,
+                                                       { 6, 6} => :doubly_diminished,
+                                                       { 7, 6} => :diminished,
+                                                       { 8, 6} => :minor,
+                                                       { 9, 6} => :major,
+                                                       {10, 6} => :augmented,
+                                                       {11, 6} => :doubly_augmented,
+                                                       { 8, 7} => :doubly_diminished,
+                                                       { 9, 7} => :diminished,
+                                                       {10, 7} => :minor,
+                                                       {11, 7} => :major,
+                                                       { 0, 7} => :augmented,
+                                                       { 1, 7} => :doubly_augmented}
+  @intervals (for {{_, interval_size}, interval_quality} <- @interval_qualities_by_semitones_and_interval_size do
+                {interval_quality, interval_size}
+              end)
   @qualities @intervals |> Stream.map(&(elem(&1, 0))) |> Enum.uniq
   @intervals_invalid @qualities |> Enum.reduce([], fn(quality, acc) ->
                                      acc ++ Enum.filter_map(1..7,
@@ -93,11 +95,11 @@ defmodule Harmonex.Interval do
     with semitones when is_integer(semitones) <- Pitch.semitones(low_pitch, high_pitch) do
       low_staff_pos  = @pitch_indexes_by_bare_name |> Map.fetch!(Pitch.bare_name(low_pitch))
       high_staff_pos = @pitch_indexes_by_bare_name |> Map.fetch!(Pitch.bare_name(high_pitch))
-      number = Integer.mod(high_staff_pos - low_staff_pos, 7) + 1
-      with {quality, size} when is_integer(size) <- Map.get(@intervals_by_semitones_and_number,
-                                                            {semitones, number},
-                                                            {:error, "Invalid interval"}) do
-        new %{quality: quality, size: size}
+      interval_size = Integer.mod(high_staff_pos - low_staff_pos, 7) + 1
+      with interval_quality when is_atom(interval_quality) <- Map.get(@interval_qualities_by_semitones_and_interval_size,
+                                                                      {semitones, interval_size},
+                                                                      {:error, "Invalid interval"}) do
+        new %{quality: interval_quality, size: interval_size}
       end
     end
   end
