@@ -5,12 +5,17 @@ defmodule Harmonex.OrdinalTest do
   describe ".to_integer/1" do
     test "accepts valid arguments" do
       assert Harmonex.Ordinal.to_integer("zeroth") == :error
+      assert Harmonex.Ordinal.to_integer("0th") == :error
       for sign <- [-1, 1] do
         negative = if sign < 0, do: "negative ", else: nil
         assert Harmonex.Ordinal.to_integer("#{negative}unison")         == sign *  1
+        assert Harmonex.Ordinal.to_integer("#{negative}1st")            == sign *  1
         assert Harmonex.Ordinal.to_integer("#{negative}second")         == sign *  2
+        assert Harmonex.Ordinal.to_integer("#{negative}2nd")            == sign *  2
         assert Harmonex.Ordinal.to_integer("#{negative}third")          == sign *  3
+        assert Harmonex.Ordinal.to_integer("#{negative}3rd")            == sign *  3
         assert Harmonex.Ordinal.to_integer("#{negative}fourth")         == sign *  4
+        assert Harmonex.Ordinal.to_integer("#{negative}4th")            == sign *  4
         assert Harmonex.Ordinal.to_integer("#{negative}fifth")          == sign *  5
         assert Harmonex.Ordinal.to_integer("#{negative}sixth")          == sign *  6
         assert Harmonex.Ordinal.to_integer("#{negative}seventh")        == sign *  7
@@ -82,6 +87,7 @@ defmodule Harmonex.OrdinalTest do
         assert Harmonex.Ordinal.to_integer("#{negative}seventy-third")  == sign * 73
         assert Harmonex.Ordinal.to_integer("#{negative}seventy-fourth") == sign * 74
         assert Harmonex.Ordinal.to_integer("#{negative}seventy-fifth")  == sign * 75
+        assert Harmonex.Ordinal.to_integer("#{negative}76th")           == sign * 76
       end
     end
   end
@@ -166,6 +172,7 @@ defmodule Harmonex.OrdinalTest do
         assert Harmonex.Ordinal.to_string(sign * 73) == "#{negative}seventy-third"
         assert Harmonex.Ordinal.to_string(sign * 74) == "#{negative}seventy-fourth"
         assert Harmonex.Ordinal.to_string(sign * 75) == "#{negative}seventy-fifth"
+        assert Harmonex.Ordinal.to_string(sign * 76) == "#{negative}76th"
       end
     end
   end

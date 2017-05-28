@@ -98,21 +98,47 @@ defmodule Harmonex.Ordinal do
       iex> Harmonex.Ordinal.to_integer "TENTH"
       10
 
-      iex> Harmonex.Ordinal.to_integer "Negative Twenty First"
-      -21
+      iex> Harmonex.Ordinal.to_integer "10th"
+      10
+
+      iex> Harmonex.Ordinal.to_integer "Negative Twenty Fifth"
+      -25
+
+      iex> Harmonex.Ordinal.to_integer "81st"
+      81
+
+      iex> Harmonex.Ordinal.to_integer "nEGATIVE 82nD"
+      -82
+
+      iex> Harmonex.Ordinal.to_integer "83rd"
+      83
+
+      iex> Harmonex.Ordinal.to_integer "84th"
+      84
 
       iex> Harmonex.Ordinal.to_integer "zeroth"
+      :error
+
+      iex> Harmonex.Ordinal.to_integer "0th"
       :error
   """
   @spec to_integer(binary) :: integer | :error
   def to_integer(ordinal) do
     sign = if String.match?(ordinal, @regex_negative), do: -1, else: 1
     ordinal = ordinal |> String.replace(@regex_negative, "")
-
-    absolute = (Enum.find_index(@regexes, &(String.match?(ordinal, &1))) || -1) +
-               1
-
-    if absolute == 0, do: :error, else: absolute * sign
+    absolute = @regexes |> Enum.find_index(&(String.match?(ordinal, &1)))
+    if absolute do
+      (absolute + 1) * sign
+    else
+      with {integer, ""} <- ordinal |> String.replace(~r/(st|nd|rd|th)$/i, "")
+                                    |> Integer.parse do
+        if integer == 0 do
+          :error
+        else
+          integer * sign
+        end
+      end
+    end
   end
 
   @doc """
@@ -129,8 +155,20 @@ defmodule Harmonex.Ordinal do
       iex> Harmonex.Ordinal.to_string 10
       "tenth"
 
-      iex> Harmonex.Ordinal.to_string -21
-      "negative twenty-first"
+      iex> Harmonex.Ordinal.to_string -25
+      "negative twenty-fifth"
+
+      iex> Harmonex.Ordinal.to_string 81
+      "81st"
+
+      iex> Harmonex.Ordinal.to_string -82
+      "negative 82nd"
+
+      iex> Harmonex.Ordinal.to_string 83
+      "83rd"
+
+      iex> Harmonex.Ordinal.to_string 84
+      "84th"
 
       iex> Harmonex.Ordinal.to_string 0
       :error
@@ -143,10 +181,17 @@ defmodule Harmonex.Ordinal do
     if integer == 0 do
       :error
     else
-      case @strings |> Enum.at(integer - 1) do
-        nil    -> :error
-        string -> [sign, string] |> Enum.join
+      string = case @strings |> Enum.at(integer - 1) do
+        nil ->
+          integer |> Integer.to_string
+                  |> String.replace(~r/1$/,    "1st")
+                  |> String.replace(~r/2$/,    "2nd")
+                  |> String.replace(~r/3$/,    "3rd")
+                  |> String.replace(~r/(\d)$/, "\\1th")
+        string ->
+          string
       end
+      [sign, string] |> Enum.join
     end
   end
 end
