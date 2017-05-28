@@ -326,6 +326,18 @@ defmodule Harmonex.PitchTest do
 
       actual = Harmonex.Pitch.interval(:h, :a)
       assert actual == expected
+
+      actual = Harmonex.Pitch.interval(:a_out_of_tune, :a)
+      assert actual == expected
+    end
+
+    test "rejects an invalid alteration in the first argument" do
+      expected = {:error, @invalid_alteration}
+
+      actual = Harmonex.Pitch.interval(%Harmonex.Pitch{bare_name: :a,
+                                                       alteration: :out_of_tune},
+                                       :a)
+      assert actual == expected
     end
 
     test "rejects an invalid name in the second argument" do
@@ -343,6 +355,18 @@ defmodule Harmonex.PitchTest do
       assert actual == expected
 
       actual = Harmonex.Pitch.interval(:a, :h)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.interval(:a, :a_out_of_tune)
+      assert actual == expected
+    end
+
+    test "rejects an invalid alteration in the second argument" do
+      expected = {:error, @invalid_alteration}
+
+      actual = Harmonex.Pitch.interval(:a,
+                                        %Harmonex.Pitch{bare_name: :a,
+                                                        alteration: :out_of_tune})
       assert actual == expected
     end
   end

@@ -65,30 +65,31 @@ defmodule Harmonex.Interval do
                                    end)
 
   @doc """
-  Computes the `Interval` between the specified `low_pitch` and `high_pitch`.
+  Computes the `Harmonex.Interval` between the specified `low_pitch` and
+  `high_pitch`.
 
   ## Examples
 
-      iex> Harmonex.Interval.between_pitches %{bare_name: :a, alteration: :sharp}, %{bare_name: :c}
+      iex> Harmonex.Interval.from_pitches %{bare_name: :a, alteration: :sharp}, %{bare_name: :c}
       %Harmonex.Interval{quality: :diminished, size: 3}
 
-      iex> Harmonex.Interval.between_pitches :b_flat, :c
+      iex> Harmonex.Interval.from_pitches :b_flat, :c
       %Harmonex.Interval{quality: :major, size: 2}
 
-      iex> Harmonex.Interval.between_pitches :d_double_sharp, :a_double_sharp
+      iex> Harmonex.Interval.from_pitches :d_double_sharp, :a_double_sharp
       %Harmonex.Interval{quality: :perfect, size: 5}
 
-      iex> Harmonex.Interval.between_pitches :c_flat, :c_natural
+      iex> Harmonex.Interval.from_pitches :c_flat, :c_natural
       %Harmonex.Interval{quality: :augmented, size: 1}
 
-      iex> Harmonex.Interval.between_pitches :a_flat, :e_sharp
+      iex> Harmonex.Interval.from_pitches :a_flat, :e_sharp
       %Harmonex.Interval{quality: :doubly_augmented, size: 5}
 
-      iex> Harmonex.Interval.between_pitches :a_flat, :e_double_sharp
+      iex> Harmonex.Interval.from_pitches :a_flat, :e_double_sharp
       {:error, "Invalid interval"}
   """
-  @spec between_pitches(Pitch.t, Pitch.t) :: t | {:error, binary}
-  def between_pitches(low_pitch, high_pitch) do
+  @spec from_pitches(Pitch.t, Pitch.t) :: t | {:error, binary}
+  def from_pitches(low_pitch, high_pitch) do
     with semitones when is_integer(semitones) <- Pitch.semitones(low_pitch, high_pitch) do
       low  = low_pitch  |> Pitch.bare_name |> to_charlist |> List.first
       high = high_pitch |> Pitch.bare_name |> to_charlist |> List.first
@@ -160,7 +161,7 @@ defmodule Harmonex.Interval do
     end
 
     def new(unquote(quality)=quality, unquote(size)=size) do
-      %{quality: quality, size: size} |> new
+      error_quality quality, size
     end
   end
 

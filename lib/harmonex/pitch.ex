@@ -247,7 +247,7 @@ defmodule Harmonex.Pitch do
 
   @doc """
   Computes the quality and number of the interval between the specified
-  `low_pitch` and `high_pitch`.
+  `low_pitch` and `high_pitch`. Equivalent to `Harmonex.Interval.from_pitches/2`.
 
   ## Examples
 
@@ -271,7 +271,7 @@ defmodule Harmonex.Pitch do
   """
   @spec interval(t, t) :: Interval.t | {:error, binary}
   def interval(low_pitch, high_pitch) do
-    Interval.between_pitches low_pitch, high_pitch
+    Interval.from_pitches(low_pitch, high_pitch)
   end
 
   @doc """

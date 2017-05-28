@@ -30,7 +30,7 @@ questions such as:
   `Harmonex.Pitch.interval(:f, :b_double_flat) == %Harmonex.Interval{quality:
   :diminished, size: 4}`  
   _Answer:_
-  `Harmonex.Interval.between_pitches(:f, :b_double_flat) ==
+  `Harmonex.Interval.from_pitches(:f, :b_double_flat) ==
   %Harmonex.Interval{quality: :diminished, size: 4}`
 
 ### Functionality still under development
