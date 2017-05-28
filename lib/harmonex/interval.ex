@@ -184,10 +184,6 @@ defmodule Harmonex.Interval do
 
   @spec error_quality(quality, integer) :: {:error, binary}
   defp error_quality(quality, size) do
-    size_ordinal = case Ordinal.to_string(size) do
-                     :error  -> "#{to_string size}th"
-                     ordinal -> ordinal
-                   end
-    {:error, "Quality of #{size_ordinal} cannot be #{inspect quality}"}
+    {:error, "Quality of #{Ordinal.to_string size} cannot be #{inspect quality}"}
   end
 end
