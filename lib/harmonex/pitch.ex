@@ -120,12 +120,14 @@ defmodule Harmonex.Pitch do
   @spec bare_name(t) :: bare_name
 
   for bare_name <- @bare_names do
-    def bare_name(%{bare_name: unquote(bare_name)=bare_name}), do: bare_name
+    def bare_name(%{bare_name: unquote(bare_name)=bare_name}=_pitch) do
+      bare_name
+    end
 
-    def bare_name(unquote(bare_name)=bare_name), do: bare_name
+    def bare_name(unquote(bare_name)=pitch), do: pitch
   end
 
-  def bare_name(%{bare_name: _}), do: {:error, @invalid_name}
+  def bare_name(%{bare_name: _}=_pitch), do: {:error, @invalid_name}
 
   for bare_name <- @bare_names, alteration <- @alterations do
     full_name = String.to_atom("#{to_string bare_name}_#{to_string alteration}")
