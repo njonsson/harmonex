@@ -53,7 +53,7 @@ questions such as:
   **of the chord described by B, D♯, E, and G♯?**  
   _Answer: E major seventh in second inversion._
 * **What are the jazz chart symbols of the chords just mentioned?**  
-  _Answer: F<sup>O</sup>/A♭, A♭<sup>7(no 5)</sup>, and E<sup>△7</sup>/B._
+  _Answer: F♯<sup>O</sup>/C, A♭<sup>7(no 5)</sup>, and E<sup>△7</sup>/B._
 * **What is the functional-harmonic symbol of the chord described by the pitches
   C♮, F♯, and A♮ in C major?**  
   _Answer: vii<sup>O</sup>/V._  
