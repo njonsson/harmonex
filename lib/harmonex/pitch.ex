@@ -43,17 +43,17 @@ defmodule Harmonex.Pitch do
   """
   @spec adjust_by_semitones(t, integer) :: t
   def adjust_by_semitones(%{natural_name: _}=pitch, adjustment) do
-    with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
-      pitch_full_name |> adjust_by_semitones(adjustment) |> new
+    with pitch_name when is_atom(pitch_name) <- name(pitch) do
+      pitch_name |> adjust_by_semitones(adjustment) |> new
     end
   end
 
   def adjust_by_semitones(pitch, adjustment) do
-    with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
-      (position(pitch_full_name) + adjustment) |> Integer.mod(12)
-                                                      |> full_names_at
-                                                      |> Enum.sort_by(&complexity_score/1)
-                                                      |> List.first
+    with pitch_name when is_atom(pitch_name) <- name(pitch) do
+      (position(pitch_name) + adjustment) |> Integer.mod(12)
+                                          |> names_at
+                                          |> Enum.sort_by(&complexity_score/1)
+                                          |> List.first
     end
   end
 
@@ -88,8 +88,8 @@ defmodule Harmonex.Pitch do
   def accidental(%{accidental: _}=_pitch), do: {:error, @invalid_accidental}
 
   for natural_name <- @natural_names, accidental <- @accidentals do
-    full_name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
-    def accidental(unquote(full_name)=_pitch), do: unquote(accidental)
+    name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
+    def accidental(unquote(name)=_pitch), do: unquote(accidental)
   end
 
   for natural_name <- @natural_names do
@@ -130,8 +130,8 @@ defmodule Harmonex.Pitch do
   def natural_name(%{natural_name: _}=_pitch), do: {:error, @invalid_name}
 
   for natural_name <- @natural_names, accidental <- @accidentals do
-    full_name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
-    def natural_name(unquote(full_name)=_pitch), do: unquote(natural_name)
+    name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
+    def natural_name(unquote(name)=_pitch), do: unquote(natural_name)
   end
 
   def natural_name(_pitch), do: {:error, @invalid_name}
@@ -156,9 +156,9 @@ defmodule Harmonex.Pitch do
   """
   @spec enharmonic?(t, t) :: boolean
   def enharmonic?(pitch1, pitch2) do
-    with pitch1_full_name when is_atom(pitch1_full_name) <- full_name(pitch1),
-         pitch2_full_name when is_atom(pitch2_full_name) <- full_name(pitch2) do
-      position(pitch1_full_name) == position(pitch2_full_name)
+    with pitch1_name when is_atom(pitch1_name) <- name(pitch1),
+         pitch2_name when is_atom(pitch2_name) <- name(pitch2) do
+      position(pitch1_name) == position(pitch2_name)
     end
   end
 
@@ -187,64 +187,16 @@ defmodule Harmonex.Pitch do
   """
   @spec enharmonics(t) :: [t]
   def enharmonics(%{natural_name: _}=pitch) do
-    with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
-      pitch_full_name |> enharmonics |> Enum.map(&(new(&1)))
+    with pitch_name when is_atom(pitch_name) <- name(pitch) do
+      pitch_name |> enharmonics |> Enum.map(&(new(&1)))
     end
   end
 
   def enharmonics(pitch) do
-    with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
-      pitch_full_name |> position
-                      |> full_names_at
-                      |> Enum.reject(&(&1 == pitch_full_name))
+    with pitch_name when is_atom(pitch_name) <- name(pitch) do
+      pitch_name |> position |> names_at |> Enum.reject(&(&1 == pitch_name))
     end
   end
-
-  @doc """
-  Computes the full name of the specified `pitch`.
-
-  ## Examples
-
-      iex> Harmonex.Pitch.full_name %{natural_name: :a, accidental: :flat}
-      :a_flat
-
-      iex> Harmonex.Pitch.full_name %{natural_name: :a}
-      :a_natural
-
-      iex> Harmonex.Pitch.full_name :a_flat
-      :a_flat
-
-      iex> Harmonex.Pitch.full_name :a
-      :a_natural
-  """
-  @spec full_name(t) :: atom
-
-  for natural_name <- @natural_names, accidental <- @accidentals do
-    full_name = :"#{to_string natural_name}_#{to_string accidental}"
-    def full_name(%{natural_name: unquote(natural_name),
-                    accidental: unquote(accidental)}=_pitch) do
-      unquote full_name
-    end
-
-    def full_name(unquote(full_name)=pitch), do: pitch
-  end
-
-  for natural_name <- @natural_names do
-    def full_name(%{natural_name: unquote(natural_name),
-                    accidental: _}=_pitch) do
-      {:error, @invalid_accidental}
-    end
-
-    def full_name(%{natural_name: unquote(natural_name)}=_pitch) do
-      unquote :"#{to_string natural_name}_natural"
-    end
-
-    def full_name(unquote(natural_name)=_pitch) do
-      unquote(:"#{to_string natural_name}_natural")
-    end
-  end
-
-  def full_name(_pitch), do: {:error, @invalid_name}
 
   @doc """
   Computes the quality and number of the interval between the specified
@@ -274,6 +226,52 @@ defmodule Harmonex.Pitch do
   def interval(low_pitch, high_pitch) do
     Interval.from_pitches(low_pitch, high_pitch)
   end
+
+  @doc """
+  Computes the full name of the specified `pitch`, combining its natural name and
+  its accidental.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.name %{natural_name: :a, accidental: :flat}
+      :a_flat
+
+      iex> Harmonex.Pitch.name %{natural_name: :a}
+      :a_natural
+
+      iex> Harmonex.Pitch.name :a_flat
+      :a_flat
+
+      iex> Harmonex.Pitch.name :a
+      :a_natural
+  """
+  @spec name(t) :: atom
+
+  for natural_name <- @natural_names, accidental <- @accidentals do
+    name = :"#{to_string natural_name}_#{to_string accidental}"
+    def name(%{natural_name: unquote(natural_name),
+               accidental: unquote(accidental)}=_pitch) do
+      unquote name
+    end
+
+    def name(unquote(name)=pitch), do: pitch
+  end
+
+  for natural_name <- @natural_names do
+    def name(%{natural_name: unquote(natural_name), accidental: _}=_pitch) do
+      {:error, @invalid_accidental}
+    end
+
+    def name(%{natural_name: unquote(natural_name)}=_pitch) do
+      unquote :"#{to_string natural_name}_natural"
+    end
+
+    def name(unquote(natural_name)=_pitch) do
+      unquote(:"#{to_string natural_name}_natural")
+    end
+  end
+
+  def name(_pitch), do: {:error, @invalid_name}
 
   @doc """
   Constructs a new `Harmonex.Pitch` with the specified `name`.
@@ -330,8 +328,8 @@ defmodule Harmonex.Pitch do
       __MODULE__ |> struct(natural_name: natural_name, accidental: accidental)
     end
 
-    full_name = :"#{to_string natural_name}_#{to_string accidental}"
-    def new(unquote(full_name)=_name) do
+    name = :"#{to_string natural_name}_#{to_string accidental}"
+    def new(unquote(name)=_name) do
       new unquote(natural_name), unquote(accidental)
     end
   end
@@ -373,11 +371,11 @@ defmodule Harmonex.Pitch do
   """
   @spec semitones(t, t) :: 0..11
   def semitones(low_pitch, high_pitch) do
-    with low_full_name when is_atom(low_full_name)   <- full_name(low_pitch),
-         low_position                                <- position(low_full_name),
-         high_full_name when is_atom(high_full_name) <- full_name(high_pitch),
-         high_position                               <- position(high_full_name) do
-      (high_position - low_position) |> Integer.mod(12)
+    with low_pitch_name when is_atom(low_pitch_name)   <- name(low_pitch),
+         low_pitch_position                            <- position(low_pitch_name),
+         high_pitch_name when is_atom(high_pitch_name) <- name(high_pitch),
+         high_pitch_position                           <- position(high_pitch_name) do
+      (high_pitch_position - low_pitch_position) |> Integer.mod(12)
     end
   end
 
@@ -393,17 +391,17 @@ defmodule Harmonex.Pitch do
     defp complexity_score(unquote(:"#{natural_name}_double_sharp")), do: 2
   end
 
-  @spec full_names_at(0..11) :: [atom]
-  full_name_list_by_position = @position_by_natural_name |> Enum.reduce(%{},
-                                                                     fn({natural_name, position},
-                                                                        acc) ->
+  @spec names_at(0..11) :: [atom]
+  name_list_by_position = @position_by_natural_name |> Enum.reduce(%{},
+                                                                   fn({natural_name, position},
+                                                                      acc) ->
     @accidental_by_offset |> Enum.reduce(acc,
                                          fn({accidental, offset}, inner_acc) ->
-      full_name = :"#{to_string natural_name}_#{to_string accidental}"
+      name = :"#{to_string natural_name}_#{to_string accidental}"
       altered_position = Integer.mod(position + offset, 12)
 
       # Tweak the order of enharmonic groups that wrap around G-A.
-      insert_at = case full_name do
+      insert_at = case name do
                     :g_natural      ->  1
                     :g_sharp        -> -1
                     :f_double_sharp -> -1
@@ -413,11 +411,11 @@ defmodule Harmonex.Pitch do
 
       inner_acc |> Map.put_new(altered_position, [])
                 |> Map.update!(altered_position,
-                               &(&1 |> List.insert_at(insert_at, full_name)))
+                               &(&1 |> List.insert_at(insert_at, name)))
     end)
   end)
-  for {position, full_names} <- full_name_list_by_position do
-    defp full_names_at(unquote(position)), do: unquote(Enum.reverse(full_names))
+  for {position, names} <- name_list_by_position do
+    defp names_at(unquote(position)), do: unquote(Enum.reverse(names))
   end
 
   @spec position(atom) :: 0..11
@@ -427,8 +425,8 @@ defmodule Harmonex.Pitch do
 
   for {natural_name, position} <- @position_by_natural_name,
       {accidental, offset} <- @accidental_by_offset do
-    full_name = :"#{to_string natural_name}_#{to_string accidental}"
-    defp position(unquote(full_name)) do
+    name = :"#{to_string natural_name}_#{to_string accidental}"
+    defp position(unquote(name)) do
       unquote(position + offset) |> Integer.mod(12)
     end
   end
