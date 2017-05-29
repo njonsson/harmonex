@@ -199,8 +199,8 @@ defmodule Harmonex.Pitch do
   end
 
   @doc """
-  Computes the quality and number of the interval between the specified
-  `low_pitch` and `high_pitch`. Equivalent to `Harmonex.Interval.from_pitches/2`.
+  Computes the `Harmonex.Interval` between the specified `low_pitch` and
+  `high_pitch`. Equivalent to `Harmonex.Interval.from_pitches/2`.
 
   ## Examples
 
