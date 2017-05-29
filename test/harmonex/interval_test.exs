@@ -105,6 +105,12 @@ defmodule Harmonex.IntervalTest do
       actual = Harmonex.Interval.from_pitches(:a, :h)
       assert actual == expected
     end
+
+    test "recognizes an invalid interval" do
+      expected = {:error, "Invalid interval"}
+      actual = Harmonex.Interval.from_pitches(:a_flat, :e_double_sharp)
+      assert actual == expected
+    end
   end
 
   describe ".new/1" do

@@ -317,6 +317,12 @@ defmodule Harmonex.PitchTest do
                                                         accidental: :out_of_tune})
       assert actual == expected
     end
+
+    test "recognizes an invalid interval" do
+      expected = {:error, "Invalid interval"}
+      actual = Harmonex.Pitch.interval(:a_flat, :e_double_sharp)
+      assert actual == expected
+    end
   end
 
   describe ".name/1" do
