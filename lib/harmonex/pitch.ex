@@ -5,15 +5,15 @@ defmodule Harmonex.Pitch do
 
   alias Harmonex.Interval
 
-  defstruct bare_name: nil, accidental: :natural
+  defstruct natural_name: nil, accidental: :natural
 
-  @type t :: %{bare_name: bare_name, accidental: accidental} |
-             %{bare_name: bare_name}                         |
+  @type t :: %{natural_name: natural_name, accidental: accidental} |
+             %{natural_name: natural_name}                         |
              atom
 
-  @type            bare_name :: :a  | :b  | :c  | :d  | :e  | :f  | :g
-  @position_by_bare_name [a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10]
-  @bare_names @position_by_bare_name |> Keyword.keys
+  @type     natural_name :: :a  | :b  | :c  | :d  | :e  | :f  | :g
+  @position_by_natural_name [a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10]
+  @natural_names @position_by_natural_name |> Keyword.keys
 
   @type accidental :: :natural | :flat | :sharp | :double_flat | :double_sharp
   @accidental_by_offset [double_flat: -2,
@@ -23,7 +23,7 @@ defmodule Harmonex.Pitch do
                          double_sharp: 2]
   @accidentals @accidental_by_offset |> Keyword.keys
 
-  @invalid_name "Invalid pitch name -- must be in #{inspect @bare_names}"
+  @invalid_name "Invalid pitch name -- must be in #{inspect @natural_names}"
   @invalid_accidental "Invalid accidental -- must be in #{inspect @accidentals}"
 
   @doc """
@@ -32,8 +32,8 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.adjust_by_semitones %{bare_name: :a, accidental: :sharp}, 14
-      %Harmonex.Pitch{bare_name: :c, accidental: :natural}
+      iex> Harmonex.Pitch.adjust_by_semitones %{natural_name: :a, accidental: :sharp}, 14
+      %Harmonex.Pitch{natural_name: :c, accidental: :natural}
 
       iex> Harmonex.Pitch.adjust_by_semitones :b_flat, -2
       :g_sharp
@@ -42,7 +42,7 @@ defmodule Harmonex.Pitch do
       :c_natural
   """
   @spec adjust_by_semitones(t, integer) :: t
-  def adjust_by_semitones(%{bare_name: _}=pitch, adjustment) do
+  def adjust_by_semitones(%{natural_name: _}=pitch, adjustment) do
     with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
       pitch_full_name |> adjust_by_semitones(adjustment) |> new
     end
@@ -62,10 +62,10 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.accidental %{bare_name: :a, accidental: :flat}
+      iex> Harmonex.Pitch.accidental %{natural_name: :a, accidental: :flat}
       :flat
 
-      iex> Harmonex.Pitch.accidental %{bare_name: :a}
+      iex> Harmonex.Pitch.accidental %{natural_name: :a}
       :natural
 
       iex> Harmonex.Pitch.accidental %{accidental: :flat}
@@ -87,15 +87,15 @@ defmodule Harmonex.Pitch do
 
   def accidental(%{accidental: _}=_pitch), do: {:error, @invalid_accidental}
 
-  for bare_name <- @bare_names, accidental <- @accidentals do
-    full_name = String.to_atom("#{to_string bare_name}_#{to_string accidental}")
+  for natural_name <- @natural_names, accidental <- @accidentals do
+    full_name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
     def accidental(unquote(full_name)=_pitch), do: unquote(accidental)
   end
 
-  for bare_name <- @bare_names do
-    def accidental(%{bare_name: unquote(bare_name)}=_pitch), do: :natural
+  for natural_name <- @natural_names do
+    def accidental(%{natural_name: unquote(natural_name)}=_pitch), do: :natural
 
-    def accidental(unquote(bare_name)=_pitch), do: :natural
+    def accidental(unquote(natural_name)=_pitch), do: :natural
   end
 
   def accidental(_pitch), do: {:error, @invalid_name}
@@ -105,36 +105,36 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.bare_name %{bare_name: :a, accidental: :flat}
+      iex> Harmonex.Pitch.natural_name %{natural_name: :a, accidental: :flat}
       :a
 
-      iex> Harmonex.Pitch.bare_name %{bare_name: :a}
+      iex> Harmonex.Pitch.natural_name %{natural_name: :a}
       :a
 
-      iex> Harmonex.Pitch.bare_name :a_flat
+      iex> Harmonex.Pitch.natural_name :a_flat
       :a
 
-      iex> Harmonex.Pitch.bare_name :a
+      iex> Harmonex.Pitch.natural_name :a
       :a
   """
-  @spec bare_name(t) :: bare_name
+  @spec natural_name(t) :: natural_name
 
-  for bare_name <- @bare_names do
-    def bare_name(%{bare_name: unquote(bare_name)=bare_name}=_pitch) do
-      bare_name
+  for natural_name <- @natural_names do
+    def natural_name(%{natural_name: unquote(natural_name)=natural_name}=_pitch) do
+      natural_name
     end
 
-    def bare_name(unquote(bare_name)=pitch), do: pitch
+    def natural_name(unquote(natural_name)=pitch), do: pitch
   end
 
-  def bare_name(%{bare_name: _}=_pitch), do: {:error, @invalid_name}
+  def natural_name(%{natural_name: _}=_pitch), do: {:error, @invalid_name}
 
-  for bare_name <- @bare_names, accidental <- @accidentals do
-    full_name = String.to_atom("#{to_string bare_name}_#{to_string accidental}")
-    def bare_name(unquote(full_name)=_pitch), do: unquote(bare_name)
+  for natural_name <- @natural_names, accidental <- @accidentals do
+    full_name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
+    def natural_name(unquote(full_name)=_pitch), do: unquote(natural_name)
   end
 
-  def bare_name(_pitch), do: {:error, @invalid_name}
+  def natural_name(_pitch), do: {:error, @invalid_name}
 
   @doc """
   Determines whether the specified `pitch1` and `pitch2` are enharmonically
@@ -142,10 +142,10 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.enharmonic? %{bare_name: :g, accidental: :sharp}, :a_flat
+      iex> Harmonex.Pitch.enharmonic? %{natural_name: :g, accidental: :sharp}, :a_flat
       true
 
-      iex> Harmonex.Pitch.enharmonic? :c_flat, %{bare_name: :a, accidental: :double_sharp}
+      iex> Harmonex.Pitch.enharmonic? :c_flat, %{natural_name: :a, accidental: :double_sharp}
       true
 
       iex> Harmonex.Pitch.enharmonic? :b_sharp, :d_double_flat
@@ -167,8 +167,8 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.enharmonics %{bare_name: :g, accidental: :sharp}
-      [%Harmonex.Pitch{bare_name: :a, accidental: :flat}]
+      iex> Harmonex.Pitch.enharmonics %{natural_name: :g, accidental: :sharp}
+      [%Harmonex.Pitch{natural_name: :a, accidental: :flat}]
 
       iex> Harmonex.Pitch.enharmonics :f_double_sharp
       [:g_natural, :a_double_flat]
@@ -186,7 +186,7 @@ defmodule Harmonex.Pitch do
       [:b_flat, :c_double_flat]
   """
   @spec enharmonics(t) :: [t]
-  def enharmonics(%{bare_name: _}=pitch) do
+  def enharmonics(%{natural_name: _}=pitch) do
     with pitch_full_name when is_atom(pitch_full_name) <- full_name(pitch) do
       pitch_full_name |> enharmonics |> Enum.map(&(new(&1)))
     end
@@ -205,10 +205,10 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.full_name %{bare_name: :a, accidental: :flat}
+      iex> Harmonex.Pitch.full_name %{natural_name: :a, accidental: :flat}
       :a_flat
 
-      iex> Harmonex.Pitch.full_name %{bare_name: :a}
+      iex> Harmonex.Pitch.full_name %{natural_name: :a}
       :a_natural
 
       iex> Harmonex.Pitch.full_name :a_flat
@@ -219,9 +219,9 @@ defmodule Harmonex.Pitch do
   """
   @spec full_name(t) :: atom
 
-  for bare_name <- @bare_names, accidental <- @accidentals do
-    full_name = :"#{to_string bare_name}_#{to_string accidental}"
-    def full_name(%{bare_name: unquote(bare_name),
+  for natural_name <- @natural_names, accidental <- @accidentals do
+    full_name = :"#{to_string natural_name}_#{to_string accidental}"
+    def full_name(%{natural_name: unquote(natural_name),
                     accidental: unquote(accidental)}=_pitch) do
       unquote full_name
     end
@@ -229,17 +229,18 @@ defmodule Harmonex.Pitch do
     def full_name(unquote(full_name)=pitch), do: pitch
   end
 
-  for bare_name <- @bare_names do
-    def full_name(%{bare_name: unquote(bare_name), accidental: _}=_pitch) do
+  for natural_name <- @natural_names do
+    def full_name(%{natural_name: unquote(natural_name),
+                    accidental: _}=_pitch) do
       {:error, @invalid_accidental}
     end
 
-    def full_name(%{bare_name: unquote(bare_name)}=_pitch) do
-      unquote :"#{to_string bare_name}_natural"
+    def full_name(%{natural_name: unquote(natural_name)}=_pitch) do
+      unquote :"#{to_string natural_name}_natural"
     end
 
-    def full_name(unquote(bare_name)=_pitch) do
-      unquote(:"#{to_string bare_name}_natural")
+    def full_name(unquote(natural_name)=_pitch) do
+      unquote(:"#{to_string natural_name}_natural")
     end
   end
 
@@ -251,7 +252,7 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.interval %{bare_name: :a, accidental: :sharp}, %{bare_name: :c}
+      iex> Harmonex.Pitch.interval %{natural_name: :a, accidental: :sharp}, %{natural_name: :c}
       %Harmonex.Interval{quality: :diminished, size: 3}
 
       iex> Harmonex.Pitch.interval :b_flat, :c
@@ -279,44 +280,44 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.new %{bare_name: :a, accidental: :flat}
-      %Harmonex.Pitch{bare_name: :a, accidental: :flat}
+      iex> Harmonex.Pitch.new %{natural_name: :a, accidental: :flat}
+      %Harmonex.Pitch{natural_name: :a, accidental: :flat}
 
-      iex> Harmonex.Pitch.new %{bare_name: :a}
-      %Harmonex.Pitch{bare_name: :a, accidental: :natural}
+      iex> Harmonex.Pitch.new %{natural_name: :a}
+      %Harmonex.Pitch{natural_name: :a, accidental: :natural}
 
       iex> Harmonex.Pitch.new :a_flat
-      %Harmonex.Pitch{bare_name: :a, accidental: :flat}
+      %Harmonex.Pitch{natural_name: :a, accidental: :flat}
 
       iex> Harmonex.Pitch.new :a
-      %Harmonex.Pitch{bare_name: :a, accidental: :natural}
+      %Harmonex.Pitch{natural_name: :a, accidental: :natural}
 
-      iex> Harmonex.Pitch.new %{bare_name: :h}
+      iex> Harmonex.Pitch.new %{natural_name: :h}
       {:error, #{inspect @invalid_name}}
 
       iex> Harmonex.Pitch.new :h
       {:error, #{inspect @invalid_name}}
 
-      iex> Harmonex.Pitch.new %{bare_name: :a, accidental: :out_of_tune}
+      iex> Harmonex.Pitch.new %{natural_name: :a, accidental: :out_of_tune}
       {:error, #{inspect @invalid_accidental}}
   """
   @spec new(t) :: t | {:error, binary}
-  @spec new(bare_name, accidental) :: t | {:error, binary}
+  @spec new(natural_name, accidental) :: t | {:error, binary}
 
-  for bare_name <- @bare_names, accidental <- @accidentals do
-    def new(%{bare_name: unquote(bare_name)=bare_name,
+  for natural_name <- @natural_names, accidental <- @accidentals do
+    def new(%{natural_name: unquote(natural_name)=natural_name,
               accidental: unquote(accidental)=accidental}=_name) do
-      new bare_name, accidental
+      new natural_name, accidental
     end
 
     @doc """
-    Constructs a new `Harmonex.Pitch` with the specified `bare_name` and
+    Constructs a new `Harmonex.Pitch` with the specified `natural_name` and
     `accidental`.
 
     ## Examples
 
         iex> Harmonex.Pitch.new :a, :flat
-        %Harmonex.Pitch{bare_name: :a, accidental: :flat}
+        %Harmonex.Pitch{natural_name: :a, accidental: :flat}
 
         iex> Harmonex.Pitch.new :h, :flat
         {:error, #{inspect @invalid_name}}
@@ -324,28 +325,29 @@ defmodule Harmonex.Pitch do
         iex> Harmonex.Pitch.new :a, :out_of_tune
         {:error, #{inspect @invalid_accidental}}
     """
-    def new(unquote(bare_name)=bare_name, unquote(accidental)=accidental) do
-      __MODULE__ |> struct(bare_name: bare_name, accidental: accidental)
+    def new(unquote(natural_name)=natural_name,
+            unquote(accidental)=accidental) do
+      __MODULE__ |> struct(natural_name: natural_name, accidental: accidental)
     end
 
-    full_name = :"#{to_string bare_name}_#{to_string accidental}"
+    full_name = :"#{to_string natural_name}_#{to_string accidental}"
     def new(unquote(full_name)=_name) do
-      new unquote(bare_name), unquote(accidental)
+      new unquote(natural_name), unquote(accidental)
     end
   end
 
-  for bare_name <- @bare_names do
-    def new(unquote(bare_name)=name), do: new(name, :natural)
+  for natural_name <- @natural_names do
+    def new(unquote(natural_name)=name), do: new(name, :natural)
 
-    def new(%{bare_name: unquote(bare_name), accidental: _}=_name) do
+    def new(%{natural_name: unquote(natural_name), accidental: _}=_name) do
       {:error, @invalid_accidental}
     end
 
-    def new(%{bare_name: unquote(bare_name)=bare_name}=_name) do
-      new bare_name, :natural
+    def new(%{natural_name: unquote(natural_name)=natural_name}=_name) do
+      new natural_name, :natural
     end
 
-    def new(unquote(bare_name)=_bare_name, _invalid_accidental) do
+    def new(unquote(natural_name)=_natural_name, _invalid_accidental) do
       {:error, @invalid_accidental}
     end
   end
@@ -360,7 +362,7 @@ defmodule Harmonex.Pitch do
 
   ## Examples
 
-      iex> Harmonex.Pitch.semitones %{bare_name: :a, accidental: :flat}, %{bare_name: :c, accidental: :sharp}
+      iex> Harmonex.Pitch.semitones %{natural_name: :a, accidental: :flat}, %{natural_name: :c, accidental: :sharp}
       5
 
       iex> Harmonex.Pitch.semitones :a_flat, :b_flat
@@ -380,24 +382,24 @@ defmodule Harmonex.Pitch do
   end
 
   @spec complexity_score(atom) :: 0..2
-  for bare_name <- @bare_names do
-    defp complexity_score(unquote(bare_name)),               do: 0
-    defp complexity_score(unquote(:"#{bare_name}_natural")), do: 0
+  for natural_name <- @natural_names do
+    defp complexity_score(unquote(natural_name)),               do: 0
+    defp complexity_score(unquote(:"#{natural_name}_natural")), do: 0
 
-    defp complexity_score(unquote(:"#{bare_name}_flat")),  do: 1
-    defp complexity_score(unquote(:"#{bare_name}_sharp")), do: 1
+    defp complexity_score(unquote(:"#{natural_name}_flat")),  do: 1
+    defp complexity_score(unquote(:"#{natural_name}_sharp")), do: 1
 
-    defp complexity_score(unquote(:"#{bare_name}_double_flat")),  do: 2
-    defp complexity_score(unquote(:"#{bare_name}_double_sharp")), do: 2
+    defp complexity_score(unquote(:"#{natural_name}_double_flat")),  do: 2
+    defp complexity_score(unquote(:"#{natural_name}_double_sharp")), do: 2
   end
 
   @spec full_names_at(0..11) :: [atom]
-  full_name_list_by_position = @position_by_bare_name |> Enum.reduce(%{},
-                                                                     fn({bare_name, position},
+  full_name_list_by_position = @position_by_natural_name |> Enum.reduce(%{},
+                                                                     fn({natural_name, position},
                                                                         acc) ->
     @accidental_by_offset |> Enum.reduce(acc,
                                          fn({accidental, offset}, inner_acc) ->
-      full_name = :"#{to_string bare_name}_#{to_string accidental}"
+      full_name = :"#{to_string natural_name}_#{to_string accidental}"
       altered_position = Integer.mod(position + offset, 12)
 
       # Tweak the order of enharmonic groups that wrap around G-A.
@@ -419,13 +421,13 @@ defmodule Harmonex.Pitch do
   end
 
   @spec position(atom) :: 0..11
-  for {bare_name, position} <- @position_by_bare_name do
-    defp position(unquote(bare_name)), do: unquote(position)
+  for {natural_name, position} <- @position_by_natural_name do
+    defp position(unquote(natural_name)), do: unquote(position)
   end
 
-  for {bare_name, position} <- @position_by_bare_name,
+  for {natural_name, position} <- @position_by_natural_name,
       {accidental, offset} <- @accidental_by_offset do
-    full_name = :"#{to_string bare_name}_#{to_string accidental}"
+    full_name = :"#{to_string natural_name}_#{to_string accidental}"
     defp position(unquote(full_name)) do
       unquote(position + offset) |> Integer.mod(12)
     end

@@ -59,24 +59,25 @@ defmodule Harmonex.IntervalTest do
     test "accepts valid arguments" do
       expected = %Harmonex.Interval{quality: :diminished, size: 3}
 
-      actual = Harmonex.Interval.from_pitches(%{bare_name: :a,
+      actual = Harmonex.Interval.from_pitches(%{natural_name: :a,
                                                 accidental: :sharp},
                                               :c)
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:a_sharp, %{bare_name: :c})
+      actual = Harmonex.Interval.from_pitches(:a_sharp, %{natural_name: :c})
       assert actual == expected
     end
 
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_pitch_name}
 
-      actual = Harmonex.Interval.from_pitches(%Harmonex.Pitch{bare_name: :h,
+      actual = Harmonex.Interval.from_pitches(%Harmonex.Pitch{natural_name: :h,
                                                               accidental: :flat},
                                               :a)
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(%Harmonex.Pitch{bare_name: :h}, :a)
+      actual = Harmonex.Interval.from_pitches(%Harmonex.Pitch{natural_name: :h},
+                                              :a)
       assert actual == expected
 
       actual = Harmonex.Interval.from_pitches(:h_flat, :a)
@@ -90,11 +91,12 @@ defmodule Harmonex.IntervalTest do
       expected = {:error, @invalid_pitch_name}
 
       actual = Harmonex.Interval.from_pitches(:a,
-                                              %Harmonex.Pitch{bare_name: :h,
+                                              %Harmonex.Pitch{natural_name: :h,
                                                               accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:a, %Harmonex.Pitch{bare_name: :h})
+      actual = Harmonex.Interval.from_pitches(:a,
+                                              %Harmonex.Pitch{natural_name: :h})
       assert actual == expected
 
       actual = Harmonex.Interval.from_pitches(:a, :h_flat)

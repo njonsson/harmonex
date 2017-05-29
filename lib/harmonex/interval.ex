@@ -70,7 +70,7 @@ defmodule Harmonex.Interval do
 
   ## Examples
 
-      iex> Harmonex.Interval.from_pitches %{bare_name: :a, accidental: :sharp}, %{bare_name: :c}
+      iex> Harmonex.Interval.from_pitches %{natural_name: :a, accidental: :sharp}, %{natural_name: :c}
       %Harmonex.Interval{quality: :diminished, size: 3}
 
       iex> Harmonex.Interval.from_pitches :b_flat, :c
@@ -91,8 +91,8 @@ defmodule Harmonex.Interval do
   @spec from_pitches(Pitch.t, Pitch.t) :: t | {:error, binary}
   def from_pitches(low_pitch, high_pitch) do
     with semitones when is_integer(semitones) <- Pitch.semitones(low_pitch, high_pitch) do
-      low  = low_pitch  |> Pitch.bare_name |> to_charlist |> List.first
-      high = high_pitch |> Pitch.bare_name |> to_charlist |> List.first
+      low  = low_pitch  |> Pitch.natural_name |> to_charlist |> List.first
+      high = high_pitch |> Pitch.natural_name |> to_charlist |> List.first
       interval_size = Integer.mod(high - low, 7) + 1
       with interval_quality when is_atom(interval_quality) <- Map.get(@quality_by_semitones_and_size,
                                                                       {semitones, interval_size},
