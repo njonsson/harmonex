@@ -15,6 +15,8 @@ defmodule Harmonex.Mixfile do
                           :"coveralls.json"   => :test,
                           :"coveralls.post"   => :test},
      package: package(),
+     source_url: "https://github.com/njonsson/harmonex",
+     homepage_url: "https://njonsson.github.io/harmonex",
      docs: [extras: ["README.md":  [filename: "about",
                                     title: "About Harmonex"],
                      "License.md": [filename: "license",
