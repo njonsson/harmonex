@@ -60,7 +60,7 @@ defmodule Harmonex.IntervalTest do
       expected = %Harmonex.Interval{quality: :diminished, size: 3}
 
       actual = Harmonex.Interval.from_pitches(%{bare_name: :a,
-                                                alteration: :sharp},
+                                                accidental: :sharp},
                                               :c)
       assert actual == expected
 
@@ -72,7 +72,7 @@ defmodule Harmonex.IntervalTest do
       expected = {:error, @invalid_pitch_name}
 
       actual = Harmonex.Interval.from_pitches(%Harmonex.Pitch{bare_name: :h,
-                                                     alteration: :flat},
+                                                              accidental: :flat},
                                               :a)
       assert actual == expected
 
@@ -91,7 +91,7 @@ defmodule Harmonex.IntervalTest do
 
       actual = Harmonex.Interval.from_pitches(:a,
                                               %Harmonex.Pitch{bare_name: :h,
-                                                              alteration: :flat})
+                                                              accidental: :flat})
       assert actual == expected
 
       actual = Harmonex.Interval.from_pitches(:a, %Harmonex.Pitch{bare_name: :h})

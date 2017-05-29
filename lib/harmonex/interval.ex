@@ -70,7 +70,7 @@ defmodule Harmonex.Interval do
 
   ## Examples
 
-      iex> Harmonex.Interval.from_pitches %{bare_name: :a, alteration: :sharp}, %{bare_name: :c}
+      iex> Harmonex.Interval.from_pitches %{bare_name: :a, accidental: :sharp}, %{bare_name: :c}
       %Harmonex.Interval{quality: :diminished, size: 3}
 
       iex> Harmonex.Interval.from_pitches :b_flat, :c
