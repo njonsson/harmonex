@@ -132,19 +132,29 @@ defmodule Harmonex.IntervalTest do
       for {quality, size} <- @intervals do
         assert Harmonex.Interval.new(%{quality: quality, size: size})     == %Harmonex.Interval{quality: quality, size: size}
         assert Harmonex.Interval.new(%{quality: quality, size: size + 7}) == %Harmonex.Interval{quality: quality, size: size + 7}
+
+        assert Harmonex.Interval.new(%{quality: quality, size: -size})       == %Harmonex.Interval{quality: quality, size: -size}
+        assert Harmonex.Interval.new(%{quality: quality, size: -(size + 7)}) == %Harmonex.Interval{quality: quality, size: -(size + 7)}
       end
 
-      assert Harmonex.Interval.new(%{quality: :minor, size: 300}) == %Harmonex.Interval{quality: :minor, size: 300}
+      assert Harmonex.Interval.new(%{quality: :minor, size:  300}) == %Harmonex.Interval{quality: :minor, size:  300}
+      assert Harmonex.Interval.new(%{quality: :minor, size: -300}) == %Harmonex.Interval{quality: :minor, size: -300}
     end
 
     test "rejects invalid arguments" do
       for {quality, size} <- @intervals_invalid do
         {:error, reason} = Harmonex.Interval.new(%{quality: quality, size: size})
         assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
+
+        {:error, reason} = Harmonex.Interval.new(%{quality: quality, size: -size})
+        assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
       end
 
       {:error, reason} = Harmonex.Interval.new(%{quality: :perfect, size: 300})
       assert reason == "Quality of 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
+
+      {:error, reason} = Harmonex.Interval.new(%{quality: :perfect, size: -300})
+      assert reason == "Quality of negative 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
     end
   end
 
@@ -153,19 +163,29 @@ defmodule Harmonex.IntervalTest do
       for {quality, size} <- @intervals do
         assert Harmonex.Interval.new(quality, size)     == %Harmonex.Interval{quality: quality, size: size}
         assert Harmonex.Interval.new(quality, size + 7) == %Harmonex.Interval{quality: quality, size: size + 7}
+
+        assert Harmonex.Interval.new(quality, -size)       == %Harmonex.Interval{quality: quality, size: -size}
+        assert Harmonex.Interval.new(quality, -(size + 7)) == %Harmonex.Interval{quality: quality, size: -(size + 7)}
       end
 
-      assert Harmonex.Interval.new(:minor, 300) == %Harmonex.Interval{quality: :minor, size: 300}
+      assert Harmonex.Interval.new(:minor,  300) == %Harmonex.Interval{quality: :minor, size:  300}
+      assert Harmonex.Interval.new(:minor, -300) == %Harmonex.Interval{quality: :minor, size: -300}
     end
 
     test "rejects invalid arguments" do
       for {quality, size} <- @intervals_invalid do
         {:error, reason} = Harmonex.Interval.new(quality, size)
         assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
+
+        {:error, reason} = Harmonex.Interval.new(quality, -size)
+        assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
       end
 
       {:error, reason} = Harmonex.Interval.new(:perfect, 300)
       assert reason == "Quality of 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
+
+      {:error, reason} = Harmonex.Interval.new(:perfect, -300)
+      assert reason == "Quality of negative 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
     end
   end
 end

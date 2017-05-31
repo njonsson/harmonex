@@ -155,6 +155,10 @@ defmodule Harmonex.Interval do
       __MODULE__ |> struct(definition)
     end
 
+    def new(%{quality: unquote(quality), size: unquote(-size)}=definition) do
+      __MODULE__ |> struct(definition)
+    end
+
     @doc """
     Constructs a new `Harmonex.Interval` with the specified `quality` and `size`.
 
@@ -178,6 +182,10 @@ defmodule Harmonex.Interval do
     def new(unquote(quality)=quality, unquote(size)=size) do
       new %{quality: quality, size: size}
     end
+
+    def new(unquote(quality)=quality, unquote(-size)=size) do
+      new %{quality: quality, size: size}
+    end
   end
 
   for {quality, size} <- @intervals_invalid do
@@ -195,17 +203,24 @@ defmodule Harmonex.Interval do
     end
 
     def new(%{quality: unquote(quality), size: size}=definition) do
-      reduced_size = Integer.mod(abs(size) - 1, 7) + 1
-      case definition |> Map.put(:size, reduced_size) |> new do
-        {:error, _} ->
-          case definition |> Map.put(:size, reduced_size + 7) |> new do
-            {:error, _} ->
-                error_quality(reduced_size, size)
-            _ ->
-              __MODULE__ |> struct(definition)
-          end
-        _ ->
-          __MODULE__ |> struct(definition)
+      reduced = definition |> reduce
+      if reduced.size == size do
+        error_quality reduced.size, size
+      else
+        case reduced |> new do
+          {:error, _} ->
+            expanded = reduced |> expand_by(7)
+            if expanded.size == size do
+              error_quality reduced.size, size
+            else
+              case reduced |> expand_by(7) |> new do
+                {:error, _} -> error_quality(reduced.size, size)
+                _           -> __MODULE__ |> struct(definition)
+              end
+            end
+          _ ->
+            __MODULE__ |> struct(definition)
+        end
       end
     end
 
@@ -214,10 +229,40 @@ defmodule Harmonex.Interval do
     end
   end
 
+  @doc """
+  Computes the octave-equivalent `Harmonex.Interval` of the specified `interval`
+  that is closest to zero in size.
+
+  ## Examples
+
+      iex> Harmonex.Interval.reduce Harmonex.Interval.new(:major, 3)
+      %Harmonex.Interval{quality: :major, size: 3}
+
+      iex> Harmonex.Interval.reduce %{size: -10}
+      %{size: -3}
+  """
+  @spec reduce(%{size: integer}) :: t
+  def reduce(%{size: size}=definition) do
+    sign = if size < 0, do: -1, else: 1
+    reduced_size = sign * (Integer.mod(abs(size) - 1, 7) + 1)
+    %{definition | size: reduced_size}
+  end
+
   @spec error_quality(integer, pos_integer) :: {:error, binary}
   for {size_in_lookup, qualities} <- @quality_list_by_size do
     defp error_quality(unquote(size_in_lookup), size) do
       {:error, "Quality of #{Ordinal.to_string size} must be in #{inspect unquote(qualities)}"}
     end
+
+    defp error_quality(unquote(-size_in_lookup), size) do
+      {:error, "Quality of #{Ordinal.to_string size} must be in #{inspect unquote(qualities)}"}
+    end
+  end
+
+  @spec expand_by(%{size: integer}, integer) :: t
+  defp expand_by(%{size: size}=interval, amount) do
+    sign = if size < 0, do: -1, else: 1
+    expanded_size = sign * (abs(size) + amount)
+    %{interval | size: expanded_size}
   end
 end
