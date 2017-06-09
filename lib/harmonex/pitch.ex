@@ -101,7 +101,7 @@ defmodule Harmonex.Pitch do
   def accidental(_pitch), do: {:error, @invalid_name}
 
   @doc """
-  Computes the bare name of the specified `pitch`.
+  Computes the natural name of the specified `pitch`.
 
   ## Examples
 
