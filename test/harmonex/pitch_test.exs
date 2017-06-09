@@ -111,49 +111,6 @@ defmodule Harmonex.PitchTest do
     end
   end
 
-  describe ".natural_name/1" do
-    test "accepts valid arguments" do
-      for natural_name <- @natural_names, accidental <- @accidentals do
-        expected = natural_name
-
-        actual = Harmonex.Pitch.natural_name(%{natural_name: natural_name,
-                                               accidental: accidental})
-        assert actual == expected
-
-        name = :"#{to_string natural_name}_#{to_string accidental}"
-        actual = Harmonex.Pitch.natural_name(name)
-        assert actual == expected
-      end
-
-      for natural_name <- @natural_names do
-        expected = natural_name
-
-        actual = Harmonex.Pitch.natural_name(%{natural_name: natural_name})
-        assert actual == expected
-
-        actual = Harmonex.Pitch.natural_name(natural_name)
-        assert actual == expected
-      end
-    end
-
-    test "rejects an invalid name" do
-      expected = {:error, @invalid_name}
-
-      actual = Harmonex.Pitch.natural_name(%Harmonex.Pitch{natural_name: :h,
-                                                           accidental: :flat})
-      assert actual == expected
-
-      actual = Harmonex.Pitch.natural_name(%Harmonex.Pitch{natural_name: :h})
-      assert actual == expected
-
-      actual = Harmonex.Pitch.natural_name(:h_flat)
-      assert actual == expected
-
-      actual = Harmonex.Pitch.natural_name(:h)
-      assert actual == expected
-    end
-  end
-
   describe ".enharmonic?/2" do
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_name}
@@ -374,6 +331,49 @@ defmodule Harmonex.PitchTest do
 
       actual = Harmonex.Pitch.name(%Harmonex.Pitch{natural_name: :a,
                                                    accidental: :out_of_tune})
+      assert actual == expected
+    end
+  end
+
+  describe ".natural_name/1" do
+    test "accepts valid arguments" do
+      for natural_name <- @natural_names, accidental <- @accidentals do
+        expected = natural_name
+
+        actual = Harmonex.Pitch.natural_name(%{natural_name: natural_name,
+                                               accidental: accidental})
+        assert actual == expected
+
+        name = :"#{to_string natural_name}_#{to_string accidental}"
+        actual = Harmonex.Pitch.natural_name(name)
+        assert actual == expected
+      end
+
+      for natural_name <- @natural_names do
+        expected = natural_name
+
+        actual = Harmonex.Pitch.natural_name(%{natural_name: natural_name})
+        assert actual == expected
+
+        actual = Harmonex.Pitch.natural_name(natural_name)
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid name" do
+      expected = {:error, @invalid_name}
+
+      actual = Harmonex.Pitch.natural_name(%Harmonex.Pitch{natural_name: :h,
+                                                           accidental: :flat})
+      assert actual == expected
+
+      actual = Harmonex.Pitch.natural_name(%Harmonex.Pitch{natural_name: :h})
+      assert actual == expected
+
+      actual = Harmonex.Pitch.natural_name(:h_flat)
+      assert actual == expected
+
+      actual = Harmonex.Pitch.natural_name(:h)
       assert actual == expected
     end
   end

@@ -101,42 +101,6 @@ defmodule Harmonex.Pitch do
   def accidental(_pitch), do: {:error, @invalid_name}
 
   @doc """
-  Computes the natural name of the specified `pitch`.
-
-  ## Examples
-
-      iex> Harmonex.Pitch.natural_name %{natural_name: :a, accidental: :flat}
-      :a
-
-      iex> Harmonex.Pitch.natural_name %{natural_name: :a}
-      :a
-
-      iex> Harmonex.Pitch.natural_name :a_flat
-      :a
-
-      iex> Harmonex.Pitch.natural_name :a
-      :a
-  """
-  @spec natural_name(t) :: natural_name
-
-  for natural_name <- @natural_names do
-    def natural_name(%{natural_name: unquote(natural_name)=natural_name}=_pitch) do
-      natural_name
-    end
-
-    def natural_name(unquote(natural_name)=pitch), do: pitch
-  end
-
-  def natural_name(%{natural_name: _}=_pitch), do: {:error, @invalid_name}
-
-  for natural_name <- @natural_names, accidental <- @accidentals do
-    name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
-    def natural_name(unquote(name)=_pitch), do: unquote(natural_name)
-  end
-
-  def natural_name(_pitch), do: {:error, @invalid_name}
-
-  @doc """
   Determines whether the specified `pitch1` and `pitch2` are enharmonically
   equivalent.
 
@@ -272,6 +236,42 @@ defmodule Harmonex.Pitch do
   end
 
   def name(_pitch), do: {:error, @invalid_name}
+
+  @doc """
+  Computes the natural name of the specified `pitch`.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.natural_name %{natural_name: :a, accidental: :flat}
+      :a
+
+      iex> Harmonex.Pitch.natural_name %{natural_name: :a}
+      :a
+
+      iex> Harmonex.Pitch.natural_name :a_flat
+      :a
+
+      iex> Harmonex.Pitch.natural_name :a
+      :a
+  """
+  @spec natural_name(t) :: natural_name
+
+  for natural_name <- @natural_names do
+    def natural_name(%{natural_name: unquote(natural_name)=natural_name}=_pitch) do
+      natural_name
+    end
+
+    def natural_name(unquote(natural_name)=pitch), do: pitch
+  end
+
+  def natural_name(%{natural_name: _}=_pitch), do: {:error, @invalid_name}
+
+  for natural_name <- @natural_names, accidental <- @accidentals do
+    name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
+    def natural_name(unquote(name)=_pitch), do: unquote(natural_name)
+  end
+
+  def natural_name(_pitch), do: {:error, @invalid_name}
 
   @doc """
   Constructs a new `Harmonex.Pitch` with the specified `name`.
