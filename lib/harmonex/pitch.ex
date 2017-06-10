@@ -6,15 +6,29 @@ defmodule Harmonex.Pitch do
   alias Harmonex.Interval
 
   defstruct natural_name: nil, accidental: :natural
+  @typedoc """
+  A `Harmonex.Pitch` struct.
+  """
+  @type pitch :: %Harmonex.Pitch{natural_name: natural_name,
+                                 accidental: accidental}
 
+  @typedoc """
+  A literal expression describing a pitch.
+  """
   @type t :: %{natural_name: natural_name, accidental: accidental} |
              %{natural_name: natural_name}                         |
              atom
 
+  @typedoc """
+  The name of a pitch whose accidental is ♮ (natural).
+  """
   @type     natural_name :: :a  | :b  | :c  | :d  | :e  | :f  | :g
   @position_by_natural_name [a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10]
   @natural_names @position_by_natural_name |> Keyword.keys
 
+  @typedoc """
+  The alteration of a pitch from its natural value.
+  """
   @type accidental :: :natural | :flat | :sharp | :double_flat | :double_sharp
   @accidental_by_offset [double_flat: -2,
                          flat:        -1,
@@ -41,7 +55,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.adjust_by_semitones :c, 0
       :c_natural
   """
-  @spec adjust_by_semitones(t, integer) :: t
+  @spec adjust_by_semitones(t, integer) :: pitch | atom
   def adjust_by_semitones(%{natural_name: _}=pitch, adjustment) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> adjust_by_semitones(adjustment) |> new
@@ -149,7 +163,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.enharmonics :a_sharp
       [:b_flat, :c_double_flat]
   """
-  @spec enharmonics(t) :: [t]
+  @spec enharmonics(t) :: [pitch] | [atom]
   def enharmonics(%{natural_name: _}=pitch) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> enharmonics |> Enum.map(&(new(&1)))
@@ -163,8 +177,8 @@ defmodule Harmonex.Pitch do
   end
 
   @doc """
-  Computes the `Harmonex.Interval` between the specified `low_pitch` and
-  `high_pitch`. Equivalent to `Harmonex.Interval.from_pitches/2`.
+  Computes the interval between the specified `low_pitch` and `high_pitch`.
+  Equivalent to `Harmonex.Interval.from_pitches/2`.
 
   ## Examples
 
@@ -186,7 +200,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.interval :a_flat, :e_double_sharp
       {:error, "Invalid interval"}
   """
-  @spec interval(t, t) :: Interval.t | {:error, binary}
+  @spec interval(t, t) :: Interval.interval | {:error, binary}
   def interval(low_pitch, high_pitch) do
     Interval.from_pitches(low_pitch, high_pitch)
   end
@@ -274,7 +288,7 @@ defmodule Harmonex.Pitch do
   def natural_name(_pitch), do: {:error, @invalid_name}
 
   @doc """
-  Constructs a new `Harmonex.Pitch` with the specified `name`.
+  Constructs a new pitch with the specified `name`.
 
   ## Examples
 
@@ -299,8 +313,8 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.new %{natural_name: :a, accidental: :out_of_tune}
       {:error, #{inspect @invalid_accidental}}
   """
-  @spec new(t) :: t | {:error, binary}
-  @spec new(natural_name, accidental) :: t | {:error, binary}
+  @spec new(t) :: pitch | {:error, binary}
+  @spec new(natural_name, accidental) :: pitch | {:error, binary}
 
   for natural_name <- @natural_names, accidental <- @accidentals do
     def new(%{natural_name: unquote(natural_name)=natural_name,
@@ -309,8 +323,7 @@ defmodule Harmonex.Pitch do
     end
 
     @doc """
-    Constructs a new `Harmonex.Pitch` with the specified `natural_name` and
-    `accidental`.
+    Constructs a new pitch with the specified `natural_name` and `accidental`.
 
     ## Examples
 

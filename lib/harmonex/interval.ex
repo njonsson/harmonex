@@ -7,9 +7,19 @@ defmodule Harmonex.Interval do
   alias Harmonex.{Ordinal,Pitch}
 
   defstruct quality: nil, size: nil
+  @typedoc """
+  A `Harmonex.Interval` struct.
+  """
+  @type interval :: %Harmonex.Interval{quality: quality, size: integer}
 
+  @typedoc """
+  A literal expression describing an interval.
+  """
   @type t :: %{quality: quality, size: integer}
 
+  @typedoc """
+  The qualified variation of an interval’s size.
+  """
   @type quality :: :perfect           |
                    :doubly_diminished |
                    :diminished        |
@@ -91,8 +101,7 @@ defmodule Harmonex.Interval do
                       end)
 
   @doc """
-  Computes the `Harmonex.Interval` between the specified `low_pitch` and
-  `high_pitch`.
+  Computes the interval between the specified `low_pitch` and `high_pitch`.
 
   ## Examples
 
@@ -114,7 +123,7 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.from_pitches :a_flat, :e_double_sharp
       {:error, "Invalid interval"}
   """
-  @spec from_pitches(Pitch.t, Pitch.t) :: t | {:error, binary}
+  @spec from_pitches(Pitch.t, Pitch.t) :: interval | {:error, binary}
   def from_pitches(low_pitch, high_pitch) do
     with semitones when is_integer(semitones) <- Pitch.semitones(low_pitch, high_pitch) do
       low  = low_pitch  |> Pitch.natural_name |> to_charlist |> List.first
@@ -129,7 +138,7 @@ defmodule Harmonex.Interval do
   end
 
   @doc """
-  Constructs a new `Harmonex.Interval` with the specified `definition`.
+  Constructs a new interval with the specified `definition`.
 
   ## Examples
 
@@ -148,8 +157,8 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.new %{quality: :major, size: 8}
       {:error, "Quality of octave must be in [:doubly_diminished, :diminished, :perfect, :augmented, :doubly_augmented]"}
   """
-  @spec new(t) :: t | {:error, binary}
-  @spec new(quality, integer) :: t | {:error, binary}
+  @spec new(t) :: interval | {:error, binary}
+  @spec new(quality, integer) :: interval | {:error, binary}
   for {quality, size} <- @intervals do
     def new(%{quality: unquote(quality), size: unquote(size)}=definition) do
       __MODULE__ |> struct(definition)
@@ -160,7 +169,7 @@ defmodule Harmonex.Interval do
     end
 
     @doc """
-    Constructs a new `Harmonex.Interval` with the specified `quality` and `size`.
+    Constructs a new interval with the specified `quality` and `size`.
 
     ## Examples
 
@@ -230,8 +239,8 @@ defmodule Harmonex.Interval do
   end
 
   @doc """
-  Computes the octave-equivalent `Harmonex.Interval` of the specified `interval`
-  that is closest to zero in size.
+  Computes the octave-equivalent interval of the specified `interval` that is
+  closest to zero in size.
 
   ## Examples
 
@@ -241,7 +250,7 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.reduce %{size: -10}
       %{size: -3}
   """
-  @spec reduce(%{size: integer}) :: t
+  @spec reduce(%{size: integer}) :: interval | t
   def reduce(%{size: size}=definition) do
     sign = if size < 0, do: -1, else: 1
     reduced_size = sign * (Integer.mod(abs(size) - 1, 7) + 1)
@@ -259,7 +268,7 @@ defmodule Harmonex.Interval do
     end
   end
 
-  @spec expand_by(%{size: integer}, integer) :: t
+  @spec expand_by(%{size: integer}, integer) :: interval | t
   defp expand_by(%{size: size}=interval, amount) do
     sign = if size < 0, do: -1, else: 1
     expanded_size = sign * (abs(size) + amount)
