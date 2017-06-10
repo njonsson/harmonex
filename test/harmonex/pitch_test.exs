@@ -57,7 +57,7 @@ defmodule Harmonex.PitchTest do
     end
   end
 
-  describe ".adjust_by_semitones/1" do
+  describe ".adjust_by_semitones/2" do
     test "accepts valid arguments" do
       for natural_name <- @natural_names, accidental <- @accidentals do
         actual = Harmonex.Pitch.adjust_by_semitones(%{natural_name: natural_name,
