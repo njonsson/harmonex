@@ -41,37 +41,6 @@ defmodule Harmonex.Pitch do
   @invalid_accidental "Invalid accidental -- must be in #{inspect @accidentals}"
 
   @doc """
-  Computes a pitch that is the sum of the specified `pitch` and the specified
-  `adjustment` in semitones.
-
-  ## Examples
-
-      iex> Harmonex.Pitch.adjust_by_semitones %{natural_name: :a, accidental: :sharp}, 14
-      %Harmonex.Pitch{natural_name: :c, accidental: :natural}
-
-      iex> Harmonex.Pitch.adjust_by_semitones :b_flat, -2
-      :g_sharp
-
-      iex> Harmonex.Pitch.adjust_by_semitones :c, 0
-      :c_natural
-  """
-  @spec adjust_by_semitones(t, integer) :: pitch | atom | Harmonex.error
-  def adjust_by_semitones(%{natural_name: _}=pitch, adjustment) do
-    with pitch_name when is_atom(pitch_name) <- name(pitch) do
-      pitch_name |> adjust_by_semitones(adjustment) |> new
-    end
-  end
-
-  def adjust_by_semitones(pitch, adjustment) do
-    with pitch_name when is_atom(pitch_name) <- name(pitch) do
-      (position(pitch_name) + adjustment) |> Integer.mod(12)
-                                          |> names_at
-                                          |> Enum.sort_by(&complexity_score/1)
-                                          |> List.first
-    end
-  end
-
-  @doc """
   Computes the accidental of the specified `pitch`.
 
   ## Examples
@@ -113,6 +82,37 @@ defmodule Harmonex.Pitch do
   end
 
   def accidental(_pitch), do: {:error, @invalid_name}
+
+  @doc """
+  Computes a pitch that is the sum of the specified `pitch` and the specified
+  `adjustment` in semitones.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.adjust_by_semitones %{natural_name: :a, accidental: :sharp}, 14
+      %Harmonex.Pitch{natural_name: :c, accidental: :natural}
+
+      iex> Harmonex.Pitch.adjust_by_semitones :b_flat, -2
+      :g_sharp
+
+      iex> Harmonex.Pitch.adjust_by_semitones :c, 0
+      :c_natural
+  """
+  @spec adjust_by_semitones(t, integer) :: pitch | atom | Harmonex.error
+  def adjust_by_semitones(%{natural_name: _}=pitch, adjustment) do
+    with pitch_name when is_atom(pitch_name) <- name(pitch) do
+      pitch_name |> adjust_by_semitones(adjustment) |> new
+    end
+  end
+
+  def adjust_by_semitones(pitch, adjustment) do
+    with pitch_name when is_atom(pitch_name) <- name(pitch) do
+      (position(pitch_name) + adjustment) |> Integer.mod(12)
+                                          |> names_at
+                                          |> Enum.sort_by(&complexity_score/1)
+                                          |> List.first
+    end
+  end
 
   @doc """
   Determines whether the specified `pitch1` and `pitch2` are enharmonically

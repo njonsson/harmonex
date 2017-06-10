@@ -8,6 +8,55 @@ defmodule Harmonex.PitchTest do
   @invalid_name "Invalid pitch name -- must be in #{inspect @natural_names}"
   @invalid_accidental "Invalid accidental -- must be in #{inspect @accidentals}"
 
+  describe ".accidental/1" do
+    test "accepts valid arguments" do
+      for natural_name <- @natural_names, accidental <- @accidentals do
+        expected = accidental
+
+        actual = Harmonex.Pitch.accidental(%{natural_name: natural_name,
+                                             accidental: accidental})
+        assert actual == expected
+
+        name = :"#{natural_name}_#{accidental}"
+        actual = Harmonex.Pitch.accidental(name)
+        assert actual == expected
+      end
+
+      for natural_name <- @natural_names do
+        expected = :natural
+
+        actual = Harmonex.Pitch.accidental(%{natural_name: natural_name})
+        assert actual == expected
+
+        actual = Harmonex.Pitch.accidental(natural_name)
+        assert actual == expected
+      end
+
+      for accidental <- @accidentals do
+        expected = accidental
+        actual = Harmonex.Pitch.accidental(%{accidental: accidental})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid accidental" do
+      expected = {:error, @invalid_accidental}
+
+      actual = Harmonex.Pitch.accidental(%Harmonex.Pitch{natural_name: :a,
+                                                         accidental: :out_of_tune})
+      assert actual == expected
+
+      actual = Harmonex.Pitch.accidental(%Harmonex.Pitch{accidental: :out_of_tune})
+      assert actual == expected
+    end
+
+    test "rejects an invalid name" do
+      expected = {:error, @invalid_name}
+      actual = Harmonex.Pitch.accidental(:a_out_of_tune)
+      assert actual == expected
+    end
+  end
+
   describe ".adjust_by_semitones/1" do
     test "accepts valid arguments" do
       for natural_name <- @natural_names, accidental <- @accidentals do
@@ -58,55 +107,6 @@ defmodule Harmonex.PitchTest do
       actual = Harmonex.Pitch.adjust_by_semitones(%Harmonex.Pitch{natural_name: :a,
                                                                   accidental: :out_of_tune},
                                                   1)
-      assert actual == expected
-    end
-  end
-
-  describe ".accidental/1" do
-    test "accepts valid arguments" do
-      for natural_name <- @natural_names, accidental <- @accidentals do
-        expected = accidental
-
-        actual = Harmonex.Pitch.accidental(%{natural_name: natural_name,
-                                             accidental: accidental})
-        assert actual == expected
-
-        name = :"#{natural_name}_#{accidental}"
-        actual = Harmonex.Pitch.accidental(name)
-        assert actual == expected
-      end
-
-      for natural_name <- @natural_names do
-        expected = :natural
-
-        actual = Harmonex.Pitch.accidental(%{natural_name: natural_name})
-        assert actual == expected
-
-        actual = Harmonex.Pitch.accidental(natural_name)
-        assert actual == expected
-      end
-
-      for accidental <- @accidentals do
-        expected = accidental
-        actual = Harmonex.Pitch.accidental(%{accidental: accidental})
-        assert actual == expected
-      end
-    end
-
-    test "rejects an invalid accidental" do
-      expected = {:error, @invalid_accidental}
-
-      actual = Harmonex.Pitch.accidental(%Harmonex.Pitch{natural_name: :a,
-                                                         accidental: :out_of_tune})
-      assert actual == expected
-
-      actual = Harmonex.Pitch.accidental(%Harmonex.Pitch{accidental: :out_of_tune})
-      assert actual == expected
-    end
-
-    test "rejects an invalid name" do
-      expected = {:error, @invalid_name}
-      actual = Harmonex.Pitch.accidental(:a_out_of_tune)
       assert actual == expected
     end
   end
