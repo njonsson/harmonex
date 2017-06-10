@@ -16,7 +16,7 @@ defmodule Harmonex.PitchTest do
                                                     1)
         assert is_map(actual)
 
-        name = :"#{to_string natural_name}_#{to_string accidental}"
+        name = :"#{natural_name}_#{accidental}"
         actual = Harmonex.Pitch.adjust_by_semitones(name, 1)
         assert is_atom(actual)
       end
@@ -71,7 +71,7 @@ defmodule Harmonex.PitchTest do
                                              accidental: accidental})
         assert actual == expected
 
-        name = :"#{to_string natural_name}_#{to_string accidental}"
+        name = :"#{natural_name}_#{accidental}"
         actual = Harmonex.Pitch.accidental(name)
         assert actual == expected
       end
@@ -285,7 +285,7 @@ defmodule Harmonex.PitchTest do
   describe ".name/1" do
     test "accepts valid arguments" do
       for natural_name <- @natural_names, accidental <- @accidentals do
-        expected = :"#{to_string natural_name}_#{to_string accidental}"
+        expected = :"#{natural_name}_#{accidental}"
 
         actual = Harmonex.Pitch.name(%{natural_name: natural_name,
                                        accidental: accidental})
@@ -296,7 +296,7 @@ defmodule Harmonex.PitchTest do
       end
 
       for natural_name <- @natural_names do
-        expected = :"#{to_string natural_name}_natural"
+        expected = :"#{natural_name}_natural"
 
         actual = Harmonex.Pitch.name(%{natural_name: natural_name})
         assert actual == expected
@@ -344,7 +344,7 @@ defmodule Harmonex.PitchTest do
                                                accidental: accidental})
         assert actual == expected
 
-        name = :"#{to_string natural_name}_#{to_string accidental}"
+        name = :"#{natural_name}_#{accidental}"
         actual = Harmonex.Pitch.natural_name(name)
         assert actual == expected
       end
@@ -388,7 +388,7 @@ defmodule Harmonex.PitchTest do
                                       accidental: accidental})
         assert actual == expected
 
-        name = :"#{to_string natural_name}_#{to_string accidental}"
+        name = :"#{natural_name}_#{accidental}"
         actual = Harmonex.Pitch.new(name)
         assert actual == expected
       end

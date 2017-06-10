@@ -102,7 +102,7 @@ defmodule Harmonex.Pitch do
   def accidental(%{accidental: _}=_pitch), do: {:error, @invalid_accidental}
 
   for natural_name <- @natural_names, accidental <- @accidentals do
-    name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
+    name = :"#{natural_name}_#{accidental}"
     def accidental(unquote(name)=_pitch), do: unquote(accidental)
   end
 
@@ -226,7 +226,7 @@ defmodule Harmonex.Pitch do
   @spec name(t) :: atom
 
   for natural_name <- @natural_names, accidental <- @accidentals do
-    name = :"#{to_string natural_name}_#{to_string accidental}"
+    name = :"#{natural_name}_#{accidental}"
     def name(%{natural_name: unquote(natural_name),
                accidental: unquote(accidental)}=_pitch) do
       unquote name
@@ -241,11 +241,11 @@ defmodule Harmonex.Pitch do
     end
 
     def name(%{natural_name: unquote(natural_name)}=_pitch) do
-      unquote :"#{to_string natural_name}_natural"
+      unquote :"#{natural_name}_natural"
     end
 
     def name(unquote(natural_name)=_pitch) do
-      unquote(:"#{to_string natural_name}_natural")
+      unquote(:"#{natural_name}_natural")
     end
   end
 
@@ -281,7 +281,7 @@ defmodule Harmonex.Pitch do
   def natural_name(%{natural_name: _}=_pitch), do: {:error, @invalid_name}
 
   for natural_name <- @natural_names, accidental <- @accidentals do
-    name = String.to_atom("#{to_string natural_name}_#{to_string accidental}")
+    name = :"#{natural_name}_#{accidental}"
     def natural_name(unquote(name)=_pitch), do: unquote(natural_name)
   end
 
@@ -341,7 +341,7 @@ defmodule Harmonex.Pitch do
       __MODULE__ |> struct(natural_name: natural_name, accidental: accidental)
     end
 
-    name = :"#{to_string natural_name}_#{to_string accidental}"
+    name = :"#{natural_name}_#{accidental}"
     def new(unquote(name)=_name) do
       new unquote(natural_name), unquote(accidental)
     end
@@ -410,7 +410,7 @@ defmodule Harmonex.Pitch do
                                                                       acc) ->
     @accidental_by_offset |> Enum.reduce(acc,
                                          fn({accidental, offset}, inner_acc) ->
-      name = :"#{to_string natural_name}_#{to_string accidental}"
+      name = :"#{natural_name}_#{accidental}"
       altered_position = Integer.mod(position + offset, 12)
 
       # Tweak the order of enharmonic groups that wrap around G-A.
@@ -438,7 +438,7 @@ defmodule Harmonex.Pitch do
 
   for {natural_name, position} <- @position_by_natural_name,
       {accidental, offset} <- @accidental_by_offset do
-    name = :"#{to_string natural_name}_#{to_string accidental}"
+    name = :"#{natural_name}_#{accidental}"
     defp position(unquote(name)) do
       unquote(position + offset) |> Integer.mod(12)
     end
