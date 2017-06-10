@@ -123,7 +123,7 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.from_pitches :a_flat, :e_double_sharp
       {:error, "Invalid interval"}
   """
-  @spec from_pitches(Pitch.t, Pitch.t) :: interval | {:error, binary}
+  @spec from_pitches(Pitch.t, Pitch.t) :: interval | Harmonex.error
   def from_pitches(low_pitch, high_pitch) do
     with semitones when is_integer(semitones) <- Pitch.semitones(low_pitch, high_pitch) do
       low  = low_pitch  |> Pitch.natural_name |> to_charlist |> List.first
@@ -157,8 +157,8 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.new %{quality: :major, size: 8}
       {:error, "Quality of octave must be in [:doubly_diminished, :diminished, :perfect, :augmented, :doubly_augmented]"}
   """
-  @spec new(t) :: interval | {:error, binary}
-  @spec new(quality, integer) :: interval | {:error, binary}
+  @spec new(t) :: interval | Harmonex.error
+  @spec new(quality, integer) :: interval | Harmonex.error
   for {quality, size} <- @intervals do
     def new(%{quality: unquote(quality), size: unquote(size)}=definition) do
       __MODULE__ |> struct(definition)
@@ -251,14 +251,14 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.reduce %{size: -10}
       %{size: -3}
   """
-  @spec reduce(%{size: integer}) :: interval | t
+  @spec reduce(%{size: integer}) :: t
   def reduce(%{size: size}=definition) do
     sign = if size < 0, do: -1, else: 1
     reduced_size = sign * (Integer.mod(abs(size) - 1, 7) + 1)
     %{definition | size: reduced_size}
   end
 
-  @spec error_quality(integer, pos_integer) :: {:error, binary}
+  @spec error_quality(integer, pos_integer) :: Harmonex.error
   for {size_in_lookup, qualities} <- @quality_list_by_size do
     defp error_quality(unquote(size_in_lookup), size) do
       {:error, "Quality of #{Ordinal.to_string size} must be in #{inspect unquote(qualities)}"}
@@ -269,7 +269,7 @@ defmodule Harmonex.Interval do
     end
   end
 
-  @spec expand_by(%{size: integer}, integer) :: interval | t
+  @spec expand_by(%{size: integer}, integer) :: t
   defp expand_by(%{size: size}=interval, amount) do
     sign = if size < 0, do: -1, else: 1
     expanded_size = sign * (abs(size) + amount)

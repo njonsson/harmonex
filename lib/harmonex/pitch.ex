@@ -55,7 +55,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.adjust_by_semitones :c, 0
       :c_natural
   """
-  @spec adjust_by_semitones(t, integer) :: pitch | atom
+  @spec adjust_by_semitones(t, integer) :: pitch | atom | Harmonex.error
   def adjust_by_semitones(%{natural_name: _}=pitch, adjustment) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> adjust_by_semitones(adjustment) |> new
@@ -91,7 +91,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.accidental :a
       :natural
   """
-  @spec accidental(%{accidental: accidental} | atom) :: accidental
+  @spec accidental(%{accidental: accidental} | atom) :: accidental | Harmonex.error
 
   for accidental <- @accidentals do
     def accidental(%{accidental: unquote(accidental)=accidental}=_pitch) do
@@ -132,7 +132,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.enharmonic? :a_sharp, :a
       false
   """
-  @spec enharmonic?(t, t) :: boolean
+  @spec enharmonic?(t, t) :: boolean | Harmonex.error
   def enharmonic?(pitch1, pitch2) do
     with pitch1_name when is_atom(pitch1_name) <- name(pitch1),
          pitch2_name when is_atom(pitch2_name) <- name(pitch2) do
@@ -163,7 +163,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.enharmonics :a_sharp
       [:b_flat, :c_double_flat]
   """
-  @spec enharmonics(t) :: [pitch] | [atom]
+  @spec enharmonics(t) :: [pitch] | [atom] | Harmonex.error
   def enharmonics(%{natural_name: _}=pitch) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> enharmonics |> Enum.map(&(new(&1)))
@@ -200,7 +200,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.interval :a_flat, :e_double_sharp
       {:error, "Invalid interval"}
   """
-  @spec interval(t, t) :: Interval.interval | {:error, binary}
+  @spec interval(t, t) :: Interval.interval | Harmonex.error
   def interval(low_pitch, high_pitch) do
     Interval.from_pitches(low_pitch, high_pitch)
   end
@@ -223,7 +223,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.name :a
       :a_natural
   """
-  @spec name(t) :: atom
+  @spec name(t) :: atom | Harmonex.error
 
   for natural_name <- @natural_names, accidental <- @accidentals do
     name = :"#{natural_name}_#{accidental}"
@@ -268,7 +268,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.natural_name :a
       :a
   """
-  @spec natural_name(t) :: natural_name
+  @spec natural_name(t) :: natural_name | Harmonex.error
 
   for natural_name <- @natural_names do
     def natural_name(%{natural_name: unquote(natural_name)=natural_name}=_pitch) do
@@ -313,8 +313,8 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.new %{natural_name: :a, accidental: :out_of_tune}
       {:error, #{inspect @invalid_accidental}}
   """
-  @spec new(t) :: pitch | {:error, binary}
-  @spec new(natural_name, accidental) :: pitch | {:error, binary}
+  @spec new(t) :: pitch | Harmonex.error
+  @spec new(natural_name, accidental) :: pitch | Harmonex.error
 
   for natural_name <- @natural_names, accidental <- @accidentals do
     def new(%{natural_name: unquote(natural_name)=natural_name,
@@ -382,7 +382,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.semitones :d_double_sharp, :b_double_sharp
       9
   """
-  @spec semitones(t, t) :: 0..11
+  @spec semitones(t, t) :: 0..11 | Harmonex.error
   def semitones(low_pitch, high_pitch) do
     with low_pitch_name when is_atom(low_pitch_name)   <- name(low_pitch),
          low_pitch_position                            <- position(low_pitch_name),
