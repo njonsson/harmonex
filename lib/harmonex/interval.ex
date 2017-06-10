@@ -240,7 +240,8 @@ defmodule Harmonex.Interval do
 
   @doc """
   Computes the octave-equivalent interval of the specified `interval` that is
-  closest to zero in size.
+  closest to zero in size. The result is like a simple interval except that an
+  octave is represented as a unison.
 
   ## Examples
 
