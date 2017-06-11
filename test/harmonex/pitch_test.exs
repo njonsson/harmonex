@@ -42,11 +42,11 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid accidental" do
       expected = {:error, @invalid_accidental}
 
-      actual = Harmonex.Pitch.accidental(%Harmonex.Pitch{natural_name: :a,
-                                                         accidental: :out_of_tune})
+      actual = Harmonex.Pitch.accidental(%{natural_name: :a,
+                                           accidental: :out_of_tune})
       assert actual == expected
 
-      actual = Harmonex.Pitch.accidental(%Harmonex.Pitch{accidental: :out_of_tune})
+      actual = Harmonex.Pitch.accidental(%{accidental: :out_of_tune})
       assert actual == expected
     end
 
@@ -71,7 +71,8 @@ defmodule Harmonex.PitchTest do
       end
 
       for natural_name <- @natural_names do
-        actual = Harmonex.Pitch.adjust_by_semitones(%{natural_name: natural_name}, 1)
+        actual = Harmonex.Pitch.adjust_by_semitones(%{natural_name: natural_name},
+                                                    1)
         assert is_map(actual)
 
         actual = Harmonex.Pitch.adjust_by_semitones(natural_name, 1)
@@ -82,13 +83,12 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid name" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.adjust_by_semitones(%Harmonex.Pitch{natural_name: :h,
-                                                                  accidental: :flat},
+      actual = Harmonex.Pitch.adjust_by_semitones(%{natural_name: :h,
+                                                    accidental: :flat},
                                                   1)
       assert actual == expected
 
-      actual = Harmonex.Pitch.adjust_by_semitones(%Harmonex.Pitch{natural_name: :h},
-                                                  1)
+      actual = Harmonex.Pitch.adjust_by_semitones(%{natural_name: :h}, 1)
       assert actual == expected
 
       actual = Harmonex.Pitch.adjust_by_semitones(:h_flat, 1)
@@ -104,8 +104,8 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid accidental" do
       expected = {:error, @invalid_accidental}
 
-      actual = Harmonex.Pitch.adjust_by_semitones(%Harmonex.Pitch{natural_name: :a,
-                                                                  accidental: :out_of_tune},
+      actual = Harmonex.Pitch.adjust_by_semitones(%{natural_name: :a,
+                                                    accidental: :out_of_tune},
                                                   1)
       assert actual == expected
     end
@@ -115,12 +115,11 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.enharmonic?(%Harmonex.Pitch{natural_name: :h,
-                                                          accidental: :flat},
+      actual = Harmonex.Pitch.enharmonic?(%{natural_name: :h, accidental: :flat},
                                           :a)
       assert actual == expected
 
-      actual = Harmonex.Pitch.enharmonic?(%Harmonex.Pitch{natural_name: :h}, :a)
+      actual = Harmonex.Pitch.enharmonic?(%{natural_name: :h}, :a)
       assert actual == expected
 
       actual = Harmonex.Pitch.enharmonic?(:h_flat, :a)
@@ -136,8 +135,8 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid accidental in the first argument" do
       expected = {:error, @invalid_accidental}
 
-      actual = Harmonex.Pitch.enharmonic?(%Harmonex.Pitch{natural_name: :a,
-                                                          accidental: :out_of_tune},
+      actual = Harmonex.Pitch.enharmonic?(%{natural_name: :a,
+                                            accidental: :out_of_tune},
                                           :a)
       assert actual == expected
     end
@@ -146,11 +145,11 @@ defmodule Harmonex.PitchTest do
       expected = {:error, @invalid_name}
 
       actual = Harmonex.Pitch.enharmonic?(:a,
-                                          %Harmonex.Pitch{natural_name: :h,
+                                          %{natural_name: :h,
                                                           accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Pitch.enharmonic?(:a, %Harmonex.Pitch{natural_name: :h})
+      actual = Harmonex.Pitch.enharmonic?(:a, %{natural_name: :h})
       assert actual == expected
 
       actual = Harmonex.Pitch.enharmonic?(:a, :h_flat)
@@ -167,7 +166,7 @@ defmodule Harmonex.PitchTest do
       expected = {:error, @invalid_accidental}
 
       actual = Harmonex.Pitch.enharmonic?(:a,
-                                          %Harmonex.Pitch{natural_name: :a,
+                                          %{natural_name: :a,
                                                           accidental: :out_of_tune})
       assert actual == expected
     end
@@ -177,11 +176,10 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid name" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.enharmonics(%Harmonex.Pitch{natural_name: :h,
-                                                          accidental: :flat})
+      actual = Harmonex.Pitch.enharmonics(%{natural_name: :h, accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Pitch.enharmonics(%Harmonex.Pitch{natural_name: :h})
+      actual = Harmonex.Pitch.enharmonics(%{natural_name: :h})
       assert actual == expected
 
       actual = Harmonex.Pitch.enharmonics(:h_flat)
@@ -197,8 +195,8 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid accidental" do
       expected = {:error, @invalid_accidental}
 
-      actual = Harmonex.Pitch.enharmonics(%Harmonex.Pitch{natural_name: :a,
-                                                          accidental: :out_of_tune})
+      actual = Harmonex.Pitch.enharmonics(%{natural_name: :a,
+                                            accidental: :out_of_tune})
       assert actual == expected
     end
   end
@@ -218,12 +216,11 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.interval(%Harmonex.Pitch{natural_name: :h,
-                                                       accidental: :flat},
+      actual = Harmonex.Pitch.interval(%{natural_name: :h, accidental: :flat},
                                        :a)
       assert actual == expected
 
-      actual = Harmonex.Pitch.interval(%Harmonex.Pitch{natural_name: :h}, :a)
+      actual = Harmonex.Pitch.interval(%{natural_name: :h}, :a)
       assert actual == expected
 
       actual = Harmonex.Pitch.interval(:h_flat, :a)
@@ -239,8 +236,8 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid accidental in the first argument" do
       expected = {:error, @invalid_accidental}
 
-      actual = Harmonex.Pitch.interval(%Harmonex.Pitch{natural_name: :a,
-                                                       accidental: :out_of_tune},
+      actual = Harmonex.Pitch.interval(%{natural_name: :a,
+                                         accidental: :out_of_tune},
                                        :a)
       assert actual == expected
     end
@@ -249,11 +246,11 @@ defmodule Harmonex.PitchTest do
       expected = {:error, @invalid_name}
 
       actual = Harmonex.Pitch.interval(:a,
-                                       %Harmonex.Pitch{natural_name: :h,
+                                       %{natural_name: :h,
                                                        accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Pitch.interval(:a, %Harmonex.Pitch{natural_name: :h})
+      actual = Harmonex.Pitch.interval(:a, %{natural_name: :h})
       assert actual == expected
 
       actual = Harmonex.Pitch.interval(:a, :h_flat)
@@ -270,7 +267,7 @@ defmodule Harmonex.PitchTest do
       expected = {:error, @invalid_accidental}
 
       actual = Harmonex.Pitch.interval(:a,
-                                        %Harmonex.Pitch{natural_name: :a,
+                                        %{natural_name: :a,
                                                         accidental: :out_of_tune})
       assert actual == expected
     end
@@ -309,11 +306,10 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid name" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.name(%Harmonex.Pitch{natural_name: :h,
-                                                   accidental: :flat})
+      actual = Harmonex.Pitch.name(%{natural_name: :h, accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Pitch.name(%Harmonex.Pitch{natural_name: :h})
+      actual = Harmonex.Pitch.name(%{natural_name: :h})
       assert actual == expected
 
       actual = Harmonex.Pitch.name(:h_flat)
@@ -329,8 +325,7 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid accidental" do
       expected = {:error, @invalid_accidental}
 
-      actual = Harmonex.Pitch.name(%Harmonex.Pitch{natural_name: :a,
-                                                   accidental: :out_of_tune})
+      actual = Harmonex.Pitch.name(%{natural_name: :a, accidental: :out_of_tune})
       assert actual == expected
     end
   end
@@ -363,11 +358,11 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid name" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.natural_name(%Harmonex.Pitch{natural_name: :h,
-                                                           accidental: :flat})
+      actual = Harmonex.Pitch.natural_name(%{natural_name: :h,
+                                             accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Pitch.natural_name(%Harmonex.Pitch{natural_name: :h})
+      actual = Harmonex.Pitch.natural_name(%{natural_name: :h})
       assert actual == expected
 
       actual = Harmonex.Pitch.natural_name(:h_flat)
@@ -421,12 +416,11 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_name}
 
-      actual = Harmonex.Pitch.semitones(%Harmonex.Pitch{natural_name: :h,
-                                                        accidental: :flat},
+      actual = Harmonex.Pitch.semitones(%{natural_name: :h, accidental: :flat},
                                         :a)
       assert actual == expected
 
-      actual = Harmonex.Pitch.semitones(%Harmonex.Pitch{natural_name: :h}, :a)
+      actual = Harmonex.Pitch.semitones(%{natural_name: :h}, :a)
       assert actual == expected
 
       actual = Harmonex.Pitch.semitones(:h_flat, :a)
@@ -442,8 +436,8 @@ defmodule Harmonex.PitchTest do
     test "rejects an invalid accidental in the first argument" do
       expected = {:error, @invalid_accidental}
 
-      actual = Harmonex.Pitch.semitones(%Harmonex.Pitch{natural_name: :a,
-                                                        accidental: :out_of_tune},
+      actual = Harmonex.Pitch.semitones(%{natural_name: :a,
+                                          accidental: :out_of_tune},
                                         :a)
       assert actual == expected
     end
@@ -452,11 +446,11 @@ defmodule Harmonex.PitchTest do
       expected = {:error, @invalid_name}
 
       actual = Harmonex.Pitch.semitones(:a,
-                                        %Harmonex.Pitch{natural_name: :h,
+                                        %{natural_name: :h,
                                                         accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Pitch.semitones(:a, %Harmonex.Pitch{natural_name: :h})
+      actual = Harmonex.Pitch.semitones(:a, %{natural_name: :h})
       assert actual == expected
 
       actual = Harmonex.Pitch.semitones(:a, :h_flat)
@@ -473,8 +467,8 @@ defmodule Harmonex.PitchTest do
       expected = {:error, @invalid_accidental}
 
       actual = Harmonex.Pitch.semitones(:a,
-                                        %Harmonex.Pitch{natural_name: :a,
-                                                        accidental: :out_of_tune})
+                                        %{natural_name: :a,
+                                          accidental: :out_of_tune})
       assert actual == expected
     end
   end

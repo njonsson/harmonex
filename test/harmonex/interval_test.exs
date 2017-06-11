@@ -85,13 +85,12 @@ defmodule Harmonex.IntervalTest do
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_pitch_name}
 
-      actual = Harmonex.Interval.from_pitches(%Harmonex.Pitch{natural_name: :h,
-                                                              accidental: :flat},
+      actual = Harmonex.Interval.from_pitches(%{natural_name: :h,
+                                                accidental: :flat},
                                               :a)
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(%Harmonex.Pitch{natural_name: :h},
-                                              :a)
+      actual = Harmonex.Interval.from_pitches(%{natural_name: :h}, :a)
       assert actual == expected
 
       actual = Harmonex.Interval.from_pitches(:h_flat, :a)
@@ -105,12 +104,11 @@ defmodule Harmonex.IntervalTest do
       expected = {:error, @invalid_pitch_name}
 
       actual = Harmonex.Interval.from_pitches(:a,
-                                              %Harmonex.Pitch{natural_name: :h,
-                                                              accidental: :flat})
+                                              %{natural_name: :h,
+                                                accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:a,
-                                              %Harmonex.Pitch{natural_name: :h})
+      actual = Harmonex.Interval.from_pitches(:a, %{natural_name: :h})
       assert actual == expected
 
       actual = Harmonex.Interval.from_pitches(:a, :h_flat)
