@@ -1,6 +1,4 @@
-# Harmonex
-
-![logo](assets/logo.png)
+# <img align="left" alt="logo" src="assets/logo.png" /> Harmonex
 
 [<img alt="Travis CI build status" src="https://secure.travis-ci.org/njonsson/harmonex.svg?branch=master" />][Travis-CI-build-status]
 [<img alt="HexFaktor dependencies status" src="https://beta.hexfaktor.org/badge/all/github/njonsson/harmonex.svg" />][HexFaktor-deps-status]
