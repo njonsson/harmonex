@@ -1,6 +1,9 @@
 defmodule Harmonex.IntervalTest do
   use ExUnit.Case, async: true
-  doctest Harmonex.Interval
+
+  alias Harmonex.Interval
+
+  doctest Interval
 
   @intervals [perfect:           1,
               augmented:         1,
@@ -71,56 +74,50 @@ defmodule Harmonex.IntervalTest do
 
   describe ".from_pitches/2" do
     test "accepts valid arguments" do
-      expected = %Harmonex.Interval{quality: :diminished, size: 3}
+      expected = %Interval{quality: :diminished, size: 3}
 
-      actual = Harmonex.Interval.from_pitches(%{natural_name: :a,
-                                                accidental: :sharp},
-                                              :c)
+      actual = Interval.from_pitches(%{natural_name: :a, accidental: :sharp}, :c)
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:a_sharp, %{natural_name: :c})
+      actual = Interval.from_pitches(:a_sharp, %{natural_name: :c})
       assert actual == expected
     end
 
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_pitch_name}
 
-      actual = Harmonex.Interval.from_pitches(%{natural_name: :h,
-                                                accidental: :flat},
-                                              :a)
+      actual = Interval.from_pitches(%{natural_name: :h, accidental: :flat}, :a)
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(%{natural_name: :h}, :a)
+      actual = Interval.from_pitches(%{natural_name: :h}, :a)
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:h_flat, :a)
+      actual = Interval.from_pitches(:h_flat, :a)
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:h, :a)
+      actual = Interval.from_pitches(:h, :a)
       assert actual == expected
     end
 
     test "rejects an invalid name in the second argument" do
       expected = {:error, @invalid_pitch_name}
 
-      actual = Harmonex.Interval.from_pitches(:a,
-                                              %{natural_name: :h,
-                                                accidental: :flat})
+      actual = Interval.from_pitches(:a, %{natural_name: :h, accidental: :flat})
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:a, %{natural_name: :h})
+      actual = Interval.from_pitches(:a, %{natural_name: :h})
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:a, :h_flat)
+      actual = Interval.from_pitches(:a, :h_flat)
       assert actual == expected
 
-      actual = Harmonex.Interval.from_pitches(:a, :h)
+      actual = Interval.from_pitches(:a, :h)
       assert actual == expected
     end
 
     test "recognizes an invalid interval" do
       expected = {:error, "Invalid interval"}
-      actual = Harmonex.Interval.from_pitches(:a_flat, :e_double_sharp)
+      actual = Interval.from_pitches(:a_flat, :e_double_sharp)
       assert actual == expected
     end
   end
@@ -128,30 +125,30 @@ defmodule Harmonex.IntervalTest do
   describe ".new/1" do
     test "accepts valid arguments" do
       for {quality, size} <- @intervals do
-        assert Harmonex.Interval.new(%{quality: quality, size: size})     == %Harmonex.Interval{quality: quality, size: size}
-        assert Harmonex.Interval.new(%{quality: quality, size: size + 7}) == %Harmonex.Interval{quality: quality, size: size + 7}
+        assert Interval.new(%{quality: quality, size: size})     == %Interval{quality: quality, size: size}
+        assert Interval.new(%{quality: quality, size: size + 7}) == %Interval{quality: quality, size: size + 7}
 
-        assert Harmonex.Interval.new(%{quality: quality, size: -size})       == %Harmonex.Interval{quality: quality, size: -size}
-        assert Harmonex.Interval.new(%{quality: quality, size: -(size + 7)}) == %Harmonex.Interval{quality: quality, size: -(size + 7)}
+        assert Interval.new(%{quality: quality, size: -size})       == %Interval{quality: quality, size: -size}
+        assert Interval.new(%{quality: quality, size: -(size + 7)}) == %Interval{quality: quality, size: -(size + 7)}
       end
 
-      assert Harmonex.Interval.new(%{quality: :minor, size:  300}) == %Harmonex.Interval{quality: :minor, size:  300}
-      assert Harmonex.Interval.new(%{quality: :minor, size: -300}) == %Harmonex.Interval{quality: :minor, size: -300}
+      assert Interval.new(%{quality: :minor, size:  300}) == %Interval{quality: :minor, size:  300}
+      assert Interval.new(%{quality: :minor, size: -300}) == %Interval{quality: :minor, size: -300}
     end
 
     test "rejects invalid arguments" do
       for {quality, size} <- @intervals_invalid do
-        {:error, reason} = Harmonex.Interval.new(%{quality: quality, size: size})
+        {:error, reason} = Interval.new(%{quality: quality, size: size})
         assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
 
-        {:error, reason} = Harmonex.Interval.new(%{quality: quality, size: -size})
+        {:error, reason} = Interval.new(%{quality: quality, size: -size})
         assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
       end
 
-      {:error, reason} = Harmonex.Interval.new(%{quality: :perfect, size: 300})
+      {:error, reason} = Interval.new(%{quality: :perfect, size: 300})
       assert reason == "Quality of 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
 
-      {:error, reason} = Harmonex.Interval.new(%{quality: :perfect, size: -300})
+      {:error, reason} = Interval.new(%{quality: :perfect, size: -300})
       assert reason == "Quality of negative 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
     end
   end
@@ -159,30 +156,30 @@ defmodule Harmonex.IntervalTest do
   describe ".new/2" do
     test "accepts valid arguments" do
       for {quality, size} <- @intervals do
-        assert Harmonex.Interval.new(quality, size)     == %Harmonex.Interval{quality: quality, size: size}
-        assert Harmonex.Interval.new(quality, size + 7) == %Harmonex.Interval{quality: quality, size: size + 7}
+        assert Interval.new(quality, size)     == %Interval{quality: quality, size: size}
+        assert Interval.new(quality, size + 7) == %Interval{quality: quality, size: size + 7}
 
-        assert Harmonex.Interval.new(quality, -size)       == %Harmonex.Interval{quality: quality, size: -size}
-        assert Harmonex.Interval.new(quality, -(size + 7)) == %Harmonex.Interval{quality: quality, size: -(size + 7)}
+        assert Interval.new(quality, -size)       == %Interval{quality: quality, size: -size}
+        assert Interval.new(quality, -(size + 7)) == %Interval{quality: quality, size: -(size + 7)}
       end
 
-      assert Harmonex.Interval.new(:minor,  300) == %Harmonex.Interval{quality: :minor, size:  300}
-      assert Harmonex.Interval.new(:minor, -300) == %Harmonex.Interval{quality: :minor, size: -300}
+      assert Interval.new(:minor,  300) == %Interval{quality: :minor, size:  300}
+      assert Interval.new(:minor, -300) == %Interval{quality: :minor, size: -300}
     end
 
     test "rejects invalid arguments" do
       for {quality, size} <- @intervals_invalid do
-        {:error, reason} = Harmonex.Interval.new(quality, size)
+        {:error, reason} = Interval.new(quality, size)
         assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
 
-        {:error, reason} = Harmonex.Interval.new(quality, -size)
+        {:error, reason} = Interval.new(quality, -size)
         assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
       end
 
-      {:error, reason} = Harmonex.Interval.new(:perfect, 300)
+      {:error, reason} = Interval.new(:perfect, 300)
       assert reason == "Quality of 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
 
-      {:error, reason} = Harmonex.Interval.new(:perfect, -300)
+      {:error, reason} = Interval.new(:perfect, -300)
       assert reason == "Quality of negative 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
     end
   end
