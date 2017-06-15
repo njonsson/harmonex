@@ -77,6 +77,7 @@ defmodule Harmonex.Interval do
          MapSet.new(Map.values(@quality_by_semitones_and_size)) do
     raise "Qualities mismatch between @qualities and @quality_by_semitones_and_size"
   end
+
   @intervals @quality_by_semitones_and_size |> Enum.reduce([],
                                                            fn({{semitones, size}, quality},
                                                               acc) ->
@@ -87,6 +88,9 @@ defmodule Harmonex.Interval do
                                                            end
                                                  [{quality, size + 7} | new_acc]
                                                end)
+  unless MapSet.new(@qualities) == MapSet.new(Keyword.keys(@intervals)) do
+    raise "Qualities mismatch between @qualities and @intervals"
+  end
 
   quality_score = fn(quality) ->
     @qualities |> Enum.find_index(&(&1 == quality))
@@ -101,6 +105,7 @@ defmodule Harmonex.Interval do
          MapSet.new(List.flatten(Map.values(@quality_list_by_size))) do
     raise "Qualities mismatch between @qualities and @quality_list_by_size"
   end
+
   @intervals_invalid (@quality_list_by_size |> Enum.reduce([], fn({size, qualities}, acc) ->
                         for_quality = for q <- (@qualities -- qualities) do
                           {q, size}
