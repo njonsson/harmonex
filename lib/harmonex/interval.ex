@@ -182,11 +182,11 @@ defmodule Harmonex.Interval do
   @spec new(quality, integer) :: interval | Harmonex.error
   for {quality, size} <- @intervals do
     def new(%{quality: unquote(quality), size: unquote(size)}=definition) do
-      __MODULE__ |> struct(definition)
+      __MODULE__ |> struct(Map.delete(definition, :__struct__))
     end
 
     def new(%{quality: unquote(quality), size: unquote(-size)}=definition) do
-      __MODULE__ |> struct(definition)
+      __MODULE__ |> struct(Map.delete(definition, :__struct__))
     end
 
     @doc """
