@@ -15,9 +15,20 @@ defmodule Harmonex.Pitch do
   @typedoc """
   A literal expression describing a pitch.
   """
-  @type t :: %{natural_name: natural_name, accidental: accidental} |
-             %{natural_name: natural_name}                         |
-             atom
+  @type t :: t_map | t_atom
+
+  @typedoc """
+  A map literal expression describing a pitch.
+  """
+  @type t_map :: %{natural_name: natural_name, accidental: accidental} |
+                 %{natural_name: natural_name}
+
+  @typedoc """
+  An atom literal expression describing a pitch. Can be a `t:natural_name/0`, or
+  a `t:natural_name/0` joined by underscore with an `t:accidental/0` (e.g.,
+  `:a_flat`).
+  """
+  @type t_atom :: natural_name | atom
 
   @typedoc """
   The name of a pitch whose accidental is ♮ (natural).
@@ -57,8 +68,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.accidental :a
       :natural
   """
-  @spec accidental(%{accidental: accidental} | atom) :: accidental | Harmonex.error
-
+  @spec accidental(t) :: accidental | Harmonex.error
   for natural_name <- @natural_names, accidental <- @accidentals do
     def accidental(%{natural_name: unquote(natural_name),
                      accidental: unquote(accidental)=accidental}=_pitch) do
@@ -107,13 +117,14 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.adjust_by_semitones :c, 0
       :c_natural
   """
-  @spec adjust_by_semitones(t, integer) :: pitch | atom | Harmonex.error
+  @spec adjust_by_semitones(t_map, integer) :: pitch | Harmonex.error
   def adjust_by_semitones(%{natural_name: _}=pitch, adjustment) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> adjust_by_semitones(adjustment) |> new
     end
   end
 
+  @spec adjust_by_semitones(t_atom, integer) :: t_atom | Harmonex.error
   def adjust_by_semitones(pitch, adjustment) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       (position(pitch_name) + adjustment) |> Integer.mod(12)
@@ -172,13 +183,14 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.enharmonics :a_sharp
       [:b_flat, :c_double_flat]
   """
-  @spec enharmonics(t) :: [pitch] | [atom] | Harmonex.error
+  @spec enharmonics(t_map) :: [pitch] | Harmonex.error
   def enharmonics(%{natural_name: _}=pitch) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> enharmonics |> Enum.map(&(new(&1)))
     end
   end
 
+  @spec enharmonics(t_atom) :: [t_atom] | Harmonex.error
   def enharmonics(pitch) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> position |> names_at |> Enum.reject(&(&1 == pitch_name))
@@ -232,8 +244,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.name :a
       :a_natural
   """
-  @spec name(t) :: atom | Harmonex.error
-
+  @spec name(t) :: t_atom | Harmonex.error
   for natural_name <- @natural_names, accidental <- @accidentals do
     name = :"#{natural_name}_#{accidental}"
     def name(%{natural_name: unquote(natural_name),
@@ -278,7 +289,6 @@ defmodule Harmonex.Pitch do
       :a
   """
   @spec natural_name(t) :: natural_name | Harmonex.error
-
   for natural_name <- @natural_names, accidental <- @accidentals do
     def natural_name(%{natural_name: unquote(natural_name)=natural_name,
                        accidental: unquote(accidental)}=_pitch) do
@@ -332,7 +342,6 @@ defmodule Harmonex.Pitch do
   """
   @spec new(t) :: pitch | Harmonex.error
   @spec new(natural_name, accidental) :: pitch | Harmonex.error
-
   for natural_name <- @natural_names, accidental <- @accidentals do
     def new(%{natural_name: unquote(natural_name)=natural_name,
               accidental: unquote(accidental)=accidental}=_name) do
@@ -409,7 +418,7 @@ defmodule Harmonex.Pitch do
     end
   end
 
-  @spec complexity_score(atom) :: 0..2
+  @spec complexity_score(t_atom) :: 0..2
   for natural_name <- @natural_names do
     defp complexity_score(unquote(natural_name)),               do: 0
     defp complexity_score(unquote(:"#{natural_name}_natural")), do: 0
@@ -421,7 +430,7 @@ defmodule Harmonex.Pitch do
     defp complexity_score(unquote(:"#{natural_name}_double_sharp")), do: 2
   end
 
-  @spec names_at(0..11) :: [atom]
+  @spec names_at(0..11) :: [t_atom]
   name_list_by_position = @position_by_natural_name |> Enum.reduce(%{},
                                                                    fn({natural_name, position},
                                                                       acc) ->
@@ -448,7 +457,7 @@ defmodule Harmonex.Pitch do
     defp names_at(unquote(position)), do: unquote(Enum.reverse(names))
   end
 
-  @spec position(atom) :: 0..11
+  @spec position(t_atom) :: 0..11
   for {natural_name, position} <- @position_by_natural_name do
     defp position(unquote(natural_name)), do: unquote(position)
   end
