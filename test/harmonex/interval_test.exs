@@ -53,70 +53,241 @@ defmodule Harmonex.IntervalTest do
               augmented:         9,
               doubly_augmented:  9]
 
-  @intervals_invalid [doubly_diminished: 1,
-                      diminished:        1,
-                      minor:             1,
-                      major:             1,
-                      doubly_diminished: 2,
-                      perfect:           2,
-                      perfect:           3,
-                      minor:             4,
-                      major:             4,
-                      minor:             5,
-                      major:             5,
-                      perfect:           6,
-                      perfect:           7,
-                      minor:             8,
-                      major:             8,
-                      perfect:           9]
+  @qualities ~w(perfect
+                minor
+                major
+                diminished
+                augmented
+                doubly_diminished
+                doubly_augmented)a
 
-  @invalid_pitch_name "Invalid pitch name -- must be in [:a, :b, :c, :d, :e, :f, :g]"
+  @intervals_invalid [minor:   1,
+                      major:   1,
+                      perfect: 2,
+                      perfect: 3,
+                      minor:   4,
+                      major:   4,
+                      minor:   5,
+                      major:   5,
+                      perfect: 6,
+                      perfect: 7,
+                      minor:   8,
+                      major:   8,
+                      perfect: 9]
+
+  @pitch_natural_names ~w(a b c d e f g)a
+  @pitch_accidentals ~w(double_flat flat natural sharp double_sharp)a
+
+  @invalid_quality "Invalid quality -- must be in #{inspect @qualities}"
+  @invalid_size "Size cannot be zero"
+  @invalid_interval "Invalid interval"
+  @invalid_pitch_name "Invalid pitch name -- must be in #{inspect @pitch_natural_names}"
+  @invalid_pitch_accidental "Invalid accidental -- must be in #{inspect @pitch_accidentals}"
 
   describe ".from_pitches/2" do
     test "accepts valid arguments" do
       expected = %Interval{quality: :diminished, size: 3}
 
-      actual = Interval.from_pitches(%{natural_name: :a, accidental: :sharp}, :c)
+      actual = Interval.from_pitches(%{natural_name: :a, accidental: :sharp},
+                                     %{natural_name: :c})
       assert actual == expected
 
       actual = Interval.from_pitches(:a_sharp, %{natural_name: :c})
+      assert actual == expected
+
+      actual = Interval.from_pitches(%{natural_name: :a, accidental: :sharp}, :c)
+      assert actual == expected
+
+      actual = Interval.from_pitches(:a_sharp, :c)
       assert actual == expected
     end
 
     test "rejects an invalid name in the first argument" do
       expected = {:error, @invalid_pitch_name}
 
-      actual = Interval.from_pitches(%{natural_name: :h, accidental: :flat}, :a)
-      assert actual == expected
+      for accidental1 <- @pitch_accidentals,
+          natural_name2 <- @pitch_natural_names,
+          accidental2 <- @pitch_accidentals do
+        actual = Interval.from_pitches(%{natural_name: :h,
+                                         accidental: accidental1},
+                                       %{natural_name: natural_name2,
+                                         accidental: accidental2})
+        assert actual == expected
 
-      actual = Interval.from_pitches(%{natural_name: :h}, :a)
-      assert actual == expected
+        actual = Interval.from_pitches(:"h_#{accidental1}",
+                                       %{natural_name: natural_name2,
+                                         accidental: accidental2})
+        assert actual == expected
 
-      actual = Interval.from_pitches(:h_flat, :a)
-      assert actual == expected
+        actual = Interval.from_pitches(%{natural_name: :h,
+                                         accidental: accidental1},
+                                       :"#{natural_name2}_#{accidental2}")
+        assert actual == expected
 
-      actual = Interval.from_pitches(:h, :a)
-      assert actual == expected
+        actual = Interval.from_pitches(:"h_#{accidental1}",
+                                       :"#{natural_name2}_#{accidental2}")
+        assert actual == expected
+      end
+
+      for accidental1 <- @pitch_accidentals,
+          natural_name2 <- @pitch_natural_names do
+        actual = Interval.from_pitches(%{natural_name: :h,
+                                         accidental: accidental1},
+                                       %{natural_name: natural_name2})
+        assert actual == expected
+
+        actual = Interval.from_pitches(:"h_#{accidental1}",
+                                       %{natural_name: natural_name2})
+        assert actual == expected
+
+        actual = Interval.from_pitches(%{natural_name: :h,
+                                         accidental: accidental1},
+                                       natural_name2)
+        assert actual == expected
+
+        actual = Interval.from_pitches(:"h_#{accidental1}", natural_name2)
+        assert actual == expected
+      end
+
+      for natural_name2 <- @pitch_natural_names do
+        actual = Interval.from_pitches(%{natural_name: :h},
+                                       %{natural_name: natural_name2})
+        assert actual == expected
+
+        actual = Interval.from_pitches(:h, %{natural_name: natural_name2})
+        assert actual == expected
+
+        actual = Interval.from_pitches(%{natural_name: :h}, natural_name2)
+        assert actual == expected
+
+        actual = Interval.from_pitches(:h, natural_name2)
+        assert actual == expected
+      end
     end
 
     test "rejects an invalid name in the second argument" do
       expected = {:error, @invalid_pitch_name}
 
-      actual = Interval.from_pitches(:a, %{natural_name: :h, accidental: :flat})
-      assert actual == expected
+      for natural_name1 <- @pitch_natural_names,
+          accidental1 <- @pitch_accidentals,
+          accidental2 <- @pitch_accidentals do
+        actual = Interval.from_pitches(%{natural_name: natural_name1,
+                                         accidental: accidental1},
+                                       %{natural_name: :h,
+                                         accidental: accidental2})
+        assert actual == expected
 
-      actual = Interval.from_pitches(:a, %{natural_name: :h})
-      assert actual == expected
+        actual = Interval.from_pitches(%{natural_name: natural_name1,
+                                         accidental: accidental1},
+                                       :"h_#{accidental2}")
+        assert actual == expected
 
-      actual = Interval.from_pitches(:a, :h_flat)
-      assert actual == expected
+        actual = Interval.from_pitches(:"#{natural_name1}_#{accidental1}",
+                                       %{natural_name: :h,
+                                         accidental: accidental2})
+        assert actual == expected
 
-      actual = Interval.from_pitches(:a, :h)
-      assert actual == expected
+        actual = Interval.from_pitches(:"#{natural_name1}_#{accidental1}",
+                                       :"h_#{accidental2}")
+        assert actual == expected
+      end
+
+      for natural_name1 <- @pitch_natural_names,
+          accidental2 <- @pitch_accidentals do
+        actual = Interval.from_pitches(%{natural_name: natural_name1},
+                                       %{natural_name: :h,
+                                         accidental: accidental2})
+        assert actual == expected
+
+        actual = Interval.from_pitches(%{natural_name: natural_name1},
+                                :"h_#{accidental2}")
+        assert actual == expected
+
+        actual = Interval.from_pitches(natural_name1,
+                                       %{natural_name: :h,
+                                         accidental: accidental2})
+        assert actual == expected
+
+        actual = Interval.from_pitches(natural_name1, :"h_#{accidental2}")
+        assert actual == expected
+      end
+
+      for natural_name1 <- @pitch_natural_names do
+        actual = Interval.from_pitches(%{natural_name: natural_name1},
+                                       %{natural_name: :h})
+        assert actual == expected
+
+        actual = Interval.from_pitches(%{natural_name: natural_name1}, :h)
+        assert actual == expected
+
+        actual = Interval.from_pitches(natural_name1, %{natural_name: :h})
+        assert actual == expected
+
+        actual = Interval.from_pitches(natural_name1, :h)
+        assert actual == expected
+      end
     end
 
-    test "recognizes an invalid interval" do
-      expected = {:error, "Invalid interval"}
+    test "rejects an invalid accidental in the first argument" do
+      expected = {:error, @invalid_pitch_accidental}
+
+      for natural_name1 <- @pitch_natural_names,
+          natural_name2 <- @pitch_natural_names,
+          accidental2 <- @pitch_accidentals do
+        actual = Interval.from_pitches(%{natural_name: natural_name1,
+                                         accidental: :out_of_tune},
+                                       %{natural_name: natural_name2,
+                                         accidental: accidental2})
+        assert actual == expected
+
+        actual = Interval.from_pitches(%{natural_name: natural_name1,
+                                         accidental: :out_of_tune},
+                                       :"#{natural_name2}_#{accidental2}")
+        assert actual == expected
+      end
+
+      for natural_name1 <- @pitch_natural_names,
+          natural_name2 <- @pitch_natural_names do
+        actual = Interval.from_pitches(%{natural_name: natural_name1,
+                                         accidental: :out_of_tune},
+                                       %{natural_name: natural_name2})
+        assert actual == expected
+
+        actual = Interval.from_pitches(%{natural_name: natural_name1,
+                                         accidental: :out_of_tune},
+                                       natural_name2)
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid accidental in the second argument" do
+      expected = {:error, @invalid_pitch_accidental}
+
+      for natural_name1 <- @pitch_natural_names,
+          accidental1 <- @pitch_accidentals,
+          natural_name2 <- @pitch_natural_names do
+        actual = Interval.from_pitches(%{natural_name: natural_name1,
+                                         accidental: accidental1},
+                                       %{natural_name: natural_name2,
+                                         accidental: :out_of_tune})
+        assert actual == expected
+      end
+
+      for natural_name1 <- @pitch_natural_names, natural_name2 <- @pitch_natural_names do
+        actual = Interval.from_pitches(%{natural_name: natural_name1},
+                                       %{natural_name: natural_name2,
+                                         accidental: :out_of_tune})
+        assert actual == expected
+
+        actual = Interval.from_pitches(natural_name1,
+                                       %{natural_name: natural_name2,
+                                         accidental: :out_of_tune})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid interval" do
+      expected = {:error, @invalid_interval}
       actual = Interval.from_pitches(:a_flat, :e_double_sharp)
       assert actual == expected
     end
@@ -136,7 +307,29 @@ defmodule Harmonex.IntervalTest do
       assert Interval.new(%{quality: :minor, size: -300}) == %Interval{quality: :minor, size: -300}
     end
 
-    test "rejects invalid arguments" do
+    test "rejects an invalid quality" do
+      expected = {:error, @invalid_quality}
+
+      actual = Interval.new(%{quality: :foo, size: 1})
+      assert actual == expected
+
+      actual = Interval.new(%{size: 1})
+      assert actual == expected
+    end
+
+    test "rejects an invalid size" do
+      expected = {:error, @invalid_size}
+
+      for quality <- @qualities do
+        actual = Interval.new(%{quality: quality, size: 0})
+        assert actual == expected
+
+        actual = Interval.new(%{quality: quality})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid interval" do
       for {quality, size} <- @intervals_invalid do
         {:error, reason} = Interval.new(%{quality: quality, size: size})
         assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
@@ -145,11 +338,15 @@ defmodule Harmonex.IntervalTest do
         assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
       end
 
-      {:error, reason} = Interval.new(%{quality: :perfect, size: 300})
-      assert reason == "Quality of 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
+      expected = {:error,
+                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.new(%{quality: :perfect, size: 300})
+      assert actual == expected
 
-      {:error, reason} = Interval.new(%{quality: :perfect, size: -300})
-      assert reason == "Quality of negative 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
+      expected = {:error,
+                  "Quality of negative 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.new(%{quality: :perfect, size: -300})
+      assert actual == expected
     end
   end
 
@@ -167,7 +364,20 @@ defmodule Harmonex.IntervalTest do
       assert Interval.new(:minor, -300) == %Interval{quality: :minor, size: -300}
     end
 
-    test "rejects invalid arguments" do
+    test "rejects an invalid quality" do
+      actual = Interval.new(:foo, 1)
+      assert actual == {:error, @invalid_quality}
+    end
+
+    test "rejects an invalid size" do
+      expected = {:error, @invalid_size}
+      for quality <- @qualities do
+        actual = Interval.new(quality, 0)
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid interval" do
       for {quality, size} <- @intervals_invalid do
         {:error, reason} = Interval.new(quality, size)
         assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
@@ -176,11 +386,83 @@ defmodule Harmonex.IntervalTest do
         assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
       end
 
-      {:error, reason} = Interval.new(:perfect, 300)
-      assert reason == "Quality of 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
+      expected = {:error,
+                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.new(:perfect, 300)
+      assert actual == expected
 
-      {:error, reason} = Interval.new(:perfect, -300)
-      assert reason == "Quality of negative 300th must be in [:doubly_diminished, :diminished, :minor, :major, :augmented, :doubly_augmented]"
+      expected = {:error,
+                  "Quality of negative 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.new(:perfect, -300)
+      assert actual == expected
+    end
+  end
+
+  describe ".reduce/1" do
+    test "accepts valid arguments" do
+      for {quality, size} when size < 8 <- @intervals do
+        assert Interval.reduce(%{quality: quality, size:  size}) == %{quality: quality, size:  size}
+        assert Interval.reduce(%{quality: quality, size: -size}) == %{quality: quality, size: -size}
+      end
+
+      for {quality, size} when 8 <= size <- @intervals do
+        reduced_size = case {quality, size} do
+          {:doubly_diminished, 8} -> size
+          {:diminished,        8} -> size
+          {:doubly_diminished, 9} -> size
+          _                       -> size - 7
+        end
+        assert Interval.reduce(%{quality: quality, size:  size}) == %{quality: quality, size:  reduced_size}
+        assert Interval.reduce(%{quality: quality, size: -size}) == %{quality: quality, size: -reduced_size}
+      end
+
+      assert Interval.reduce(%{quality: :minor, size:  300}) == %{quality: :minor, size:  6}
+      assert Interval.reduce(%{quality: :minor, size: -300}) == %{quality: :minor, size: -6}
+    end
+
+    test "rejects an invalid quality" do
+      actual = Interval.reduce(%{quality: :foo, size: 1})
+      assert actual == {:error, @invalid_quality}
+    end
+
+    test "rejects an invalid size" do
+      expected = {:error, @invalid_size}
+      for quality <- @qualities do
+        actual = Interval.reduce(%{quality: quality, size: 0})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid interval" do
+      for {quality, size} <- @intervals_invalid do
+        if {quality, size} in [{:doubly_diminished, 1},
+                               {:diminished,        1},
+                               {:doubly_diminished, 2}] do
+          expected = {:error, @invalid_interval}
+
+          actual = Interval.reduce(%{quality: quality, size: size})
+          assert actual == expected
+
+          actual = Interval.reduce(%{quality: quality, size: -size})
+          assert actual == expected
+        else
+          {:error, reason} = Interval.reduce(%{quality: quality, size: size})
+          assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
+
+          {:error, reason} = Interval.reduce(%{quality: quality, size: -size})
+          assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
+        end
+      end
+
+      expected = {:error,
+                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.reduce(%{quality: :perfect, size: 300})
+      assert actual == expected
+
+      expected = {:error,
+                  "Quality of negative 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.reduce(%{quality: :perfect, size: -300})
+      assert actual == expected
     end
   end
 end

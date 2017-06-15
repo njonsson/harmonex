@@ -21,12 +21,19 @@ defmodule Harmonex.Interval do
   The qualified variation of an interval’s size.
   """
   @type quality :: :perfect           |
-                   :doubly_diminished |
+                   :minor             |
+                   :major             |
                    :diminished        |
                    :augmented         |
-                   :doubly_augmented  |
-                   :minor             |
-                   :major
+                   :doubly_diminished |
+                   :doubly_augmented
+  @qualities ~w(perfect
+                minor
+                major
+                diminished
+                augmented
+                doubly_diminished
+                doubly_augmented)a
   @quality_by_semitones_and_size %{{-2, 1} => :doubly_diminished,
                                    {-1, 1} => :diminished,
                                    { 0, 1} => :perfect,
@@ -66,6 +73,10 @@ defmodule Harmonex.Interval do
                                    {11, 7} => :major,
                                    { 0, 7} => :augmented,
                                    { 1, 7} => :doubly_augmented}
+  unless MapSet.new(@qualities) ==
+         MapSet.new(Map.values(@quality_by_semitones_and_size)) do
+    raise "Qualities mismatch between @qualities and @quality_by_semitones_and_size"
+  end
   @intervals @quality_by_semitones_and_size |> Enum.reduce([],
                                                            fn({{semitones, size}, quality},
                                                               acc) ->
@@ -76,16 +87,9 @@ defmodule Harmonex.Interval do
                                                            end
                                                  [{quality, size + 7} | new_acc]
                                                end)
-  @qualities @quality_by_semitones_and_size |> Map.values |> Enum.uniq
 
   quality_score = fn(quality) ->
-    ~w(doubly_diminished
-       diminished
-       minor
-       perfect
-       major
-       augmented
-       doubly_augmented)a |> Enum.find_index(&(&1 == quality))
+    @qualities |> Enum.find_index(&(&1 == quality))
   end
   @quality_list_by_size @intervals |> Enum.reduce(%{},
                                                   fn({quality, size}, acc) ->
@@ -93,12 +97,24 @@ defmodule Harmonex.Interval do
                                             |> Map.update!(size,
                                                            &([quality | &1] |> Enum.sort_by(fn(q) -> quality_score.(q) end)))
                                       end)
-  @intervals_invalid @quality_list_by_size |> Enum.reduce([], fn({size, qualities}, acc) ->
+  unless MapSet.new(@qualities) ==
+         MapSet.new(List.flatten(Map.values(@quality_list_by_size))) do
+    raise "Qualities mismatch between @qualities and @quality_list_by_size"
+  end
+  @intervals_invalid (@quality_list_by_size |> Enum.reduce([], fn({size, qualities}, acc) ->
                         for_quality = for q <- (@qualities -- qualities) do
                           {q, size}
                         end
                         acc ++ for_quality
-                      end)
+                               # These are invalid, but also less than zero
+                               # semitones in size.
+                      end)) -- [doubly_diminished: 1,
+                                diminished:        1,
+                                doubly_diminished: 2]
+
+  @invalid_quality "Invalid quality -- must be in #{inspect @qualities}"
+  @invalid_size "Size cannot be zero"
+  @invalid_interval "Invalid interval"
 
   @doc """
   Computes the interval between the specified `low_pitch` and `high_pitch`.
@@ -121,7 +137,7 @@ defmodule Harmonex.Interval do
       %Harmonex.Interval{quality: :doubly_augmented, size: 5}
 
       iex> Harmonex.Interval.from_pitches :a_flat, :e_double_sharp
-      {:error, "Invalid interval"}
+      {:error, #{inspect @invalid_interval}}
   """
   @spec from_pitches(Pitch.t, Pitch.t) :: interval | Harmonex.error
   def from_pitches(low_pitch, high_pitch) do
@@ -131,7 +147,7 @@ defmodule Harmonex.Interval do
       interval_size = Integer.mod(high - low, 7) + 1
       with interval_quality when is_atom(interval_quality) <- Map.get(@quality_by_semitones_and_size,
                                                                       {semitones, interval_size},
-                                                                      {:error, "Invalid interval"}) do
+                                                                      {:error, @invalid_interval}) do
         new %{quality: interval_quality, size: interval_size}
       end
     end
@@ -149,13 +165,13 @@ defmodule Harmonex.Interval do
       %Harmonex.Interval{quality: :minor, size: -10}
 
       iex> Harmonex.Interval.new %{quality: :perfect, size: 0}
-      {:error, "Size cannot be zero"}
+      {:error, #{inspect @invalid_size}}
 
       iex> Harmonex.Interval.new %{quality: :minor, size: 1}
       {:error, "Quality of unison must be in [:perfect, :augmented, :doubly_augmented]"}
 
       iex> Harmonex.Interval.new %{quality: :major, size: 8}
-      {:error, "Quality of octave must be in [:doubly_diminished, :diminished, :perfect, :augmented, :doubly_augmented]"}
+      {:error, "Quality of octave must be in [:perfect, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
   """
   @spec new(t) :: interval | Harmonex.error
   @spec new(quality, integer) :: interval | Harmonex.error
@@ -180,13 +196,13 @@ defmodule Harmonex.Interval do
         %Harmonex.Interval{quality: :minor, size: -10}
 
         iex> Harmonex.Interval.new :perfect, 0
-        {:error, "Size cannot be zero"}
+        {:error, #{inspect @invalid_size}}
 
         iex> Harmonex.Interval.new :minor, 1
         {:error, "Quality of unison must be in [:perfect, :augmented, :doubly_augmented]"}
 
         iex> Harmonex.Interval.new :major, 8
-        {:error, "Quality of octave must be in [:doubly_diminished, :diminished, :perfect, :augmented, :doubly_augmented]"}
+        {:error, "Quality of octave must be in [:perfect, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
     """
     def new(unquote(quality)=quality, unquote(size)=size) do
       new %{quality: quality, size: size}
@@ -208,11 +224,11 @@ defmodule Harmonex.Interval do
 
   for quality <- @qualities do
     def new(%{quality: unquote(quality), size: 0}=_definition) do
-      {:error, "Size cannot be zero"}
+      {:error, @invalid_size}
     end
 
     def new(%{quality: unquote(quality), size: size}=definition) do
-      reduced = definition |> reduce
+      reduced = definition |> reduce_impl
       if reduced.size == size do
         error_quality reduced.size, size
       else
@@ -233,29 +249,99 @@ defmodule Harmonex.Interval do
       end
     end
 
+    def new(%{quality: unquote(quality)}=_definition) do
+      {:error, @invalid_size}
+    end
+
     def new(unquote(quality)=quality, size) do
       %{quality: quality, size: size} |> new
     end
   end
 
+  def new(_definition), do: {:error, @invalid_quality}
+
+  def new(_quality, _size), do: {:error, @invalid_quality}
+
   @doc """
-  Computes the octave-equivalent interval of the specified `interval` that is
-  closest to zero in size. The result is like a simple interval except that an
-  octave is represented as a unison.
+  Computes the simple-interval equivalent of the specified `interval`.
 
   ## Examples
+
+      iex> Harmonex.Interval.reduce %{quality: :major, size: -10}
+      %{quality: :major, size: -3}
 
       iex> Harmonex.Interval.reduce Harmonex.Interval.new(:major, 3)
       %Harmonex.Interval{quality: :major, size: 3}
 
-      iex> Harmonex.Interval.reduce %{size: -10}
-      %{size: -3}
+      iex> Harmonex.Interval.reduce %{quality: :augmented, size: -8}
+      %{quality: :augmented, size: -1}
   """
-  @spec reduce(%{size: integer}) :: t
-  def reduce(%{size: size}=definition) do
+  @spec reduce(t) :: t | Harmonex.error
+  def reduce(%{size: 0}=_interval), do: {:error, @invalid_size}
+
+  def reduce(%{quality: :doubly_diminished, size: -8}=interval), do: interval
+
+  def reduce(%{quality: :diminished, size: -8}=interval), do: interval
+
+  def reduce(%{quality: :doubly_diminished, size: 8}=interval), do: interval
+
+  def reduce(%{quality: :diminished, size: 8}=interval) do
+    interval
+  end
+
+  def reduce(%{quality: :doubly_diminished, size: -9}=interval) do
+    interval
+  end
+
+  def reduce(%{quality: :doubly_diminished, size: 9}=interval) do
+    interval
+  end
+
+  for {quality, size} <- (@intervals -- [doubly_diminished: 8,
+                                         diminished:        8,
+                                         doubly_diminished: 9]) do
+    def reduce(%{quality: unquote(quality), size: unquote(size)}=interval) do
+      interval |> reduce_impl
+    end
+
+    def reduce(%{quality: unquote(quality), size: unquote(-size)}=interval) do
+      interval |> reduce_impl
+    end
+  end
+
+  for {quality, size} <- @intervals_invalid do
+    def reduce(%{quality: unquote(quality),
+                 size: unquote(size)=size}=_interval) do
+      error_quality size, size
+    end
+
+    def reduce(%{quality: unquote(quality),
+                 size: unquote(-size)=size}=_interval) do
+      error_quality size, size
+    end
+  end
+
+  for quality <- @qualities do
+    def reduce(%{quality: unquote(quality),
+                 size: size}=interval) when is_integer(size) do
+      reduced_interval = interval |> reduce_impl
+      case reduced_interval |> reduce do
+        {:error, _} -> error_quality reduced_interval.size, size
+        interval    -> interval
+      end
+    end
+
+    def reduce(%{quality: unquote(quality), size: _}=_interval) do
+      {:error, @invalid_size}
+    end
+  end
+
+  def reduce(%{quality: _}=_interval), do: {:error, @invalid_quality}
+
+  defp reduce_impl(%{size: size}=interval) do
     sign = if size < 0, do: -1, else: 1
     reduced_size = sign * (Integer.mod(abs(size) - 1, 7) + 1)
-    %{definition | size: reduced_size}
+    %{interval | size: reduced_size}
   end
 
   @spec error_quality(integer, pos_integer) :: Harmonex.error

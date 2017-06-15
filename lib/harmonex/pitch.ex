@@ -51,9 +51,6 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.accidental %{natural_name: :a}
       :natural
 
-      iex> Harmonex.Pitch.accidental %{accidental: :flat}
-      :flat
-
       iex> Harmonex.Pitch.accidental :a_flat
       :flat
 
@@ -62,20 +59,32 @@ defmodule Harmonex.Pitch do
   """
   @spec accidental(%{accidental: accidental} | atom) :: accidental | Harmonex.error
 
-  for accidental <- @accidentals do
-    def accidental(%{accidental: unquote(accidental)=accidental}=_pitch) do
+  for natural_name <- @natural_names, accidental <- @accidentals do
+    def accidental(%{natural_name: unquote(natural_name),
+                     accidental: unquote(accidental)=accidental}=_pitch) do
       accidental
     end
-  end
 
-  def accidental(%{accidental: _}=_pitch), do: {:error, @invalid_accidental}
-
-  for natural_name <- @natural_names, accidental <- @accidentals do
     name = :"#{natural_name}_#{accidental}"
     def accidental(unquote(name)=_pitch), do: unquote(accidental)
   end
 
+  for accidental <- @accidentals do
+    def accidental(%{natural_name: _, accidental: unquote(accidental)}=_pitch) do
+      {:error, @invalid_name}
+    end
+
+    def accidental(%{accidental: unquote(accidental)}=_pitch) do
+      {:error, @invalid_name}
+    end
+  end
+
   for natural_name <- @natural_names do
+    def accidental(%{natural_name: unquote(natural_name),
+                     accidental: _}=_pitch) do
+      {:error, @invalid_accidental}
+    end
+
     def accidental(%{natural_name: unquote(natural_name)}=_pitch), do: :natural
 
     def accidental(unquote(natural_name)=_pitch), do: :natural
@@ -270,19 +279,27 @@ defmodule Harmonex.Pitch do
   """
   @spec natural_name(t) :: natural_name | Harmonex.error
 
+  for natural_name <- @natural_names, accidental <- @accidentals do
+    def natural_name(%{natural_name: unquote(natural_name)=natural_name,
+                       accidental: unquote(accidental)}=_pitch) do
+      natural_name
+    end
+
+    name = :"#{natural_name}_#{accidental}"
+    def natural_name(unquote(name)=_pitch), do: unquote(natural_name)
+  end
+
   for natural_name <- @natural_names do
+    def natural_name(%{natural_name: unquote(natural_name),
+                       accidental: _}=_pitch) do
+      {:error, @invalid_accidental}
+    end
+
     def natural_name(%{natural_name: unquote(natural_name)=natural_name}=_pitch) do
       natural_name
     end
 
     def natural_name(unquote(natural_name)=pitch), do: pitch
-  end
-
-  def natural_name(%{natural_name: _}=_pitch), do: {:error, @invalid_name}
-
-  for natural_name <- @natural_names, accidental <- @accidentals do
-    name = :"#{natural_name}_#{accidental}"
-    def natural_name(unquote(name)=_pitch), do: unquote(natural_name)
   end
 
   def natural_name(_pitch), do: {:error, @invalid_name}
