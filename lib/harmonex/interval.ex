@@ -233,18 +233,18 @@ defmodule Harmonex.Interval do
     end
 
     def new(%{quality: unquote(quality), size: size}=definition) do
-      reduced = definition |> reduce_impl
-      if reduced.size == size do
-        error_quality reduced.size, size
+      %{size: reduced_size} = reduced = definition |> reduce_impl
+      if reduced_size == size do
+        error_quality reduced_size, size
       else
         case reduced |> new do
           {:error, _} ->
-            expanded = reduced |> expand_by(7)
-            if expanded.size == size do
-              error_quality reduced.size, size
+            %{size: expanded_size} = reduced |> expand_by(7)
+            if expanded_size == size do
+              error_quality reduced_size, size
             else
               case reduced |> expand_by(7) |> new do
-                {:error, _} -> error_quality(reduced.size, size)
+                {:error, _} -> error_quality(reduced_size, size)
                 _           -> __MODULE__ |> struct(definition)
               end
             end
