@@ -1,5 +1,14 @@
 # Version history for the _Harmonex_ project
 
+## <a name="v0.5.0"></a>v0.5.0, Sat 6/17/2017
+
+* Implement _Interval.semitones/1_ and _.simplify/1_
+* Rename _Pitch.alteration/1_ to _.accidental/1_
+* Rename *Pitch.bare_name/1* to *.natural_name/1*
+* Rename *Pitch.full_name/1* to _.name_
+* Enhance documentation by introducing more granular types better documenting
+  existing ones
+
 ## <a name="v0.4.0"></a>v0.4.0, Mon 5/22/2017
 
 * Extract _Interval_ and reimplement *Pitch.interval_diatonic/2* as
