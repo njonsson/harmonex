@@ -91,7 +91,7 @@ defmodule Harmonex.Pitch do
       :c_natural
   """
   @spec adjust_by_semitones(t_map, integer) :: pitch | Harmonex.error
-  def adjust_by_semitones(%{natural_name: _}=pitch, adjustment) do
+  def adjust_by_semitones(pitch, adjustment) when is_map(pitch) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> adjust_by_semitones(adjustment) |> new
     end
@@ -157,7 +157,7 @@ defmodule Harmonex.Pitch do
       [:b_flat, :c_double_flat]
   """
   @spec enharmonics(t_map) :: [pitch] | Harmonex.error
-  def enharmonics(%{natural_name: _}=pitch) do
+  def enharmonics(pitch) when is_map(pitch) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
       pitch_name |> enharmonics |> Enum.map(&(new(&1)))
     end
