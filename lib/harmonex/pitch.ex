@@ -13,19 +13,19 @@ defmodule Harmonex.Pitch do
                                  accidental: accidental}
 
   @typedoc """
-  A literal expression describing a pitch.
+  An expression describing a pitch.
   """
   @type t :: t_map | t_atom
 
   @typedoc """
-  A map literal expression describing a pitch.
+  A map expression describing a pitch.
   """
   @type t_map :: %{natural_name: natural_name, accidental: accidental} |
                  %{natural_name: natural_name}
 
   @typedoc """
-  An atom literal expression describing a pitch. Can be a `t:natural_name/0`, or
-  a `t:natural_name/0` joined by underscore with an `t:accidental/0` (e.g.,
+  An atom expression describing a pitch. Can be a `t:natural_name/0`, or a
+  `t:natural_name/0` joined by underscore with an `t:accidental/0` (e.g.,
   `:a_flat`).
   """
   @type t_atom :: natural_name | atom

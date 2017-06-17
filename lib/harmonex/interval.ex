@@ -13,7 +13,7 @@ defmodule Harmonex.Interval do
   @type interval :: %Harmonex.Interval{quality: quality, size: integer}
 
   @typedoc """
-  A literal expression describing an interval.
+  An expression describing an interval.
   """
   @type t :: %{quality: quality, size: integer}
 
