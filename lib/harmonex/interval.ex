@@ -304,6 +304,49 @@ defmodule Harmonex.Interval do
     end
   end
 
+  @doc """
+  Computes the distance in half steps across the specified `interval`.
+
+  ## Examples
+
+      iex> Harmonex.Interval.semitones %{quality: :major, size: 3}
+      4
+
+      iex> Harmonex.Interval.semitones %{quality: :doubly_diminished, size: -9}
+      -11
+
+      iex> Harmonex.Interval.semitones %{quality: :doubly_diminished, size: 16}
+      23
+
+      iex> Harmonex.Interval.semitones %{quality: :augmented, size: -300}
+      -514
+  """
+  @spec semitones(t) :: integer | Harmonex.error
+  def semitones(interval) do
+    with interval_struct when is_map(interval_struct) <- interval |> new,
+         %{quality: interval_quality, size: interval_size} <- interval_struct do
+      interval_sign = sign(interval_size)
+      case @semitones_by_quality_and_size |> Map.get({interval_quality,
+                                                      abs(interval_size)}) do
+        semitones when is_integer(semitones) ->
+          interval_sign * semitones
+        _ ->
+          simple_size = interval_size |> abs_mod(7)
+          case @semitones_by_quality_and_size |> Map.get({interval_quality,
+                                                          abs(simple_size)}) do
+            semitones when is_integer(semitones) ->
+              (interval_sign * semitones) + (12 * div(interval_size, 7))
+            _ ->
+              simple_size = simple_size + (interval_sign * 7)
+              semitones = @semitones_by_quality_and_size |> Map.fetch!({interval_quality,
+                                                                        abs(simple_size)})
+              (interval_sign * semitones) +
+                (12 * (div(interval_size, 7) - interval_sign))
+          end
+      end
+    end
+  end
+
   @spec abs_mod(integer, integer) :: integer
   defp abs_mod(dividend, divisor) do
     {dividend_sign, divisor_sign} = {sign(dividend), sign(divisor)}

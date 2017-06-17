@@ -470,4 +470,76 @@ defmodule Harmonex.IntervalTest do
       assert actual == expected
     end
   end
+
+  describe ".semitones/1" do
+    test "accepts valid arguments" do
+      for {quality, size} <- @intervals do
+        actual = Interval.semitones(%{quality: quality, size: size})
+        assert actual |> is_integer
+        assert 0 <= actual
+
+        actual = Interval.semitones(%{quality: quality, size: -size})
+        assert actual |> is_integer
+        assert actual <= 0
+      end
+
+      actual = Interval.semitones(%{quality: :minor, size: 300})
+      assert actual == 512
+
+      actual = Interval.semitones(%{quality: :minor, size: -300})
+      assert actual == -512
+    end
+
+    test "rejects an invalid quality" do
+      actual = Interval.semitones(%{quality: :foo, size: 1})
+      assert actual == {:error, @invalid_quality}
+
+      actual = Interval.semitones(%{size: 1})
+      assert actual == {:error, @invalid_quality}
+    end
+
+    test "rejects an invalid size" do
+      expected = {:error, @invalid_size}
+
+      for quality <- @qualities do
+        actual = Interval.semitones(%{quality: quality, size: 0})
+        assert actual == expected
+
+        actual = Interval.semitones(%{quality: quality})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid interval" do
+      for {quality, size} <- @intervals_invalid do
+        if {quality, size} in [{:doubly_diminished, 1},
+                               {:diminished,        1},
+                               {:doubly_diminished, 2}] do
+          expected = {:error, @invalid_interval}
+
+          actual = Interval.semitones(%{quality: quality, size: size})
+          assert actual == expected
+
+          actual = Interval.semitones(%{quality: quality, size: -size})
+          assert actual == expected
+        else
+          {:error, reason} = Interval.semitones(%{quality: quality, size: size})
+          assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
+
+          {:error, reason} = Interval.semitones(%{quality: quality, size: -size})
+          assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
+        end
+      end
+
+      expected = {:error,
+                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.semitones(%{quality: :perfect, size: 300})
+      assert actual == expected
+
+      expected = {:error,
+                  "Quality of negative 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.semitones(%{quality: :perfect, size: -300})
+      assert actual == expected
+    end
+  end
 end

@@ -22,7 +22,10 @@ questions such as:
   _Answer:_
   `Harmonex.Pitch.enharmonics(:f_double_sharp) == [:g_natural, :a_double_flat]`
 * **How far apart, in semitones, are the pitches A♭ and D♯?**  
-  _Answer:_ `Harmonex.Pitch.semitones(:a_flat, :d_sharp) == 7`
+  _Answer:_ `Harmonex.Pitch.semitones(:a_flat, :d_sharp) == 7`  
+  **How far across in semitones is a doubly augmented second?**  
+  _Answer:_
+  `Harmonex.Interval.semitones(%{quality: :doubly_augmented, size: 2}) == 4`
 * **What is the interval between the pitches F♮ and B𝄫?**  
   _Answer:_
   `Harmonex.Pitch.interval(:f, :b_double_flat) == %Harmonex.Interval{quality:
