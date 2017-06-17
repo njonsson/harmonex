@@ -70,10 +70,7 @@ defmodule Harmonex.IntervalTest do
                       minor:   5,
                       major:   5,
                       perfect: 6,
-                      perfect: 7,
-                      minor:   8,
-                      major:   8,
-                      perfect: 9]
+                      perfect: 7]
 
   @pitch_natural_names ~w(a b c d e f g)a
   @pitch_accidentals ~w(double_flat flat natural sharp double_sharp)a
@@ -371,6 +368,7 @@ defmodule Harmonex.IntervalTest do
 
     test "rejects an invalid size" do
       expected = {:error, @invalid_size}
+
       for quality <- @qualities do
         actual = Interval.new(quality, 0)
         assert actual == expected
@@ -401,8 +399,8 @@ defmodule Harmonex.IntervalTest do
   describe ".reduce/1" do
     test "accepts valid arguments" do
       for {quality, size} when size < 8 <- @intervals do
-        assert Interval.reduce(%{quality: quality, size:  size}) == %{quality: quality, size:  size}
-        assert Interval.reduce(%{quality: quality, size: -size}) == %{quality: quality, size: -size}
+        assert Interval.reduce(%{quality: quality, size:  size}) == %Interval{quality: quality, size:  size}
+        assert Interval.reduce(%{quality: quality, size: -size}) == %Interval{quality: quality, size: -size}
       end
 
       for {quality, size} when 8 <= size <- @intervals do
@@ -412,23 +410,30 @@ defmodule Harmonex.IntervalTest do
           {:doubly_diminished, 9} -> size
           _                       -> size - 7
         end
-        assert Interval.reduce(%{quality: quality, size:  size}) == %{quality: quality, size:  reduced_size}
-        assert Interval.reduce(%{quality: quality, size: -size}) == %{quality: quality, size: -reduced_size}
+        assert Interval.reduce(%{quality: quality, size:  size}) == %Interval{quality: quality, size:  reduced_size}
+        assert Interval.reduce(%{quality: quality, size: -size}) == %Interval{quality: quality, size: -reduced_size}
       end
 
-      assert Interval.reduce(%{quality: :minor, size:  300}) == %{quality: :minor, size:  6}
-      assert Interval.reduce(%{quality: :minor, size: -300}) == %{quality: :minor, size: -6}
+      assert Interval.reduce(%{quality: :minor, size:  300}) == %Interval{quality: :minor, size:  6}
+      assert Interval.reduce(%{quality: :minor, size: -300}) == %Interval{quality: :minor, size: -6}
     end
 
     test "rejects an invalid quality" do
       actual = Interval.reduce(%{quality: :foo, size: 1})
       assert actual == {:error, @invalid_quality}
+
+      actual = Interval.reduce(%{size: 1})
+      assert actual == {:error, @invalid_quality}
     end
 
     test "rejects an invalid size" do
       expected = {:error, @invalid_size}
+
       for quality <- @qualities do
         actual = Interval.reduce(%{quality: quality, size: 0})
+        assert actual == expected
+
+        actual = Interval.reduce(%{quality: quality})
         assert actual == expected
       end
     end

@@ -34,12 +34,9 @@ defmodule Harmonex.Interval do
                 augmented
                 doubly_diminished
                 doubly_augmented)a
-  @quality_by_semitones_and_size %{{-2, 1} => :doubly_diminished,
-                                   {-1, 1} => :diminished,
-                                   { 0, 1} => :perfect,
+  @quality_by_semitones_and_size %{{ 0, 1} => :perfect,
                                    { 1, 1} => :augmented,
                                    { 2, 1} => :doubly_augmented,
-                                   {-1, 2} => :doubly_diminished,
                                    { 0, 2} => :diminished,
                                    { 1, 2} => :minor,
                                    { 2, 2} => :major,
@@ -71,25 +68,47 @@ defmodule Harmonex.Interval do
                                    { 9, 7} => :diminished,
                                    {10, 7} => :minor,
                                    {11, 7} => :major,
-                                   { 0, 7} => :augmented,
-                                   { 1, 7} => :doubly_augmented}
+                                   {12, 7} => :augmented,
+                                   {13, 7} => :doubly_augmented,
+                                   {10, 8} => :doubly_diminished,
+                                   {11, 8} => :diminished,
+                                   {12, 8} => :perfect,
+                                   {13, 8} => :augmented,
+                                   {14, 8} => :doubly_augmented,
+                                   {11, 9} => :doubly_diminished,
+                                   {12, 9} => :diminished,
+                                   {13, 9} => :minor,
+                                   {14, 9} => :major,
+                                   {15, 9} => :augmented,
+                                   {16, 9} => :doubly_augmented}
   unless MapSet.new(@qualities) ==
          MapSet.new(Map.values(@quality_by_semitones_and_size)) do
     raise "Qualities mismatch between @qualities and @quality_by_semitones_and_size"
   end
 
   @intervals @quality_by_semitones_and_size |> Enum.reduce([],
-                                                           fn({{semitones, size}, quality},
+                                                           fn({{_, size},
+                                                               quality},
                                                               acc) ->
-                                                 new_acc = if semitones < 0 do
-                                                             acc
-                                                           else
-                                                             [{quality, size} | acc]
-                                                           end
-                                                 [{quality, size + 7} | new_acc]
+                                                 [{quality, size} | acc]
                                                end)
   unless MapSet.new(@qualities) == MapSet.new(Keyword.keys(@intervals)) do
     raise "Qualities mismatch between @qualities and @intervals"
+  end
+
+  @semitones_by_quality_and_size @quality_by_semitones_and_size |> Enum.reduce(%{},
+                                                                               fn({{semitones,
+                                                                                    size},
+                                                                                   quality},
+                                                                                  acc) ->
+                                                                     acc |> Map.put({quality,
+                                                                                     size},
+                                                                                    semitones)
+                                                                   end)
+  unless MapSet.new(@qualities) ==
+         MapSet.new(Enum.map(Map.keys(@semitones_by_quality_and_size),
+                             fn {quality, _} -> quality end)) do
+    raise "Qualities mismatch between @qualities and @semitones_by_quality_and_size"
   end
 
   quality_score = fn(quality) ->
@@ -106,16 +125,14 @@ defmodule Harmonex.Interval do
     raise "Qualities mismatch between @qualities and @quality_list_by_size"
   end
 
-  @intervals_invalid (@quality_list_by_size |> Enum.reduce([], fn({size, qualities}, acc) ->
-                        for_quality = for q <- (@qualities -- qualities) do
-                          {q, size}
-                        end
-                        acc ++ for_quality
-                               # These are invalid, but also less than zero
-                               # semitones in size.
-                      end)) -- [doubly_diminished: 1,
-                                diminished:        1,
-                                doubly_diminished: 2]
+  @intervals_invalid @quality_list_by_size |> Enum.reduce([],
+                                                          fn({size, qualities},
+                                                             acc) ->
+                       for_quality = for q <- (@qualities -- qualities) do
+                         {q, size}
+                       end
+                       acc ++ for_quality
+                     end)
 
   @invalid_quality "Invalid quality -- must be in #{inspect @qualities}"
   @invalid_size "Size cannot be zero"
@@ -233,23 +250,17 @@ defmodule Harmonex.Interval do
     end
 
     def new(%{quality: unquote(quality), size: size}=definition) do
-      %{size: reduced_size} = reduced = definition |> reduce_impl
-      if reduced_size == size do
-        error_quality reduced_size, size
+      sign = if size < 0, do: -1, else: 1
+      next_magnitude = abs(size) - 7
+      if next_magnitude <= 0 do
+        error_quality abs(size), size
       else
-        case reduced |> new do
+        next_size =  sign * next_magnitude
+        case new(%{definition | size: next_size}) do
+          interval when is_map(interval) ->
+            __MODULE__ |> struct(Map.delete(definition, :__struct__))
           {:error, _} ->
-            %{size: expanded_size} = reduced |> expand_by(7)
-            if expanded_size == size do
-              error_quality reduced_size, size
-            else
-              case reduced |> expand_by(7) |> new do
-                {:error, _} -> error_quality(reduced_size, size)
-                _           -> __MODULE__ |> struct(definition)
-              end
-            end
-          _ ->
-            __MODULE__ |> struct(definition)
+            error_quality abs(next_size), size
         end
       end
     end
@@ -259,7 +270,7 @@ defmodule Harmonex.Interval do
     end
 
     def new(unquote(quality)=quality, size) do
-      %{quality: quality, size: size} |> new
+      new %{quality: quality, size: size}
     end
   end
 
@@ -268,102 +279,54 @@ defmodule Harmonex.Interval do
   def new(_quality, _size), do: {:error, @invalid_quality}
 
   @doc """
-  Computes the simple-interval equivalent of the specified `interval`.
+  Computes the simple-interval equivalent of the specified `interval`. Simple
+  intervals span no more than 11 semitones (see `semitones/1`).
 
   ## Examples
 
       iex> Harmonex.Interval.reduce %{quality: :major, size: -10}
-      %{quality: :major, size: -3}
+      %Harmonex.Interval{quality: :major, size: -3}
 
-      iex> Harmonex.Interval.reduce Harmonex.Interval.new(:major, 3)
+      iex> Harmonex.Interval.reduce %{quality: :major, size: 3}
       %Harmonex.Interval{quality: :major, size: 3}
 
       iex> Harmonex.Interval.reduce %{quality: :augmented, size: -8}
-      %{quality: :augmented, size: -1}
+      %Harmonex.Interval{quality: :augmented, size: -1}
+
+      iex> Harmonex.Interval.reduce %{quality: :diminished, size: 8}
+      %Harmonex.Interval{quality: :diminished, size: 8}
   """
-  @spec reduce(t) :: t | Harmonex.error
-  def reduce(%{size: 0}=_interval), do: {:error, @invalid_size}
-
-  def reduce(%{quality: :doubly_diminished, size: -8}=interval), do: interval
-
-  def reduce(%{quality: :diminished, size: -8}=interval), do: interval
-
-  def reduce(%{quality: :doubly_diminished, size: 8}=interval), do: interval
-
-  def reduce(%{quality: :diminished, size: 8}=interval) do
-    interval
-  end
-
-  def reduce(%{quality: :doubly_diminished, size: -9}=interval) do
-    interval
-  end
-
-  def reduce(%{quality: :doubly_diminished, size: 9}=interval) do
-    interval
-  end
-
-  for {quality, size} <- (@intervals -- [doubly_diminished: 8,
-                                         diminished:        8,
-                                         doubly_diminished: 9]) do
-    def reduce(%{quality: unquote(quality), size: unquote(size)}=interval) do
-      interval |> reduce_impl
-    end
-
-    def reduce(%{quality: unquote(quality), size: unquote(-size)}=interval) do
-      interval |> reduce_impl
+  @spec reduce(t) :: interval | Harmonex.error
+  def reduce(interval) do
+    with interval_struct when is_map(interval_struct) <- new(interval),
+         reduced <- reduce_impl(interval_struct) do
+      if reduced |> new |> is_map, do: reduced, else: interval_struct
     end
   end
 
-  for {quality, size} <- @intervals_invalid do
-    def reduce(%{quality: unquote(quality),
-                 size: unquote(size)=size}=_interval) do
-      error_quality size, size
-    end
-
-    def reduce(%{quality: unquote(quality),
-                 size: unquote(-size)=size}=_interval) do
-      error_quality size, size
-    end
+  @spec abs_mod(integer, integer) :: integer
+  defp abs_mod(dividend, divisor) do
+    {dividend_sign, divisor_sign} = {sign(dividend), sign(divisor)}
+    dividend_sign * divisor_sign * Integer.mod(abs(dividend), abs(divisor))
   end
 
-  for quality <- @qualities do
-    def reduce(%{quality: unquote(quality),
-                 size: size}=interval) when is_integer(size) do
-      reduced_interval = interval |> reduce_impl
-      case reduced_interval |> reduce do
-        {:error, _} -> error_quality reduced_interval.size, size
-        interval    -> interval
-      end
-    end
-
-    def reduce(%{quality: unquote(quality), size: _}=_interval) do
-      {:error, @invalid_size}
-    end
-  end
-
-  def reduce(%{quality: _}=_interval), do: {:error, @invalid_quality}
-
-  defp reduce_impl(%{size: size}=interval) do
-    sign = if size < 0, do: -1, else: 1
-    reduced_size = sign * (Integer.mod(abs(size) - 1, 7) + 1)
-    %{interval | size: reduced_size}
-  end
-
-  @spec error_quality(integer, pos_integer) :: Harmonex.error
+  @spec error_quality(pos_integer, integer) :: Harmonex.error
   for {size_in_lookup, qualities} <- @quality_list_by_size do
     defp error_quality(unquote(size_in_lookup), size) do
-      {:error, "Quality of #{Ordinal.to_string size} must be in #{inspect unquote(qualities)}"}
-    end
-
-    defp error_quality(unquote(-size_in_lookup), size) do
-      {:error, "Quality of #{Ordinal.to_string size} must be in #{inspect unquote(qualities)}"}
+      {:error,
+       "Quality of #{Ordinal.to_string size} must be in #{inspect unquote(qualities)}"}
     end
   end
 
-  @spec expand_by(%{size: integer}, integer) :: t
-  defp expand_by(%{size: size}=interval, amount) do
-    sign = if size < 0, do: -1, else: 1
-    expanded_size = sign * (abs(size) + amount)
-    %{interval | size: expanded_size}
+  defp error_quality(size_in_lookup, size) do
+    error_quality size_in_lookup - 7, size
   end
+
+  @spec reduce_impl(t) :: t
+  defp reduce_impl(%{size: size}=interval) do
+    %{interval | size: abs_mod(size, 7)}
+  end
+
+  @spec sign(integer) :: -1 | 1
+  defp sign(integer), do: if integer < 0, do: -1, else: 1
 end
