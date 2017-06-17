@@ -396,81 +396,6 @@ defmodule Harmonex.IntervalTest do
     end
   end
 
-  describe ".reduce/1" do
-    test "accepts valid arguments" do
-      for {quality, size} when size < 8 <- @intervals do
-        assert Interval.reduce(%{quality: quality, size:  size}) == %Interval{quality: quality, size:  size}
-        assert Interval.reduce(%{quality: quality, size: -size}) == %Interval{quality: quality, size: -size}
-      end
-
-      for {quality, size} when 8 <= size <- @intervals do
-        reduced_size = case {quality, size} do
-          {:doubly_diminished, 8} -> size
-          {:diminished,        8} -> size
-          {:doubly_diminished, 9} -> size
-          _                       -> size - 7
-        end
-        assert Interval.reduce(%{quality: quality, size:  size}) == %Interval{quality: quality, size:  reduced_size}
-        assert Interval.reduce(%{quality: quality, size: -size}) == %Interval{quality: quality, size: -reduced_size}
-      end
-
-      assert Interval.reduce(%{quality: :minor, size:  300}) == %Interval{quality: :minor, size:  6}
-      assert Interval.reduce(%{quality: :minor, size: -300}) == %Interval{quality: :minor, size: -6}
-    end
-
-    test "rejects an invalid quality" do
-      actual = Interval.reduce(%{quality: :foo, size: 1})
-      assert actual == {:error, @invalid_quality}
-
-      actual = Interval.reduce(%{size: 1})
-      assert actual == {:error, @invalid_quality}
-    end
-
-    test "rejects an invalid size" do
-      expected = {:error, @invalid_size}
-
-      for quality <- @qualities do
-        actual = Interval.reduce(%{quality: quality, size: 0})
-        assert actual == expected
-
-        actual = Interval.reduce(%{quality: quality})
-        assert actual == expected
-      end
-    end
-
-    test "rejects an invalid interval" do
-      for {quality, size} <- @intervals_invalid do
-        if {quality, size} in [{:doubly_diminished, 1},
-                               {:diminished,        1},
-                               {:doubly_diminished, 2}] do
-          expected = {:error, @invalid_interval}
-
-          actual = Interval.reduce(%{quality: quality, size: size})
-          assert actual == expected
-
-          actual = Interval.reduce(%{quality: quality, size: -size})
-          assert actual == expected
-        else
-          {:error, reason} = Interval.reduce(%{quality: quality, size: size})
-          assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
-
-          {:error, reason} = Interval.reduce(%{quality: quality, size: -size})
-          assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
-        end
-      end
-
-      expected = {:error,
-                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
-      actual = Interval.reduce(%{quality: :perfect, size: 300})
-      assert actual == expected
-
-      expected = {:error,
-                  "Quality of negative 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
-      actual = Interval.reduce(%{quality: :perfect, size: -300})
-      assert actual == expected
-    end
-  end
-
   describe ".semitones/1" do
     test "accepts valid arguments" do
       for {quality, size} <- @intervals do
@@ -539,6 +464,81 @@ defmodule Harmonex.IntervalTest do
       expected = {:error,
                   "Quality of negative 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
       actual = Interval.semitones(%{quality: :perfect, size: -300})
+      assert actual == expected
+    end
+  end
+
+  describe ".simplify/1" do
+    test "accepts valid arguments" do
+      for {quality, size} when size < 8 <- @intervals do
+        assert Interval.simplify(%{quality: quality, size:  size}) == %Interval{quality: quality, size:  size}
+        assert Interval.simplify(%{quality: quality, size: -size}) == %Interval{quality: quality, size: -size}
+      end
+
+      for {quality, size} when 8 <= size <- @intervals do
+        simplified_size = case {quality, size} do
+          {:doubly_diminished, 8} -> size
+          {:diminished,        8} -> size
+          {:doubly_diminished, 9} -> size
+          _                       -> size - 7
+        end
+        assert Interval.simplify(%{quality: quality, size:  size}) == %Interval{quality: quality, size:  simplified_size}
+        assert Interval.simplify(%{quality: quality, size: -size}) == %Interval{quality: quality, size: -simplified_size}
+      end
+
+      assert Interval.simplify(%{quality: :minor, size:  300}) == %Interval{quality: :minor, size:  6}
+      assert Interval.simplify(%{quality: :minor, size: -300}) == %Interval{quality: :minor, size: -6}
+    end
+
+    test "rejects an invalid quality" do
+      actual = Interval.simplify(%{quality: :foo, size: 1})
+      assert actual == {:error, @invalid_quality}
+
+      actual = Interval.simplify(%{size: 1})
+      assert actual == {:error, @invalid_quality}
+    end
+
+    test "rejects an invalid size" do
+      expected = {:error, @invalid_size}
+
+      for quality <- @qualities do
+        actual = Interval.simplify(%{quality: quality, size: 0})
+        assert actual == expected
+
+        actual = Interval.simplify(%{quality: quality})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid interval" do
+      for {quality, size} <- @intervals_invalid do
+        if {quality, size} in [{:doubly_diminished, 1},
+                               {:diminished,        1},
+                               {:doubly_diminished, 2}] do
+          expected = {:error, @invalid_interval}
+
+          actual = Interval.simplify(%{quality: quality, size: size})
+          assert actual == expected
+
+          actual = Interval.simplify(%{quality: quality, size: -size})
+          assert actual == expected
+        else
+          {:error, reason} = Interval.simplify(%{quality: quality, size: size})
+          assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
+
+          {:error, reason} = Interval.simplify(%{quality: quality, size: -size})
+          assert reason |> String.match?(~r/^Quality of negative \w+ must be in \[.+\]$/)
+        end
+      end
+
+      expected = {:error,
+                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.simplify(%{quality: :perfect, size: 300})
+      assert actual == expected
+
+      expected = {:error,
+                  "Quality of negative 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.simplify(%{quality: :perfect, size: -300})
       assert actual == expected
     end
   end

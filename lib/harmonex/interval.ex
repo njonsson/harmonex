@@ -279,32 +279,6 @@ defmodule Harmonex.Interval do
   def new(_quality, _size), do: {:error, @invalid_quality}
 
   @doc """
-  Computes the simple-interval equivalent of the specified `interval`. Simple
-  intervals span no more than 11 semitones (see `semitones/1`).
-
-  ## Examples
-
-      iex> Harmonex.Interval.reduce %{quality: :major, size: -10}
-      %Harmonex.Interval{quality: :major, size: -3}
-
-      iex> Harmonex.Interval.reduce %{quality: :major, size: 3}
-      %Harmonex.Interval{quality: :major, size: 3}
-
-      iex> Harmonex.Interval.reduce %{quality: :augmented, size: -8}
-      %Harmonex.Interval{quality: :augmented, size: -1}
-
-      iex> Harmonex.Interval.reduce %{quality: :diminished, size: 8}
-      %Harmonex.Interval{quality: :diminished, size: 8}
-  """
-  @spec reduce(t) :: interval | Harmonex.error
-  def reduce(interval) do
-    with interval_struct when is_map(interval_struct) <- new(interval),
-         reduced <- reduce_impl(interval_struct) do
-      if reduced |> new |> is_map, do: reduced, else: interval_struct
-    end
-  end
-
-  @doc """
   Computes the distance in half steps across the specified `interval`.
 
   ## Examples
@@ -347,6 +321,32 @@ defmodule Harmonex.Interval do
     end
   end
 
+  @doc """
+  Computes the simple interval that corresponds to the specified `interval`.
+  Simple intervals are no more than 11 semitones across (see `semitones/1`).
+
+  ## Examples
+
+      iex> Harmonex.Interval.simplify %{quality: :major, size: -10}
+      %Harmonex.Interval{quality: :major, size: -3}
+
+      iex> Harmonex.Interval.simplify %{quality: :major, size: 3}
+      %Harmonex.Interval{quality: :major, size: 3}
+
+      iex> Harmonex.Interval.simplify %{quality: :augmented, size: -8}
+      %Harmonex.Interval{quality: :augmented, size: -1}
+
+      iex> Harmonex.Interval.simplify %{quality: :diminished, size: 8}
+      %Harmonex.Interval{quality: :diminished, size: 8}
+  """
+  @spec simplify(t) :: interval | Harmonex.error
+  def simplify(interval) do
+    with interval_struct when is_map(interval_struct) <- new(interval),
+         simplified <- simplify_impl(interval_struct) do
+      if simplified |> new |> is_map, do: simplified, else: interval_struct
+    end
+  end
+
   @spec abs_mod(integer, integer) :: integer
   defp abs_mod(dividend, divisor) do
     {dividend_sign, divisor_sign} = {sign(dividend), sign(divisor)}
@@ -365,11 +365,11 @@ defmodule Harmonex.Interval do
     error_quality size_in_lookup - 7, size
   end
 
-  @spec reduce_impl(t) :: t
-  defp reduce_impl(%{size: size}=interval) do
-    %{interval | size: abs_mod(size, 7)}
-  end
-
   @spec sign(integer) :: -1 | 1
   defp sign(integer), do: if integer < 0, do: -1, else: 1
+
+  @spec simplify_impl(t) :: t
+  defp simplify_impl(%{size: size}=interval) do
+    %{interval | size: abs_mod(size, 7)}
+  end
 end
