@@ -69,38 +69,11 @@ defmodule Harmonex.Pitch do
       :natural
   """
   @spec accidental(t) :: accidental | Harmonex.error
-  for natural_name <- @natural_names, accidental <- @accidentals do
-    def accidental(%{natural_name: unquote(natural_name),
-                     accidental: unquote(accidental)=accidental}=_pitch) do
+  def accidental(pitch) do
+    with %{accidental: accidental} <- pitch |> new do
       accidental
     end
-
-    name = :"#{natural_name}_#{accidental}"
-    def accidental(unquote(name)=_pitch), do: unquote(accidental)
   end
-
-  for accidental <- @accidentals do
-    def accidental(%{natural_name: _, accidental: unquote(accidental)}=_pitch) do
-      {:error, @invalid_name}
-    end
-
-    def accidental(%{accidental: unquote(accidental)}=_pitch) do
-      {:error, @invalid_name}
-    end
-  end
-
-  for natural_name <- @natural_names do
-    def accidental(%{natural_name: unquote(natural_name),
-                     accidental: _}=_pitch) do
-      {:error, @invalid_accidental}
-    end
-
-    def accidental(%{natural_name: unquote(natural_name)}=_pitch), do: :natural
-
-    def accidental(unquote(natural_name)=_pitch), do: :natural
-  end
-
-  def accidental(_pitch), do: {:error, @invalid_name}
 
   @doc """
   Computes a pitch that is the sum of the specified `pitch` and the specified
@@ -245,31 +218,12 @@ defmodule Harmonex.Pitch do
       :a_natural
   """
   @spec name(t) :: t_atom | Harmonex.error
-  for natural_name <- @natural_names, accidental <- @accidentals do
-    name = :"#{natural_name}_#{accidental}"
-    def name(%{natural_name: unquote(natural_name),
-               accidental: unquote(accidental)}=_pitch) do
-      unquote name
-    end
-
-    def name(unquote(name)=pitch), do: pitch
-  end
-
-  for natural_name <- @natural_names do
-    def name(%{natural_name: unquote(natural_name), accidental: _}=_pitch) do
-      {:error, @invalid_accidental}
-    end
-
-    def name(%{natural_name: unquote(natural_name)}=_pitch) do
-      unquote :"#{natural_name}_natural"
-    end
-
-    def name(unquote(natural_name)=_pitch) do
-      unquote(:"#{natural_name}_natural")
+  def name(pitch) do
+    with %{natural_name: pitch_natural_name,
+           accidental: pitch_accidental} <- new(pitch) do
+      :"#{pitch_natural_name}_#{pitch_accidental}"
     end
   end
-
-  def name(_pitch), do: {:error, @invalid_name}
 
   @doc """
   Computes the natural name of the specified `pitch`.
@@ -289,30 +243,11 @@ defmodule Harmonex.Pitch do
       :a
   """
   @spec natural_name(t) :: natural_name | Harmonex.error
-  for natural_name <- @natural_names, accidental <- @accidentals do
-    def natural_name(%{natural_name: unquote(natural_name)=natural_name,
-                       accidental: unquote(accidental)}=_pitch) do
-      natural_name
+  def natural_name(pitch) do
+    with %{natural_name: pitch_natural_name} <- new(pitch) do
+      pitch_natural_name
     end
-
-    name = :"#{natural_name}_#{accidental}"
-    def natural_name(unquote(name)=_pitch), do: unquote(natural_name)
   end
-
-  for natural_name <- @natural_names do
-    def natural_name(%{natural_name: unquote(natural_name),
-                       accidental: _}=_pitch) do
-      {:error, @invalid_accidental}
-    end
-
-    def natural_name(%{natural_name: unquote(natural_name)=natural_name}=_pitch) do
-      natural_name
-    end
-
-    def natural_name(unquote(natural_name)=pitch), do: pitch
-  end
-
-  def natural_name(_pitch), do: {:error, @invalid_name}
 
   @doc """
   Constructs a new pitch with the specified `name`.
