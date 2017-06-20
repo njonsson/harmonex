@@ -5,7 +5,7 @@
 * Implement _Interval.semitones/1_ and _.simplify/1_
 * Rename _Pitch.alteration/1_ to _.accidental/1_
 * Rename *Pitch.bare_name/1* to *.natural_name/1*
-* Rename *Pitch.full_name/1* to _.name_
+* Rename *Pitch.full_name/1* to _.name/1_
 * Enhance documentation by introducing more granular types and better documenting
   existing ones
 
