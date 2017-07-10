@@ -37,31 +37,31 @@ questions such as:
 ### Functionality still under development
 
 * **What is the key signature of G harmonic minor?**  
-  _Answer: two flats, one sharp — B♭, E♭, and F♯._
+  _Answer:_ two flats, one sharp — B♭, E♭, and F♯.
 * **What keys and modes have the signature of three sharps?**  
-  _Answer: A major/Ionian, B Dorian, C♯ Phrygian, D Lydian, E Mixolydian, F♯
-  minor/Aeolian, and G♯ Locrian._
+  _Answer:_ A major/Ionian, B Dorian, C♯ Phrygian, D Lydian, E Mixolydian, F♯
+  minor/Aeolian, and G♯ Locrian.
 * **Does A♮ occur diatonically in the key of E♭ minor?**  
-  _Answer: no._
+  _Answer:_ no.
 * **What are the pitches of the simplest voicing of a D♭ minor triad in
   second inversion?**  
-  _Answer: A♭, D♭, and F♭._
+  _Answer:_ A♭, D♭, and F♭.
 * **What is the name and inversion of the chord described by the pitches C♮, F♯,
   and A♮?**  
-  _Answer: F♯ diminished triad in second inversion._  
+  _Answer:_ F♯ diminished triad in second inversion.  
   **of the chord described by A♭, C, and F♯?**  
-  _Answer: A♭ Italian sixth._  
+  _Answer:_ A♭ Italian sixth.  
   **of the chord described by B, D♯, E, and G♯?**  
-  _Answer: E major seventh in second inversion._
+  _Answer:_ E major seventh in second inversion.
 * **What are the jazz chart symbols of the chords just mentioned?**  
-  _Answer: F♯<sup>o</sup>/C, A♭<sup>7(no 5)</sup>, and E<sup>△7</sup>/B._
+  _Answer:_ F♯<sup>o</sup>/C, A♭<sup>7(no 5)</sup>, and E<sup>△7</sup>/B.
 * **What is the functional-harmonic symbol of the chord described by the pitches
   C♮, E♮, F♯, and A♮ in C major?**  
-  _Answer: vii<sup>ø3</sup><span style="position: relative; left: -1ex;"><sub>2</sub>/V.</span>_  
+  _Answer:_ vii<sup>ø3</sup><span style="position: relative; left: -1ex;"><sub>2</sub>/V.</span>  
   **of the chord described by A♭, C, and F♯ in C minor?**  
-  _Answer: It<sup>6</sup>._  
+  _Answer:_ It<sup>6</sup>.  
   **of the chord described by B, D♯, E, and G♯ in E major?**  
-  _Answer: I<sup>4</sup><span style="position: relative; left: -1ex;"><sub>3</sub>._
+  _Answer:_ I<sup>4</sup><span style="position: relative; left: -1ex;"><sub>3</sub>.
 
 Harmonex also will have functions for exploring compositional questions such as:
 
