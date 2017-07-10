@@ -61,7 +61,7 @@ questions such as:
   **of the chord described by A♭, C, and F♯ in C minor?**  
   _Answer: It<sup>6</sup>._  
   **of the chord described by B, D♯, E, and G♯ in E major?**  
-  _Answer: I<sup>7</sup>._
+  _Answer: I<sup>4</sup><span style="position: relative; left: -1ex;"><sub>3</sub>._
 
 Harmonex also will have functions for exploring compositional questions such as:
 
