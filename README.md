@@ -98,14 +98,17 @@ Its functions can answer elementary textbook music theory questions such as:
 Harmonex also will have functions for exploring compositional questions such as:
 
 * **What is the set of triads and seventh chords, including enharmonic
-  equivalents of same, that the keys of B Mixolydian and D Lydian have in
-  common?**
+  equivalents, that the keys of B Mixolydian and D Lydian have in common?**
 * **What is the set of seventh chords, including enharmonic equivalents, that are
   within one degree of difference (by shifting one note by a half or whole step)
-  from an F major seventh chord?** **within two degrees?** **three?**
+  from an F major seventh chord?**  
+  **within two degrees?**  
+  **three?**  
   **four?**
 * **What are sets of three-chord changes for modulating from the key of D minor
-  to F♯ major?** **sets of four-chord changes?** **sets of five-chord changes?**
+  to F♯ major?**  
+  **four-chord changes?**  
+  **five-chord changes?**
 
 ## Installation
 
