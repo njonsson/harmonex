@@ -18,11 +18,14 @@ questions such as:
 
 * **Are C♯ and D♭ enharmonically equivalent pitches?**  
   _Answer:_ `Harmonex.Pitch.enharmonic?(:c_sharp, :d_flat) == true`
+* **What about B♯₄ and C₅?**  
+  _Answer:_ `Harmonex.Pitch.enharmonic?(Harmonex.Pitch.new(:b_sharp, 4),
+  Harmonex.Pitch.new(:c, 5)) == true`
 * **What are the enharmonic equivalents of F𝄪?**  
   _Answer:_
   `Harmonex.Pitch.enharmonics(:f_double_sharp) == [:g_natural, :a_double_flat]`
 * **How far apart, in semitones, are the pitches A♭ and D♯?**  
-  _Answer:_ `Harmonex.Pitch.semitones(:a_flat, :d_sharp) == 7`  
+  _Answer:_ `Harmonex.Pitch.semitones(:a_flat, :d_sharp) == 5`  
   **How far across in semitones is a doubly augmented second?**  
   _Answer:_
   `Harmonex.Interval.semitones(%{quality: :doubly_augmented, size: 2}) == 4`

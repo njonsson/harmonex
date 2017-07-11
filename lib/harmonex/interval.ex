@@ -10,12 +10,12 @@ defmodule Harmonex.Interval do
   @typedoc """
   A `Harmonex.Interval` struct.
   """
-  @type interval :: %Harmonex.Interval{quality: quality, size: integer}
+  @type interval :: %Harmonex.Interval{quality: quality, size: pos_integer}
 
   @typedoc """
   An expression describing an interval.
   """
-  @type t :: %{quality: quality, size: integer}
+  @type t :: %{quality: quality, size: pos_integer}
 
   @typedoc """
   The qualified variation of an interval’s size.
@@ -135,43 +135,49 @@ defmodule Harmonex.Interval do
                      end)
 
   @invalid_quality "Invalid quality -- must be in #{inspect @qualities}"
-  @invalid_size "Size cannot be zero"
+  @invalid_size "Size must be a positive integer"
   @invalid_interval "Invalid interval"
 
   @doc """
-  Computes the interval between the specified `low_pitch` and `high_pitch`.
+  Computes the interval between the specified `pitch1` and `pitch2`.
 
   ## Examples
 
-      iex> Harmonex.Interval.from_pitches %{natural_name: :a, accidental: :sharp}, %{natural_name: :c}
+      iex> Harmonex.Interval.from_pitches %{natural_name: :a, accidental: :sharp, octave: 4}, %{natural_name: :c, octave: 6}
+      %Harmonex.Interval{quality: :diminished, size: 10}
+
+      iex> Harmonex.Interval.from_pitches :a_sharp, :c
       %Harmonex.Interval{quality: :diminished, size: 3}
 
-      iex> Harmonex.Interval.from_pitches :b_flat, :c
-      %Harmonex.Interval{quality: :major, size: 2}
-
       iex> Harmonex.Interval.from_pitches :d_double_sharp, :a_double_sharp
-      %Harmonex.Interval{quality: :perfect, size: 5}
+      %Harmonex.Interval{quality: :perfect, size: 4}
 
       iex> Harmonex.Interval.from_pitches :c_flat, :c_natural
       %Harmonex.Interval{quality: :augmented, size: 1}
 
       iex> Harmonex.Interval.from_pitches :a_flat, :e_sharp
-      %Harmonex.Interval{quality: :doubly_augmented, size: 5}
+      %Harmonex.Interval{quality: :doubly_diminished, size: 4}
 
       iex> Harmonex.Interval.from_pitches :a_flat, :e_double_sharp
       {:error, #{inspect @invalid_interval}}
   """
   @spec from_pitches(Pitch.t, Pitch.t) :: interval | Harmonex.error
-  def from_pitches(low_pitch, high_pitch) do
-    with semitones when is_integer(semitones) <- Pitch.semitones(low_pitch, high_pitch) do
-      low  = low_pitch  |> Pitch.natural_name |> to_charlist |> List.first
-      high = high_pitch |> Pitch.natural_name |> to_charlist |> List.first
-      interval_size = Integer.mod(high - low, 7) + 1
-      with interval_quality when is_atom(interval_quality) <- Map.get(@quality_by_semitones_and_size,
-                                                                      {semitones, interval_size},
-                                                                      {:error, @invalid_interval}) do
-        new %{quality: interval_quality, size: interval_size}
-      end
+  def from_pitches(pitch1, pitch2) do
+    with semitones
+           when is_integer(semitones)     <- Pitch.semitones(pitch1, pitch2),
+         semitones_simple                 <- semitones |> Integer.mod(12),
+         interval_size_simple             <- 1 +
+                                             Pitch.staff_positions(pitch1,
+                                                                   pitch2),
+         interval_quality
+           when is_atom(interval_quality) <- Map.get(@quality_by_semitones_and_size,
+                                                     {semitones_simple,
+                                                      interval_size_simple},
+                                                     {:error,
+                                                     @invalid_interval}),
+         interval_size                    <- interval_size_simple +
+                                             (7 * div(semitones, 12)) do
+      new %{quality: interval_quality, size: interval_size}
     end
   end
 
@@ -183,10 +189,13 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.new %{quality: :perfect, size: 1}
       %Harmonex.Interval{quality: :perfect, size: 1}
 
-      iex> Harmonex.Interval.new %{quality: :minor, size: -10}
-      %Harmonex.Interval{quality: :minor, size: -10}
+      iex> Harmonex.Interval.new %{quality: :augmented, size: 17}
+      %Harmonex.Interval{quality: :augmented, size: 17}
 
       iex> Harmonex.Interval.new %{quality: :perfect, size: 0}
+      {:error, #{inspect @invalid_size}}
+
+      iex> Harmonex.Interval.new %{quality: :minor, size: -3}
       {:error, #{inspect @invalid_size}}
 
       iex> Harmonex.Interval.new %{quality: :minor, size: 1}
@@ -202,10 +211,6 @@ defmodule Harmonex.Interval do
       __MODULE__ |> struct(Map.delete(definition, :__struct__))
     end
 
-    def new(%{quality: unquote(quality), size: unquote(-size)}=definition) do
-      __MODULE__ |> struct(Map.delete(definition, :__struct__))
-    end
-
     @doc """
     Constructs a new interval with the specified `quality` and `size`.
 
@@ -214,10 +219,13 @@ defmodule Harmonex.Interval do
         iex> Harmonex.Interval.new :perfect, 1
         %Harmonex.Interval{quality: :perfect, size: 1}
 
-        iex> Harmonex.Interval.new :minor, -10
-        %Harmonex.Interval{quality: :minor, size: -10}
+        iex> Harmonex.Interval.new :augmented, 17
+        %Harmonex.Interval{quality: :augmented, size: 17}
 
         iex> Harmonex.Interval.new :perfect, 0
+        {:error, #{inspect @invalid_size}}
+
+        iex> Harmonex.Interval.new :minor, -3
         {:error, #{inspect @invalid_size}}
 
         iex> Harmonex.Interval.new :minor, 1
@@ -227,10 +235,6 @@ defmodule Harmonex.Interval do
         {:error, "Quality of octave must be in [:perfect, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
     """
     def new(unquote(quality)=quality, unquote(size)=size) do
-      new %{quality: quality, size: size}
-    end
-
-    def new(unquote(quality)=quality, unquote(-size)=size) do
       new %{quality: quality, size: size}
     end
   end
@@ -249,18 +253,22 @@ defmodule Harmonex.Interval do
       {:error, @invalid_size}
     end
 
+    def new(%{quality: unquote(quality),
+              size: size}=_definition) when size < 0 do
+      {:error, @invalid_size}
+    end
+
     def new(%{quality: unquote(quality), size: size}=definition) do
-      sign = if size < 0, do: -1, else: 1
-      next_magnitude = abs(size) - 7
+      next_magnitude = size - 7
       if next_magnitude <= 0 do
-        error_quality abs(size), size
+        error_quality size, size
       else
-        next_size =  sign * next_magnitude
+        next_size =  next_magnitude
         case new(%{definition | size: next_size}) do
           interval when is_map(interval) ->
             __MODULE__ |> struct(Map.delete(definition, :__struct__))
           {:error, _} ->
-            error_quality abs(next_size), size
+            error_quality next_size, size
         end
       end
     end
@@ -286,36 +294,33 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.semitones %{quality: :major, size: 3}
       4
 
-      iex> Harmonex.Interval.semitones %{quality: :doubly_diminished, size: -9}
-      -11
+      iex> Harmonex.Interval.semitones %{quality: :doubly_diminished, size: 9}
+      11
 
       iex> Harmonex.Interval.semitones %{quality: :doubly_diminished, size: 16}
       23
 
-      iex> Harmonex.Interval.semitones %{quality: :augmented, size: -300}
-      -514
+      iex> Harmonex.Interval.semitones %{quality: :augmented, size: 300}
+      514
   """
   @spec semitones(t) :: integer | Harmonex.error
   def semitones(interval) do
-    with interval_struct when is_map(interval_struct) <- interval |> new,
-         %{quality: interval_quality, size: interval_size} <- interval_struct do
-      interval_sign = sign(interval_size)
+    with %{quality: interval_quality, size: interval_size} <- interval |> new do
       case @semitones_by_quality_and_size |> Map.get({interval_quality,
-                                                      abs(interval_size)}) do
+                                                      interval_size}) do
         semitones when is_integer(semitones) ->
-          interval_sign * semitones
+          semitones
         _ ->
-          simple_size = interval_size |> abs_mod(7)
+          simple_size = interval_size |> Integer.mod(7)
           case @semitones_by_quality_and_size |> Map.get({interval_quality,
-                                                          abs(simple_size)}) do
+                                                          simple_size}) do
             semitones when is_integer(semitones) ->
-              (interval_sign * semitones) + (12 * div(interval_size, 7))
+              semitones + (12 * div(interval_size, 7))
             _ ->
-              simple_size = simple_size + (interval_sign * 7)
+              simple_size = simple_size + 7
               semitones = @semitones_by_quality_and_size |> Map.fetch!({interval_quality,
-                                                                        abs(simple_size)})
-              (interval_sign * semitones) +
-                (12 * (div(interval_size, 7) - interval_sign))
+                                                                        simple_size})
+              semitones + (12 * (div(interval_size, 7) - 1))
           end
       end
     end
@@ -327,14 +332,14 @@ defmodule Harmonex.Interval do
 
   ## Examples
 
-      iex> Harmonex.Interval.simplify %{quality: :major, size: -10}
-      %Harmonex.Interval{quality: :major, size: -3}
+      iex> Harmonex.Interval.simplify %{quality: :major, size: 10}
+      %Harmonex.Interval{quality: :major, size: 3}
 
       iex> Harmonex.Interval.simplify %{quality: :major, size: 3}
       %Harmonex.Interval{quality: :major, size: 3}
 
-      iex> Harmonex.Interval.simplify %{quality: :augmented, size: -8}
-      %Harmonex.Interval{quality: :augmented, size: -1}
+      iex> Harmonex.Interval.simplify %{quality: :augmented, size: 8}
+      %Harmonex.Interval{quality: :augmented, size: 1}
 
       iex> Harmonex.Interval.simplify %{quality: :diminished, size: 8}
       %Harmonex.Interval{quality: :diminished, size: 8}
@@ -345,12 +350,6 @@ defmodule Harmonex.Interval do
          simplified <- simplify_impl(interval_struct) do
       if simplified |> new |> is_map, do: simplified, else: interval_struct
     end
-  end
-
-  @spec abs_mod(integer, integer) :: integer
-  defp abs_mod(dividend, divisor) do
-    {dividend_sign, divisor_sign} = {sign(dividend), sign(divisor)}
-    dividend_sign * divisor_sign * Integer.mod(abs(dividend), abs(divisor))
   end
 
   @spec error_quality(pos_integer, integer) :: Harmonex.error
@@ -365,11 +364,8 @@ defmodule Harmonex.Interval do
     error_quality size_in_lookup - 7, size
   end
 
-  @spec sign(integer) :: -1 | 1
-  defp sign(integer), do: if integer < 0, do: -1, else: 1
-
   @spec simplify_impl(t) :: t
   defp simplify_impl(%{size: size}=interval) do
-    %{interval | size: abs_mod(size, 7)}
+    %{interval | size: Integer.mod(size, 7)}
   end
 end

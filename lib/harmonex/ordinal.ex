@@ -1,9 +1,6 @@
 defmodule Harmonex.Ordinal do
   @moduledoc false
 
-  @string_negative "negative"
-  @regex_negative "^#{@string_negative} " |> Regex.compile!([:caseless])
-
   @strings ~w(unison
               second
               third
@@ -101,14 +98,14 @@ defmodule Harmonex.Ordinal do
       iex> Harmonex.Ordinal.to_integer "10th"
       10
 
-      iex> Harmonex.Ordinal.to_integer "Negative Twenty Fifth"
-      -25
+      iex> Harmonex.Ordinal.to_integer "Twenty Fifth"
+      25
 
       iex> Harmonex.Ordinal.to_integer "81st"
       81
 
-      iex> Harmonex.Ordinal.to_integer "nEGATIVE 82nD"
-      -82
+      iex> Harmonex.Ordinal.to_integer "82nD"
+      82
 
       iex> Harmonex.Ordinal.to_integer "83rd"
       83
@@ -124,18 +121,16 @@ defmodule Harmonex.Ordinal do
   """
   @spec to_integer(binary) :: integer | :error
   def to_integer(ordinal) do
-    sign = if String.match?(ordinal, @regex_negative), do: -1, else: 1
-    ordinal = ordinal |> String.replace(@regex_negative, "")
-    absolute = @regexes |> Enum.find_index(&(String.match?(ordinal, &1)))
-    if absolute do
-      (absolute + 1) * sign
+    known = @regexes |> Enum.find_index(&(String.match?(ordinal, &1)))
+    if known do
+      known + 1
     else
       with {integer, ""} <- ordinal |> String.replace(~r/(st|nd|rd|th)$/i, "")
                                     |> Integer.parse do
         if integer == 0 do
           :error
         else
-          integer * sign
+          integer
         end
       end
     end
@@ -155,14 +150,14 @@ defmodule Harmonex.Ordinal do
       iex> Harmonex.Ordinal.to_string 10
       "tenth"
 
-      iex> Harmonex.Ordinal.to_string -25
-      "negative twenty-fifth"
+      iex> Harmonex.Ordinal.to_string 25
+      "twenty-fifth"
 
       iex> Harmonex.Ordinal.to_string 81
       "81st"
 
-      iex> Harmonex.Ordinal.to_string -82
-      "negative 82nd"
+      iex> Harmonex.Ordinal.to_string 82
+      "82nd"
 
       iex> Harmonex.Ordinal.to_string 83
       "83rd"
@@ -175,13 +170,10 @@ defmodule Harmonex.Ordinal do
   """
   @spec to_string(integer) :: binary | :error
   def to_string(integer) do
-    sign = if integer < 0, do: "#{@string_negative} ", else: nil
-    integer = abs(integer)
-
     if integer == 0 do
       :error
     else
-      string = case @strings |> Enum.at(integer - 1) do
+      case @strings |> Enum.at(integer - 1) do
         nil ->
           integer |> Integer.to_string
                   |> String.replace(~r/1$/,    "1st")
@@ -191,7 +183,6 @@ defmodule Harmonex.Ordinal do
         string ->
           string
       end
-      [sign, string] |> Enum.join
     end
   end
 end
