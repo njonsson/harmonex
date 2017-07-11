@@ -94,6 +94,7 @@ defmodule Harmonex.OrdinalTest do
 
   describe ".to_string/1" do
     test "accepts valid arguments" do
+      assert Ordinal.to_string(-1) == :error
       assert Ordinal.to_string( 0) == :error
       assert Ordinal.to_string( 1) == "unison"
       assert Ordinal.to_string( 2) == "second"

@@ -119,7 +119,7 @@ defmodule Harmonex.Ordinal do
       iex> Harmonex.Ordinal.to_integer "0th"
       :error
   """
-  @spec to_integer(binary) :: integer | :error
+  @spec to_integer(binary) :: pos_integer | :error
   def to_integer(ordinal) do
     known = @regexes |> Enum.find_index(&(String.match?(ordinal, &1)))
     if known do
@@ -168,9 +168,9 @@ defmodule Harmonex.Ordinal do
       iex> Harmonex.Ordinal.to_string 0
       :error
   """
-  @spec to_string(integer) :: binary | :error
+  @spec to_string(pos_integer) :: binary | :error
   def to_string(integer) do
-    if integer == 0 do
+    if integer <= 0 do
       :error
     else
       case @strings |> Enum.at(integer - 1) do

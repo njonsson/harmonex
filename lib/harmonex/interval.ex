@@ -205,7 +205,7 @@ defmodule Harmonex.Interval do
       {:error, "Quality of octave must be in [:perfect, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
   """
   @spec new(t) :: interval | Harmonex.error
-  @spec new(quality, integer) :: interval | Harmonex.error
+  @spec new(quality, pos_integer) :: interval | Harmonex.error
   for {quality, size} <- @intervals do
     def new(%{quality: unquote(quality), size: unquote(size)}=definition) do
       __MODULE__ |> struct(Map.delete(definition, :__struct__))
@@ -303,7 +303,7 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.semitones %{quality: :augmented, size: 300}
       514
   """
-  @spec semitones(t) :: integer | Harmonex.error
+  @spec semitones(t) :: non_neg_integer | Harmonex.error
   def semitones(interval) do
     with %{quality: interval_quality, size: interval_size} <- interval |> new do
       case @semitones_by_quality_and_size |> Map.get({interval_quality,
@@ -352,7 +352,7 @@ defmodule Harmonex.Interval do
     end
   end
 
-  @spec error_quality(pos_integer, integer) :: Harmonex.error
+  @spec error_quality(pos_integer, pos_integer) :: Harmonex.error
   for {size_in_lookup, qualities} <- @quality_list_by_size do
     defp error_quality(unquote(size_in_lookup), size) do
       {:error,
