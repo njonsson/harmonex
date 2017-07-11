@@ -44,8 +44,8 @@ You can refer to an interval using either of the following styles of expressions
 Its functions can answer elementary textbook music theory questions such as:
 
 * **Are C♯ and D♭ enharmonically equivalent pitches?**  
-  _Answer:_ `Harmonex.Pitch.enharmonic?(:c_sharp, :d_flat) == true`
-* **What about B♯₄ and C₅?**  
+  _Answer:_ `Harmonex.Pitch.enharmonic?(:c_sharp, :d_flat) == true`  
+  **What about B♯₄ and C₅?**  
   _Answer:_ `Harmonex.Pitch.enharmonic?(Harmonex.Pitch.new(:b_sharp, 4),
   Harmonex.Pitch.new(:c, 5)) == true`
 * **What are the enharmonic equivalents of F𝄪?**  
