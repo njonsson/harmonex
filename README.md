@@ -39,8 +39,9 @@ You can refer to an interval using either of the following styles of expressions
   - `Harmonex.Interval.new(:perfect, 1)`, or
   - `Harmonex.Interval.new(%{quality: :perfect, size: 1})`
 
-What can you do with Harmonex? Its functions can answer textbook music theory
-questions such as:
+### What can you do with Harmonex?
+
+Its functions can answer elementary textbook music theory questions such as:
 
 * **Are C♯ and D♭ enharmonically equivalent pitches?**  
   _Answer:_ `Harmonex.Pitch.enharmonic?(:c_sharp, :d_flat) == true`
