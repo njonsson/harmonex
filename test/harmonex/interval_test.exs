@@ -306,11 +306,18 @@ defmodule Harmonex.IntervalTest do
   describe ".new/1" do
     test "accepts valid arguments" do
       for {quality, size} <- @intervals do
-        assert Interval.new(%{quality: quality, size: size})     == %Interval{quality: quality, size: size}
-        assert Interval.new(%{quality: quality, size: size + 7}) == %Interval{quality: quality, size: size + 7}
+        expected = %Interval{quality: quality, size: size}
+        actual = Interval.new(%{quality: quality, size: size})
+        assert actual == expected
+
+        expected = %Interval{quality: quality, size: size + 7}
+        actual = Interval.new(%{quality: quality, size: size + 7})
+        assert actual == expected
       end
 
-      assert Interval.new(%{quality: :minor, size:  300}) == %Interval{quality: :minor, size:  300}
+      expected = %Interval{quality: :minor, size:  300}
+      actual = Interval.new(%{quality: :minor, size:  300})
+      assert actual == expected
     end
 
     test "rejects an invalid quality" do
@@ -327,13 +334,16 @@ defmodule Harmonex.IntervalTest do
       expected = {:error, @invalid_size}
 
       for quality <- @qualities do
-        actual = Interval.new(%{quality: quality})
-        assert actual == expected
-
         actual = Interval.new(%{quality: quality, size: 0})
         assert actual == expected
 
         actual = Interval.new(%{quality: quality, size: -3})
+        assert actual == expected
+
+        actual = Interval.new(%{quality: quality, size: :not_a_size})
+        assert actual == expected
+
+        actual = Interval.new(%{quality: quality})
         assert actual == expected
       end
     end
@@ -354,16 +364,24 @@ defmodule Harmonex.IntervalTest do
   describe ".new/2" do
     test "accepts valid arguments" do
       for {quality, size} <- @intervals do
-        assert Interval.new(quality, size)     == %Interval{quality: quality, size: size}
-        assert Interval.new(quality, size + 7) == %Interval{quality: quality, size: size + 7}
+        expected = %Interval{quality: quality, size: size}
+        actual = Interval.new(quality, size)
+        assert actual == expected
+
+        expected = %Interval{quality: quality, size: size + 7}
+        actual = Interval.new(quality, size + 7)
+        assert actual == expected
       end
 
-      assert Interval.new(:minor,  300) == %Interval{quality: :minor, size:  300}
+      expected = %Interval{quality: :minor, size: 300}
+      actual = Interval.new(:minor, 300)
+      assert actual == expected
     end
 
     test "rejects an invalid quality" do
+      expected = {:error, @invalid_quality}
       actual = Interval.new(:foo, 1)
-      assert actual == {:error, @invalid_quality}
+      assert actual == expected
     end
 
     test "rejects an invalid size" do
@@ -398,17 +416,22 @@ defmodule Harmonex.IntervalTest do
         assert actual |> is_integer
         assert 0 <= actual
       end
+    end
 
+    test "correctly handles a minor 300th" do
+      expected = 512
       actual = Interval.semitones(%{quality: :minor, size: 300})
-      assert actual == 512
+      assert actual == expected
     end
 
     test "rejects an invalid quality" do
+      expected = {:error, @invalid_quality}
+
       actual = Interval.semitones(%{quality: :foo, size: 1})
-      assert actual == {:error, @invalid_quality}
+      assert actual == expected
 
       actual = Interval.semitones(%{size: 1})
-      assert actual == {:error, @invalid_quality}
+      assert actual == expected
     end
 
     test "rejects an invalid size" do
@@ -432,7 +455,6 @@ defmodule Harmonex.IntervalTest do
                                {:diminished,        1},
                                {:doubly_diminished, 2}] do
           expected = {:error, @invalid_interval}
-
           actual = Interval.semitones(%{quality: quality, size: size})
           assert actual == expected
         else
@@ -440,7 +462,9 @@ defmodule Harmonex.IntervalTest do
           assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
         end
       end
+    end
 
+    test "correctly handles a perfect 300th" do
       expected = {:error,
                   "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
       actual = Interval.semitones(%{quality: :perfect, size: 300})
@@ -451,7 +475,9 @@ defmodule Harmonex.IntervalTest do
   describe ".simplify/1" do
     test "accepts valid arguments" do
       for {quality, size} when size < 8 <- @intervals do
-        assert Interval.simplify(%{quality: quality, size:  size}) == %Interval{quality: quality, size:  size}
+        expected = %Interval{quality: quality, size: size}
+        actual = Interval.simplify(%{quality: quality, size: size})
+        assert actual == expected
       end
 
       for {quality, size} when 8 <= size <- @intervals do
@@ -461,18 +487,24 @@ defmodule Harmonex.IntervalTest do
           {:doubly_diminished, 9} -> size
           _                       -> size - 7
         end
-        assert Interval.simplify(%{quality: quality, size:  size}) == %Interval{quality: quality, size:  simplified_size}
+        expected = %Interval{quality: quality, size: simplified_size}
+        actual = Interval.simplify(%{quality: quality, size: size})
+        assert actual == expected
       end
 
-      assert Interval.simplify(%{quality: :minor, size:  300}) == %Interval{quality: :minor, size:  6}
+      expected = %Interval{quality: :minor, size:  6}
+      actual = Interval.simplify(%{quality: :minor, size: 300})
+      assert actual == expected
     end
 
     test "rejects an invalid quality" do
+      expected = {:error, @invalid_quality}
+
       actual = Interval.simplify(%{quality: :foo, size: 1})
-      assert actual == {:error, @invalid_quality}
+      assert actual == expected
 
       actual = Interval.simplify(%{size: 1})
-      assert actual == {:error, @invalid_quality}
+      assert actual == expected
     end
 
     test "rejects an invalid size" do
