@@ -26,6 +26,7 @@ expressions:
 * A struct representing a pitch class (A♯) or a pitch (A♯₋₁), constructed using
   `Harmonex.Pitch.new`, for example:
   - `Harmonex.Pitch.new(:a_sharp)`, or
+  - `Harmonex.Pitch.new(:a, :sharp)`, or
   - `Harmonex.Pitch.new(:a_sharp, -1)`, or
   - `Harmonex.Pitch.new(:a, :sharp, -1)`, or
   - `Harmonex.Pitch.new(%{natural_name: :a, accidental: :sharp, octave: -1})`
@@ -54,8 +55,8 @@ Its functions can answer elementary textbook music theory questions such as:
 * **How far apart, in semitones, are the pitches A♭ and D♯?**  
   _Answer:_ `Harmonex.Pitch.semitones(:a_flat, :d_sharp) == 5`  
 * **How far across in semitones is a doubly augmented second?**  
-  _Answer:_ `Harmonex.Pitch.interval(:a_flat, :d_sharp) |>
-  Harmonex.Interval.semitones == 5`
+  _Answer:_ `Harmonex.Pitch.interval(:c_flat, :d_sharp) |>
+  Harmonex.Interval.semitones == 4`  
   _Answer:_
   `Harmonex.Interval.semitones(%{quality: :doubly_augmented, size: 2}) == 4`
 * **What is the interval between the pitches F♮ and B𝄫?**  
