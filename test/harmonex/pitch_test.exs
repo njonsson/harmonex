@@ -104,6 +104,76 @@ defmodule Harmonex.PitchTest do
     end
   end
 
+  describe ".class/1" do
+    test "accepts valid arguments" do
+      for natural_name <- @natural_names,
+          accidental <- @accidentals,
+          octave <- @octaves do
+        expected = %Pitch{natural_name: natural_name, accidental: accidental}
+        actual = Pitch.class(%{natural_name: natural_name,
+                               accidental: accidental,
+                               octave: octave})
+        assert actual == expected
+      end
+
+      for natural_name <- @natural_names, accidental <- @accidentals do
+        expected = %Pitch{natural_name: natural_name, accidental: accidental}
+        actual = Pitch.class(%{natural_name: natural_name,
+                               accidental: accidental})
+        assert actual == expected
+
+        expected = :"#{natural_name}_#{accidental}"
+        actual = Pitch.class(expected)
+        assert actual == expected
+      end
+
+      for natural_name <- @natural_names, octave <- @octaves do
+        expected = %Pitch{natural_name: natural_name}
+        actual = Pitch.class(%{natural_name: natural_name, octave: octave})
+        assert actual == expected
+      end
+
+      for natural_name <- @natural_names do
+        expected = %Pitch{natural_name: natural_name}
+        actual = Pitch.class(%{natural_name: natural_name})
+        assert actual == expected
+
+        expected = :"#{natural_name}_natural"
+        actual = Pitch.class(natural_name)
+        assert actual == expected
+      end
+    end
+  end
+
+  describe ".class?/1" do
+    test "accepts valid arguments" do
+      for natural_name <- @natural_names,
+          accidental <- @accidentals,
+          octave <- @octaves do
+        refute Pitch.class?(%{natural_name: natural_name,
+                              accidental: accidental,
+                              octave: octave})
+      end
+
+      for natural_name <- @natural_names, accidental <- @accidentals do
+        assert Pitch.class?(%{natural_name: natural_name,
+                              accidental: accidental})
+
+        assert Pitch.class?(:"#{natural_name}_#{accidental}")
+      end
+
+      for natural_name <- @natural_names, octave <- @octaves do
+        refute Pitch.class?(%{natural_name: natural_name, octave: octave})
+      end
+
+      for natural_name <- @natural_names do
+        assert Pitch.class?(%{natural_name: natural_name})
+
+        assert Pitch.class?(natural_name)
+      end
+    end
+  end
+
   describe ".enharmonic?/2" do
     test "accepts valid arguments" do
       for natural_name1 <- @natural_names, accidental1 <- @accidentals, octave1 <- @octaves,
@@ -716,7 +786,6 @@ defmodule Harmonex.PitchTest do
         expected = %Pitch{natural_name: natural_name,
                           accidental: accidental,
                           octave: octave}
-
         actual = Pitch.new(%{natural_name: natural_name,
                              accidental: accidental,
                              octave: octave})
@@ -729,13 +798,17 @@ defmodule Harmonex.PitchTest do
         actual = Pitch.new(%{natural_name: natural_name, accidental: accidental})
         assert actual == expected
 
+        actual = Pitch.new(%{natural_name: natural_name,
+                             accidental: accidental,
+                             octave: nil})
+        assert actual == expected
+
         actual = Pitch.new(:"#{natural_name}_#{accidental}")
         assert actual == expected
       end
 
       for natural_name <- @natural_names, octave <- @octaves do
         expected = %Pitch{natural_name: natural_name, octave: octave}
-
         actual = Pitch.new(%{natural_name: natural_name, octave: octave})
         assert actual == expected
       end
@@ -744,6 +817,9 @@ defmodule Harmonex.PitchTest do
         expected = %Pitch{natural_name: natural_name}
 
         actual = Pitch.new(%{natural_name: natural_name})
+        assert actual == expected
+
+        actual = Pitch.new(%{natural_name: natural_name, octave: nil})
         assert actual == expected
 
         actual = Pitch.new(natural_name)
@@ -766,7 +842,11 @@ defmodule Harmonex.PitchTest do
 
       for natural_name <- @natural_names, accidental <- @accidentals do
         expected = %Pitch{natural_name: natural_name, accidental: accidental}
+
         actual = Pitch.new(natural_name, accidental)
+        assert actual == expected
+
+        actual = Pitch.new(:"#{natural_name}_#{accidental}", nil)
         assert actual == expected
       end
 
@@ -1144,13 +1224,15 @@ defmodule Harmonex.PitchTest do
   end
 
   # Functions that accept one pitch argument
-  for {fun, other_arguments} <- [accidental: [],
+  for {fun, other_arguments} <- [accidental:          [],
                                  adjust_by_semitones: [1],
-                                 enharmonics: [],
-                                 name: [],
-                                 natural_name: [],
-                                 new: [],
-                                 octave: []] do
+                                 class:               [],
+                                 class?:              [],
+                                 enharmonics:         [],
+                                 name:                [],
+                                 natural_name:        [],
+                                 new:                 [],
+                                 octave:              []] do
     describe ".#{fun}/#{1 + length(other_arguments)}" do
       test "rejects an invalid name" do
         expected = {:error, @invalid_name}

@@ -119,6 +119,59 @@ defmodule Harmonex.Pitch do
   end
 
   @doc """
+  Computes the pitch class corresponding to the specified `pitch`.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.class %{natural_name: :a, accidental: :flat, octave: 6}
+      %Harmonex.Pitch{natural_name: :a, accidental: :flat}
+
+      iex> Harmonex.Pitch.class %{natural_name: :a}
+      %Harmonex.Pitch{natural_name: :a, accidental: :natural}
+
+      iex> Harmonex.Pitch.class :a_flat
+      :a_flat
+
+      iex> Harmonex.Pitch.class :a
+      :a_natural
+  """
+  @spec class(t_map) :: pitch | Harmonex.error
+  def class(pitch) when is_map(pitch) do
+    with pitch_name when is_atom(pitch_name) <- pitch |> name do
+      pitch_name |> new
+    end
+  end
+
+  @spec class(t_atom) :: t_atom | Harmonex.error
+  def class(pitch), do: pitch |> name
+
+  @doc """
+  Determines if the specified `pitch` represents a pitch class.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.class? %{natural_name: :a, accidental: :flat, octave: 6}
+      false
+
+      iex> Harmonex.Pitch.class? %{natural_name: :a}
+      true
+
+      iex> Harmonex.Pitch.class? :a_flat
+      true
+
+      iex> Harmonex.Pitch.class? :a
+      true
+  """
+  @spec class?(t) :: boolean | Harmonex.error
+  def class?(pitch) do
+    case pitch |> octave do
+      pitch_octave when is_integer(pitch_octave) -> false
+      pitch_octave when is_nil(pitch_octave)     -> true
+      other                                      -> other
+    end
+  end
+
+  @doc """
   Determines whether the specified `pitch1` and `pitch2` are enharmonically
   equivalent.
 
