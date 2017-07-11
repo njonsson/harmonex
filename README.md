@@ -13,6 +13,32 @@ This is a collection of tools for music theory called _Harmonex_ (pronounced
 
 ## Usage
 
+**Pitches** and **intervals** are the two main constructs available in Harmonex
+at present. You can refer to a pitch using any of the following styles of
+expressions:
+
+* An atom representing a pitch class, for example, A♮:
+  - `:a`, or
+  - `:a_natural`
+* A map representing a pitch class (A𝄫) or a pitch (A𝄫₄), for example:
+  - `%{natural_name: :a, accidental: :double_flat}`, or
+  - `%{natural_name: :a, accidental: :double_flat, octave: 4}`
+* A struct representing a pitch class (A♯) or a pitch (A♯₋₁), constructed using
+  `Harmonex.Pitch.new`, for example:
+  - `Harmonex.Pitch.new(:a_sharp)`, or
+  - `Harmonex.Pitch.new(:a_sharp, -1)`, or
+  - `Harmonex.Pitch.new(:a, :sharp, -1)`, or
+  - `Harmonex.Pitch.new(%{natural_name: :a, accidental: :sharp, octave: -1})`
+
+You can refer to an interval using either of the following styles of expressions:
+
+* A map representing an interval, for example, a doubly-diminished ninth:
+  `%{quality: :doubly_diminished, size: 9}`
+* A struct representing an interval, constructed using `Harmonex.Interval.new`,
+  for example, a perfect unison:
+  - `Harmonex.Interval.new(:perfect, 1)`, or
+  - `Harmonex.Interval.new(%{quality: :perfect, size: 1})`
+
 What can you do with Harmonex? Its functions can answer textbook music theory
 questions such as:
 
