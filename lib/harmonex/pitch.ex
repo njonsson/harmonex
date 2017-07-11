@@ -87,8 +87,8 @@ defmodule Harmonex.Pitch do
   end
 
   @doc """
-  Computes a pitch that is the sum of the specified `pitch` and the specified
-  `adjustment` in semitones.
+  **DEPRECATED** Computes a pitch that is the sum of the specified `pitch` and
+  the specified `adjustment` in semitones.
 
   ## Examples
 
@@ -440,7 +440,8 @@ defmodule Harmonex.Pitch do
   def new(_natural_name, _accidental, _octave), do: {:error, @invalid_name}
 
   @doc """
-  Computes the octave of the specified `pitch`.
+  Computes the octave of the specified `pitch`. Pitch values having an octave of
+  `nil` represent pitch classes.
 
   ## Examples
 
