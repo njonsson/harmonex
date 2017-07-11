@@ -20,10 +20,9 @@ defmodule Harmonex.Mixfile do
      docs: [extras: ["README.md":  [filename: "about",
                                     title: "About Harmonex"],
                      "License.md": [filename: "license",
-                                    title: "Project license"]],
-                     # TODO: Figure out why ExDoc chokes on this
-                     # "History.md": [filename: "history",
-                     #                title: "Project history"]],
+                                    title: "Project license"],
+                     "History.md": [filename: "history",
+                                    title: "Project history"]],
             logo: "assets/logo.png",
             main: "about"],
      test_coverage: [tool: ExCoveralls]]
