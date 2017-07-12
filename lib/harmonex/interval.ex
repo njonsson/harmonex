@@ -192,17 +192,20 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.new %{quality: :augmented, size: 17}
       %Harmonex.Interval{quality: :augmented, size: 17}
 
+      iex> Harmonex.Interval.new %{quality: :minor, size: 1}
+      {:error, "Quality of unison must be in [:perfect, :augmented, :doubly_augmented]"}
+
+      iex> Harmonex.Interval.new %{quality: :major, size: 8}
+      {:error, "Quality of octave must be in [:perfect, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+
       iex> Harmonex.Interval.new %{quality: :perfect, size: 0}
       {:error, #{inspect @invalid_size}}
 
       iex> Harmonex.Interval.new %{quality: :minor, size: -3}
       {:error, #{inspect @invalid_size}}
 
-      iex> Harmonex.Interval.new %{quality: :minor, size: 1}
-      {:error, "Quality of unison must be in [:perfect, :augmented, :doubly_augmented]"}
-
-      iex> Harmonex.Interval.new %{quality: :major, size: 8}
-      {:error, "Quality of octave must be in [:perfect, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      iex> Harmonex.Interval.new %{quality: :minor}
+      {:error, #{inspect @invalid_size}}
   """
   @spec new(t) :: interval | Harmonex.error
   @spec new(quality, pos_integer) :: interval | Harmonex.error
@@ -222,17 +225,23 @@ defmodule Harmonex.Interval do
         iex> Harmonex.Interval.new :augmented, 17
         %Harmonex.Interval{quality: :augmented, size: 17}
 
+        iex> Harmonex.Interval.new :minor, 1
+        {:error, "Quality of unison must be in [:perfect, :augmented, :doubly_augmented]"}
+
+        iex> Harmonex.Interval.new :major, 8
+        {:error, "Quality of octave must be in [:perfect, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+
+        iex> Harmonex.Interval.new :imperfect, 1
+        {:error, #{inspect @invalid_quality}}
+
         iex> Harmonex.Interval.new :perfect, 0
         {:error, #{inspect @invalid_size}}
 
         iex> Harmonex.Interval.new :minor, -3
         {:error, #{inspect @invalid_size}}
 
-        iex> Harmonex.Interval.new :minor, 1
-        {:error, "Quality of unison must be in [:perfect, :augmented, :doubly_augmented]"}
-
-        iex> Harmonex.Interval.new :major, 8
-        {:error, "Quality of octave must be in [:perfect, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+        iex> Harmonex.Interval.new :minor, nil
+        {:error, #{inspect @invalid_size}}
     """
     def new(unquote(quality)=quality, unquote(size)=size) do
       new %{quality: quality, size: size}
@@ -249,12 +258,13 @@ defmodule Harmonex.Interval do
   end
 
   for quality <- @qualities do
-    def new(%{quality: unquote(quality), size: 0}=_definition) do
+    def new(%{quality: unquote(quality),
+              size: size}=_definition) when not is_integer(size) do
       {:error, @invalid_size}
     end
 
     def new(%{quality: unquote(quality),
-              size: size}=_definition) when size < 0 do
+              size: size}=_definition) when size <= 0 do
       {:error, @invalid_size}
     end
 

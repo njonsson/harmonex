@@ -340,9 +340,6 @@ defmodule Harmonex.IntervalTest do
         actual = Interval.new(%{quality: quality, size: -3})
         assert actual == expected
 
-        actual = Interval.new(%{quality: quality, size: :not_a_size})
-        assert actual == expected
-
         actual = Interval.new(%{quality: quality})
         assert actual == expected
       end
@@ -392,6 +389,9 @@ defmodule Harmonex.IntervalTest do
         assert actual == expected
 
         actual = Interval.new(quality, -3)
+        assert actual == expected
+
+        actual = Interval.new(quality, nil)
         assert actual == expected
       end
     end
