@@ -269,17 +269,12 @@ defmodule Harmonex.Interval do
     end
 
     def new(%{quality: unquote(quality), size: size}=definition) do
-      next_magnitude = size - 7
-      if next_magnitude <= 0 do
-        error_quality size, size
-      else
-        next_size =  next_magnitude
-        case new(%{definition | size: next_size}) do
-          interval when is_map(interval) ->
-            __MODULE__ |> struct(Map.delete(definition, :__struct__))
-          {:error, _} ->
-            error_quality next_size, size
-        end
+      next_size =  size - 7
+      case new(%{definition | size: next_size}) do
+        interval when is_map(interval) ->
+          __MODULE__ |> struct(Map.delete(definition, :__struct__))
+        {:error, _} ->
+          error_quality next_size, size
       end
     end
 
@@ -322,14 +317,12 @@ defmodule Harmonex.Interval do
           semitones
         _ ->
           simple_size = interval_size |> Integer.mod(7)
-          case @semitones_by_quality_and_size |> Map.get({interval_quality,
-                                                          simple_size}) do
+          case %{quality: interval_quality, size: simple_size} |> semitones do
             semitones when is_integer(semitones) ->
               semitones + (12 * div(interval_size, 7))
             _ ->
-              simple_size = simple_size + 7
-              semitones = @semitones_by_quality_and_size |> Map.fetch!({interval_quality,
-                                                                        simple_size})
+              semitones = %{quality: interval_quality,
+                            size: simple_size + 7} |> semitones
               semitones + (12 * (div(interval_size, 7) - 1))
           end
       end
