@@ -472,6 +472,72 @@ defmodule Harmonex.IntervalTest do
     end
   end
 
+  describe ".simple?/1" do
+    test "accepts valid arguments" do
+      for {quality, size} when size < 8 <- @intervals do
+        assert Interval.simple?(%{quality: quality, size: size})
+      end
+
+      for {quality, size} when 8 <= size <- @intervals do
+        expected = case {quality, size} do
+          {:doubly_diminished, 8} -> true
+          {:diminished,        8} -> true
+          {:doubly_diminished, 9} -> true
+          _                       -> false
+        end
+        assert Interval.simple?(%{quality: quality, size: size}) == expected
+      end
+
+      refute Interval.simple?(%{quality: :minor, size: 300})
+    end
+
+    test "rejects an invalid quality" do
+      expected = {:error, @invalid_quality}
+
+      actual = Interval.simple?(%{quality: :foo, size: 1})
+      assert actual == expected
+
+      actual = Interval.simple?(%{size: 1})
+      assert actual == expected
+    end
+
+    test "rejects an invalid size" do
+      expected = {:error, @invalid_size}
+
+      for quality <- @qualities do
+        actual = Interval.simple?(%{quality: quality})
+        assert actual == expected
+
+        actual = Interval.simple?(%{quality: quality, size: 0})
+        assert actual == expected
+
+        actual = Interval.simple?(%{quality: quality, size: -3})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid interval" do
+      for {quality, size} <- @intervals_invalid do
+        if {quality, size} in [{:doubly_diminished, 1},
+                               {:diminished,        1},
+                               {:doubly_diminished, 2}] do
+          expected = {:error, @invalid_interval}
+
+          actual = Interval.simple?(%{quality: quality, size: size})
+          assert actual == expected
+        else
+          {:error, reason} = Interval.simple?(%{quality: quality, size: size})
+          assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
+        end
+      end
+
+      expected = {:error,
+                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.simple?(%{quality: :perfect, size: 300})
+      assert actual == expected
+    end
+  end
+
   describe ".simplify/1" do
     test "accepts valid arguments" do
       for {quality, size} when size < 8 <- @intervals do

@@ -330,7 +330,35 @@ defmodule Harmonex.Interval do
   end
 
   @doc """
+  Determines if the specified `interval` cannot be simplified (see `simplify/1`).
+
+  Simple intervals are no more than 11 semitones across (see `semitones/1`).
+
+  ## Examples
+
+      iex> Harmonex.Interval.simple? %{quality: :major, size: 10}
+      false
+
+      iex> Harmonex.Interval.simple? %{quality: :major, size: 3}
+      true
+
+      iex> Harmonex.Interval.simple? %{quality: :augmented, size: 8}
+      false
+
+      iex> Harmonex.Interval.simple? %{quality: :diminished, size: 8}
+      true
+  """
+  @spec simple?(t) :: boolean | Harmonex.error
+  def simple?(interval) do
+    with interval_struct when is_map(interval_struct) <- interval |> new,
+         simplified                                   <- simplify(interval) do
+      interval_struct == simplified
+    end
+  end
+
+  @doc """
   Computes the simple interval that corresponds to the specified `interval`.
+
   Simple intervals are no more than 11 semitones across (see `semitones/1`).
 
   ## Examples
