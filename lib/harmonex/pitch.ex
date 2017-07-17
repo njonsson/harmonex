@@ -176,6 +176,9 @@ defmodule Harmonex.Pitch do
   Determines whether the specified `pitch1` and `pitch2` are enharmonically
   equivalent.
 
+  If either specified pitch has an octave (see `Harmonex.Pitch.octave/1`) of
+  `nil` then the pitches are assumed to be in the same octave.
+
   ## Examples
 
       iex> Harmonex.Pitch.enharmonic? %{natural_name: :a, octave: 4}, %{natural_name: :a, octave: 4}
@@ -190,11 +193,14 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.enharmonic? %{natural_name: :g, accidental: :sharp}, :a_flat
       true
 
-      iex> Harmonex.Pitch.enharmonic? :c_flat, %{natural_name: :a, accidental: :double_sharp, octave: 3}
+      iex> Harmonex.Pitch.enharmonic? :c_flat, %{natural_name: :a, accidental: :double_sharp, octave: 2}
       true
 
-      iex> Harmonex.Pitch.enharmonic? :a_sharp, :a
+      iex> Harmonex.Pitch.enharmonic? :a, :a_sharp
       false
+
+      iex> Harmonex.Pitch.enharmonic? :a, :a
+      true
   """
   @spec enharmonic?(t, t) :: boolean | Harmonex.error
   def enharmonic?(pitch1, pitch2) do

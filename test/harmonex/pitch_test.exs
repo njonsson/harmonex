@@ -416,6 +416,10 @@ defmodule Harmonex.PitchTest do
     test "correctly handles A-sharp and C-double-flat" do
       assert Pitch.enharmonic?(%{natural_name: :a, accidental: :sharp,       octave: -2},
                                %{natural_name: :c, accidental: :double_flat, octave: -1})
+      assert Pitch.enharmonic?(%{natural_name: :a, accidental: :sharp,       octave: -2},
+                               %{natural_name: :c, accidental: :double_flat})
+      assert Pitch.enharmonic?(:a_sharp,
+                               %{natural_name: :c, accidental: :double_flat, octave: -1})
       assert Pitch.enharmonic?(:a_sharp, :c_double_flat)
 
       refute Pitch.enharmonic?(%{natural_name: :a, accidental: :sharp,       octave: -1},
@@ -425,6 +429,10 @@ defmodule Harmonex.PitchTest do
     test "correctly handles B-flat and C-double-flat" do
       assert Pitch.enharmonic?(%{natural_name: :b, accidental: :flat,        octave: -1},
                                %{natural_name: :c, accidental: :double_flat, octave:  0})
+      assert Pitch.enharmonic?(%{natural_name: :b, accidental: :flat,        octave: -1},
+                               %{natural_name: :c, accidental: :double_flat})
+      assert Pitch.enharmonic?(:b_flat,
+                               %{natural_name: :c, accidental: :double_flat, octave: 0})
       assert Pitch.enharmonic?(:b_flat, :c_double_flat)
 
       refute Pitch.enharmonic?(%{natural_name: :b, accidental: :flat,        octave: 0},
@@ -434,6 +442,10 @@ defmodule Harmonex.PitchTest do
     test "correctly handles A-double-sharp and C-flat" do
       assert Pitch.enharmonic?(%{natural_name: :a, accidental: :double_sharp, octave: 0},
                                %{natural_name: :c, accidental: :flat,         octave: 1})
+      assert Pitch.enharmonic?(%{natural_name: :a, accidental: :double_sharp, octave: 0},
+                               %{natural_name: :c, accidental: :flat})
+      assert Pitch.enharmonic?(:a_double_sharp,
+                               %{natural_name: :c, accidental: :flat, octave: 1})
       assert Pitch.enharmonic?(:a_double_sharp, :c_flat)
 
       refute Pitch.enharmonic?(%{natural_name: :a, accidental: :double_sharp, octave: 1},
@@ -442,6 +454,10 @@ defmodule Harmonex.PitchTest do
 
     test "correctly handles B-natural and C-flat" do
       assert Pitch.enharmonic?(%{natural_name: :b,                    octave: 1},
+                               %{natural_name: :c, accidental: :flat, octave: 2})
+      assert Pitch.enharmonic?(%{natural_name: :b,                    octave: 1},
+                               %{natural_name: :c, accidental: :flat})
+      assert Pitch.enharmonic?(:b,
                                %{natural_name: :c, accidental: :flat, octave: 2})
       assert Pitch.enharmonic?(:b, :c_flat)
 
@@ -452,6 +468,9 @@ defmodule Harmonex.PitchTest do
     test "correctly handles B-sharp and C-natural" do
       assert Pitch.enharmonic?(%{natural_name: :b, accidental: :sharp, octave: 2},
                                %{natural_name: :c,                     octave: 3})
+      assert Pitch.enharmonic?(%{natural_name: :b, accidental: :sharp, octave: 2},
+                               %{natural_name: :c})
+      assert Pitch.enharmonic?(:b_sharp, %{natural_name: :c, octave: 3})
       assert Pitch.enharmonic?(:b_sharp, :c)
 
       refute Pitch.enharmonic?(%{natural_name: :b, accidental: :sharp, octave: 3},
@@ -460,6 +479,10 @@ defmodule Harmonex.PitchTest do
 
     test "correctly handles B-sharp and D-double-flat" do
       assert Pitch.enharmonic?(%{natural_name: :b, accidental: :sharp,       octave: 3},
+                               %{natural_name: :d, accidental: :double_flat, octave: 4})
+      assert Pitch.enharmonic?(%{natural_name: :b, accidental: :sharp,       octave: 3},
+                               %{natural_name: :d, accidental: :double_flat})
+      assert Pitch.enharmonic?(:b_sharp,
                                %{natural_name: :d, accidental: :double_flat, octave: 4})
       assert Pitch.enharmonic?(:b_sharp, :d_double_flat)
 
@@ -470,6 +493,10 @@ defmodule Harmonex.PitchTest do
     test "correctly handles B-double-sharp and D-flat" do
       assert Pitch.enharmonic?(%{natural_name: :b, accidental: :double_sharp, octave: 4},
                                %{natural_name: :d, accidental: :flat,         octave: 5})
+      assert Pitch.enharmonic?(%{natural_name: :b, accidental: :double_sharp, octave: 4},
+                               %{natural_name: :d, accidental: :flat})
+      assert Pitch.enharmonic?(:b_double_sharp,
+                               %{natural_name: :d, accidental: :flat, octave: 5})
       assert Pitch.enharmonic?(:b_double_sharp, :d_flat)
 
       refute Pitch.enharmonic?(%{natural_name: :b, accidental: :double_sharp, octave: 5},
@@ -479,10 +506,25 @@ defmodule Harmonex.PitchTest do
     test "correctly handles G-sharp and A-flat" do
       assert Pitch.enharmonic?(%{natural_name: :g, accidental: :sharp, octave: 5},
                                %{natural_name: :a, accidental: :flat,  octave: 5})
+      assert Pitch.enharmonic?(%{natural_name: :g, accidental: :sharp, octave: 5},
+                               %{natural_name: :a, accidental: :flat})
+      assert Pitch.enharmonic?(:g_sharp,
+                               %{natural_name: :a, accidental: :flat, octave: 5})
       assert Pitch.enharmonic?(:g_sharp, :a_flat)
 
       refute Pitch.enharmonic?(%{natural_name: :g, accidental: :sharp, octave: 5},
                                %{natural_name: :a, accidental: :flat,  octave: 6})
+    end
+
+    test "correctly handles a pitch class and a pitch" do
+      assert Pitch.enharmonic?(%{natural_name: :g, accidental: :sharp, octave: 5},
+                               %{natural_name: :a, accidental: :flat})
+      assert Pitch.enharmonic?(%{natural_name: :g, accidental: :sharp, octave: 5},
+                               :a_flat)
+      assert Pitch.enharmonic?(%{natural_name: :g, accidental: :sharp},
+                               %{natural_name: :a, accidental: :flat, octave: 6})
+      assert Pitch.enharmonic?(:g_sharp,
+                               %{natural_name: :a, accidental: :flat, octave: 6})
     end
   end
 
