@@ -4,7 +4,6 @@
 [<img alt="HexFaktor dependencies status" src="https://beta.hexfaktor.org/badge/all/github/njonsson/harmonex.svg" />][HexFaktor-deps-status]
 [<img alt="Coveralls test coverage status" src="https://coveralls.io/repos/njonsson/harmonex/badge.svg?branch=master" />][Coveralls-test-coverage-status]
 [<img alt="Hex release" src="https://img.shields.io/hexpm/v/harmonex.svg" />][Hex-release]
-[<img alt="Hex downloads" src="https://img.shields.io/hexpm/dt/harmonex.svg" />][Hex-release]
 
 This is a collection of tools for music theory called _Harmonex_ (pronounced
 “harmonics”).
