@@ -24,7 +24,8 @@ defmodule Harmonex.Pitch do
   @type t_map :: %{natural_name: natural_name, accidental: accidental, octave: octave} |
                  %{natural_name: natural_name, accidental: accidental}                 |
                  %{natural_name: natural_name,                         octave: octave} |
-                 %{natural_name: natural_name}
+                 %{natural_name: natural_name}                                         |
+                 pitch
 
   @typedoc """
   An atom expression describing a pitch. Can be a `t:natural_name/0`, or a

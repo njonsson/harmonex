@@ -15,7 +15,7 @@ defmodule Harmonex.Interval do
   @typedoc """
   An expression describing an interval.
   """
-  @type t :: %{quality: quality, size: pos_integer}
+  @type t :: %{quality: quality, size: pos_integer} | interval
 
   @typedoc """
   The qualified variation of an interval’s size.
