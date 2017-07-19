@@ -10,12 +10,12 @@ defmodule Harmonex.Interval do
   @typedoc """
   A `Harmonex.Interval` struct.
   """
-  @type interval :: %Harmonex.Interval{quality: quality, size: pos_integer}
+  @type interval :: %Harmonex.Interval{quality: quality, size: size}
 
   @typedoc """
   An expression describing an interval.
   """
-  @type t :: %{quality: quality, size: pos_integer} | interval
+  @type t :: %{quality: quality, size: size} | interval
 
   @typedoc """
   The qualified variation of an interval’s size.
@@ -34,6 +34,17 @@ defmodule Harmonex.Interval do
                 augmented
                 doubly_diminished
                 doubly_augmented)a
+
+  @typedoc """
+  The unqualified size of an interval.
+  """
+  @type size :: pos_integer
+
+  @typedoc """
+  The distance in half steps across an interval.
+  """
+  @type semitones :: non_neg_integer
+
   @quality_by_semitones_and_size %{{ 0, 1} => :perfect,
                                    { 1, 1} => :augmented,
                                    { 2, 1} => :doubly_augmented,
@@ -208,7 +219,7 @@ defmodule Harmonex.Interval do
       {:error, #{inspect @invalid_size}}
   """
   @spec new(t) :: interval | Harmonex.error
-  @spec new(quality, pos_integer) :: interval | Harmonex.error
+  @spec new(quality, size) :: interval | Harmonex.error
   for {quality, size} <- @intervals do
     def new(%{quality: unquote(quality), size: unquote(size)}=definition) do
       __MODULE__ |> struct(Map.delete(definition, :__struct__))
@@ -308,7 +319,7 @@ defmodule Harmonex.Interval do
       iex> Harmonex.Interval.semitones %{quality: :augmented, size: 300}
       514
   """
-  @spec semitones(t) :: non_neg_integer | Harmonex.error
+  @spec semitones(t) :: semitones | Harmonex.error
   def semitones(interval) do
     with %{quality: interval_quality, size: interval_size} <- interval |> new do
       case @semitones_by_quality_and_size |> Map.get({interval_quality,
@@ -383,7 +394,7 @@ defmodule Harmonex.Interval do
     end
   end
 
-  @spec error_quality(pos_integer, pos_integer) :: Harmonex.error
+  @spec error_quality(size, size) :: Harmonex.error
   for {size_in_lookup, qualities} <- @quality_list_by_size do
     defp error_quality(unquote(size_in_lookup), size) do
       {:error,

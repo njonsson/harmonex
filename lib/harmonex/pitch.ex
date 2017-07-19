@@ -579,7 +579,7 @@ defmodule Harmonex.Pitch do
       iex> Harmonex.Pitch.semitones :c, :c
       0
   """
-  @spec semitones(t, t) :: non_neg_integer | Harmonex.error
+  @spec semitones(t, t) :: Interval.semitones | Harmonex.error
   def semitones(pitch1, pitch2) do
     case compare_with_semitones(pitch1, pitch2) do
       %{semitones: semitones} -> semitones
@@ -597,7 +597,7 @@ defmodule Harmonex.Pitch do
     min diff_simple, diff_simple_inverse
   end
 
-  @spec compare_with_semitones(t, t) :: {Harmonex.comparison, non_neg_integer} | Harmonex.error
+  @spec compare_with_semitones(t, t) :: {Harmonex.comparison, Interval.semitones} | Harmonex.error
   defp compare_with_semitones(pitch1, pitch2) do
     with pitch1_name when is_atom(pitch1_name) <- name(pitch1),
          pitch2_name when is_atom(pitch2_name) <- name(pitch2),
