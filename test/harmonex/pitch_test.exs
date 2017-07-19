@@ -174,6 +174,437 @@ defmodule Harmonex.PitchTest do
     end
   end
 
+  describe ".compare/2" do
+    test "accepts valid arguments" do
+      for natural_name1 <- @natural_names, accidental1 <- @accidentals, octave1 <- @octaves,
+          natural_name2 <- @natural_names, accidental2 <- @accidentals, octave2 <- @octaves do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1,
+                                     octave: octave1},
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, accidental1 <- @accidentals, octave1 <- @octaves,
+          natural_name2 <- @natural_names, accidental2 <- @accidentals do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1,
+                                     octave: octave1},
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1,
+                                     octave: octave1},
+                                   :"#{natural_name2}_#{accidental2}")
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, accidental1 <- @accidentals, octave1 <- @octaves,
+          natural_name2 <- @natural_names,                              octave2 <- @octaves do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1,
+                                     octave: octave1},
+                                   %{natural_name: natural_name2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, accidental1 <- @accidentals, octave1 <- @octaves,
+          natural_name2 <- @natural_names do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1,
+                                     octave: octave1},
+                                   %{natural_name: natural_name2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1,
+                                     octave: octave1},
+                                   natural_name2)
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, accidental1 <- @accidentals,
+          natural_name2 <- @natural_names, accidental2 <- @accidentals, octave2 <- @octaves do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1},
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(:"#{natural_name1}_#{accidental1}",
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names,                              octave1 <- @octaves,
+          natural_name2 <- @natural_names, accidental2 <- @accidentals, octave2 <- @octaves do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     octave: octave1},
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names,
+          natural_name2 <- @natural_names, accidental2 <- @accidentals, octave2 <- @octaves do
+        actual = Pitch.compare(%{natural_name: natural_name1},
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(natural_name1,
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, accidental1 <- @accidentals,
+          natural_name2 <- @natural_names, accidental2 <- @accidentals do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1},
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(:"#{natural_name1}_#{accidental1}",
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1},
+                                   :"#{natural_name2}_#{accidental2}")
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(:"#{natural_name1}_#{accidental1}",
+                                   :"#{natural_name2}_#{accidental2}")
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, accidental1 <- @accidentals,
+          natural_name2 <- @natural_names,                              octave2 <- @octaves do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1},
+                                   %{natural_name: natural_name2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(:"#{natural_name1}_#{accidental1}",
+                                   %{natural_name: natural_name2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, accidental1 <- @accidentals,
+          natural_name2 <- @natural_names do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1},
+                                   %{natural_name: natural_name2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(:"#{natural_name1}_#{accidental1}",
+                                   %{natural_name: natural_name2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     accidental: accidental1},
+                                   natural_name2)
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(:"#{natural_name1}_#{accidental1}",
+                                   natural_name2)
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names,                              octave1 <- @octaves,
+          natural_name2 <- @natural_names, accidental2 <- @accidentals do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     octave: octave1},
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     octave: octave1},
+                                   :"#{natural_name2}_#{accidental2}")
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, octave1 <- @octaves,
+          natural_name2 <- @natural_names, octave2 <- @octaves do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     octave: octave1},
+                                   %{natural_name: natural_name2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, octave1 <- @octaves,
+          natural_name2 <- @natural_names do
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     octave: octave1},
+                                   %{natural_name: natural_name2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(%{natural_name: natural_name1,
+                                     octave: octave1},
+                                   natural_name2)
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names,
+          natural_name2 <- @natural_names, accidental2 <- @accidentals do
+        actual = Pitch.compare(%{natural_name: natural_name1},
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(natural_name1,
+                                   %{natural_name: natural_name2,
+                                     accidental: accidental2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(%{natural_name: natural_name1},
+                                   :"#{natural_name2}_#{accidental2}")
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(natural_name1,
+                                   :"#{natural_name2}_#{accidental2}")
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names,
+          natural_name2 <- @natural_names, octave2 <- @octaves do
+        actual = Pitch.compare(%{natural_name: natural_name1},
+                                   %{natural_name: natural_name2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(natural_name1,
+                                   %{natural_name: natural_name2,
+                                     octave: octave2})
+        assert actual in ~w( lt eq gt )a
+      end
+
+      for natural_name1 <- @natural_names, natural_name2 <- @natural_names do
+        actual = Pitch.compare(%{natural_name: natural_name1},
+                                   %{natural_name: natural_name2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(%{natural_name: natural_name1}, natural_name2)
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(natural_name1, %{natural_name: natural_name2})
+        assert actual in ~w( lt eq gt )a
+
+        actual = Pitch.compare(natural_name1, natural_name2)
+        assert actual in ~w( lt eq gt )a
+      end
+    end
+
+    test "correctly handles A-sharp and C-double-flat" do
+      expected = :eq
+
+      actual = Pitch.compare(%{natural_name: :a, accidental: :sharp,       octave: -2},
+                             %{natural_name: :c, accidental: :double_flat, octave: -1})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :a, accidental: :sharp,       octave: -2},
+                             %{natural_name: :c, accidental: :double_flat})
+      assert actual == expected
+
+      actual = Pitch.compare(:a_sharp,
+                             %{natural_name: :c, accidental: :double_flat, octave: -1})
+      assert actual == expected
+
+      actual = Pitch.compare(:a_sharp, :c_double_flat)
+      assert actual == expected
+
+      expected = :gt
+      actual = Pitch.compare(%{natural_name: :a, accidental: :sharp,       octave: -1},
+                             %{natural_name: :c, accidental: :double_flat, octave: -1})
+      assert actual == expected
+    end
+
+    test "correctly handles B-flat and C-double-flat" do
+      expected = :eq
+
+      actual = Pitch.compare(%{natural_name: :b, accidental: :flat,        octave: -1},
+                             %{natural_name: :c, accidental: :double_flat, octave:  0})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :b, accidental: :flat,        octave: -1},
+                             %{natural_name: :c, accidental: :double_flat})
+      assert actual == expected
+
+      actual = Pitch.compare(:b_flat,
+                             %{natural_name: :c, accidental: :double_flat, octave: 0})
+      assert actual == expected
+
+      actual = Pitch.compare(:b_flat, :c_double_flat)
+      assert actual == expected
+
+      expected = :gt
+      actual = Pitch.compare(%{natural_name: :b, accidental: :flat,        octave: 0},
+                             %{natural_name: :c, accidental: :double_flat, octave: 0})
+      assert actual == expected
+    end
+
+    test "correctly handles A-double-sharp and C-flat" do
+      expected = :eq
+
+      actual = Pitch.compare(%{natural_name: :a, accidental: :double_sharp, octave: 0},
+                             %{natural_name: :c, accidental: :flat,         octave: 1})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :a, accidental: :double_sharp, octave: 0},
+                             %{natural_name: :c, accidental: :flat})
+      assert actual == expected
+
+      actual = Pitch.compare(:a_double_sharp,
+                             %{natural_name: :c, accidental: :flat, octave: 1})
+      assert actual == expected
+
+      actual = Pitch.compare(:a_double_sharp, :c_flat)
+      assert actual == expected
+
+      expected = :gt
+      actual = Pitch.compare(%{natural_name: :a, accidental: :double_sharp, octave: 1},
+                             %{natural_name: :c, accidental: :flat,         octave: 1})
+      assert actual == expected
+    end
+
+    test "correctly handles B-natural and C-flat" do
+      expected = :eq
+
+      actual = Pitch.compare(%{natural_name: :b,                    octave: 1},
+                             %{natural_name: :c, accidental: :flat, octave: 2})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :b,                    octave: 1},
+                             %{natural_name: :c, accidental: :flat})
+      assert actual == expected
+
+      actual = Pitch.compare(:b,
+                             %{natural_name: :c, accidental: :flat, octave: 2})
+      assert actual == expected
+
+      actual = Pitch.compare(:b, :c_flat)
+      assert actual == expected
+
+      expected = :gt
+      actual = Pitch.compare(%{natural_name: :b,                    octave: 2},
+                               %{natural_name: :c, accidental: :flat, octave: 2})
+      assert actual == expected
+    end
+
+    test "correctly handles B-sharp and C-natural" do
+      expected = :eq
+
+      actual = Pitch.compare(%{natural_name: :b, accidental: :sharp, octave: 2},
+                             %{natural_name: :c,                     octave: 3})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :b, accidental: :sharp, octave: 2},
+                             %{natural_name: :c})
+      assert actual == expected
+
+      actual = Pitch.compare(:b_sharp, %{natural_name: :c, octave: 3})
+      assert actual == expected
+
+      actual = Pitch.compare(:b_sharp, :c)
+      assert actual == expected
+
+      expected = :gt
+      actual = Pitch.compare(%{natural_name: :b, accidental: :sharp, octave: 3},
+                             %{natural_name: :c,                     octave: 3})
+      assert actual == expected
+    end
+
+    test "correctly handles B-sharp and D-double-flat" do
+      expected = :eq
+
+      actual = Pitch.compare(%{natural_name: :b, accidental: :sharp,       octave: 3},
+                             %{natural_name: :d, accidental: :double_flat, octave: 4})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :b, accidental: :sharp,       octave: 3},
+                             %{natural_name: :d, accidental: :double_flat})
+      assert actual == expected
+
+      actual = Pitch.compare(:b_sharp,
+                             %{natural_name: :d, accidental: :double_flat, octave: 4})
+      assert actual == expected
+
+      actual = Pitch.compare(:b_sharp, :d_double_flat)
+      assert actual == expected
+
+      expected = :gt
+      actual = Pitch.compare(%{natural_name: :b, accidental: :sharp,       octave: 4},
+                             %{natural_name: :d, accidental: :double_flat, octave: 4})
+      assert actual == expected
+    end
+
+    test "correctly handles B-double-sharp and D-flat" do
+      expected = :eq
+
+      actual = Pitch.compare(%{natural_name: :b, accidental: :double_sharp, octave: 4},
+                             %{natural_name: :d, accidental: :flat,         octave: 5})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :b, accidental: :double_sharp, octave: 4},
+                             %{natural_name: :d, accidental: :flat})
+      assert actual == expected
+
+      actual = Pitch.compare(:b_double_sharp,
+                             %{natural_name: :d, accidental: :flat, octave: 5})
+      assert actual == expected
+
+      actual = Pitch.compare(:b_double_sharp, :d_flat)
+      assert actual == expected
+
+      expected = :gt
+      actual = Pitch.compare(%{natural_name: :b, accidental: :double_sharp, octave: 5},
+                             %{natural_name: :d, accidental: :flat,         octave: 5})
+      assert actual == expected
+    end
+
+    test "correctly handles G-sharp and A-flat" do
+      expected = :eq
+
+      actual = Pitch.compare(%{natural_name: :g, accidental: :sharp, octave: 5},
+                             %{natural_name: :a, accidental: :flat,  octave: 5})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :g, accidental: :sharp, octave: 5},
+                             %{natural_name: :a, accidental: :flat})
+      assert actual == expected
+
+      actual = Pitch.compare(:g_sharp,
+                             %{natural_name: :a, accidental: :flat, octave: 5})
+      assert actual == expected
+
+      actual = Pitch.compare(:g_sharp, :a_flat)
+      assert actual == expected
+
+      expected = :lt
+      actual = Pitch.compare(%{natural_name: :g, accidental: :sharp, octave: 5},
+                             %{natural_name: :a, accidental: :flat,  octave: 6})
+      assert actual == expected
+    end
+  end
+
   describe ".enharmonic?/2" do
     test "accepts valid arguments" do
       for natural_name1 <- @natural_names, accidental1 <- @accidentals, octave1 <- @octaves,
@@ -1394,7 +1825,7 @@ defmodule Harmonex.PitchTest do
   end
 
   # Functions that accept two pitch arguments
-  for fun <- ~w( enharmonic? interval semitones )a do
+  for fun <- ~w( compare enharmonic? interval semitones )a do
     describe ".#{fun}/2" do
       test "rejects an invalid name in the first argument" do
         expected = {:error, @invalid_name}

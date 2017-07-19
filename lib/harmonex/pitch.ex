@@ -173,6 +173,49 @@ defmodule Harmonex.Pitch do
   end
 
   @doc """
+  Enharmonically compares the specified `pitch1` and `pitch2`.
+
+  It returns:
+
+  * `:eq` if they are identical or enharmonically equivalent
+  * `:lt` if `pitch1` is enharmonically lower
+  * `:gt` if `pitch1` is enharmonically higher
+
+  If either specified pitch has an octave (see `Harmonex.Pitch.octave/1`) of
+  `nil` then the pitches are assumed to be in the same octave.
+
+  ## Examples
+
+      iex> Harmonex.Pitch.compare %{natural_name: :a, octave: 4}, %{natural_name: :a, octave: 4}
+      :eq
+
+      iex> Harmonex.Pitch.compare %{natural_name: :b, accidental: :sharp, octave: 5}, %{natural_name: :c, octave: 6}
+      :eq
+
+      iex> Harmonex.Pitch.compare %{natural_name: :b, accidental: :sharp, octave: 5}, %{natural_name: :c, octave: 5}
+      :gt
+
+      iex> Harmonex.Pitch.compare %{natural_name: :g, accidental: :sharp}, :a_flat
+      :eq
+
+      iex> Harmonex.Pitch.compare :c_flat, %{natural_name: :a, accidental: :double_sharp, octave: 2}
+      :eq
+
+      iex> Harmonex.Pitch.compare :a, :a_sharp
+      :lt
+
+      iex> Harmonex.Pitch.compare :a, :a
+      :eq
+  """
+  @spec compare(t, t) :: Harmonex.comparison | Harmonex.error
+  def compare(pitch1, pitch2) do
+    case compare_with_semitones(pitch1, pitch2) do
+      %{comparison: comparison} -> comparison
+      other                     -> other
+    end
+  end
+
+  @doc """
   Determines whether the specified `pitch1` and `pitch2` are enharmonically
   equivalent.
 
@@ -538,6 +581,24 @@ defmodule Harmonex.Pitch do
   """
   @spec semitones(t, t) :: non_neg_integer | Harmonex.error
   def semitones(pitch1, pitch2) do
+    case compare_with_semitones(pitch1, pitch2) do
+      %{semitones: semitones} -> semitones
+      other                   -> other
+    end
+  end
+
+  @doc false
+  @spec staff_positions(t, t) :: 0..3
+  def staff_positions(pitch1, pitch2) do
+    pitch1_position = pitch1 |> natural_name |> staff_position
+    pitch2_position = pitch2 |> natural_name |> staff_position
+    diff_simple = abs(pitch1_position - pitch2_position) |> Integer.mod(@natural_names_count)
+    diff_simple_inverse = @natural_names_count - diff_simple
+    min diff_simple, diff_simple_inverse
+  end
+
+  @spec compare_with_semitones(t, t) :: {Harmonex.comparison, non_neg_integer} | Harmonex.error
+  defp compare_with_semitones(pitch1, pitch2) do
     with pitch1_name when is_atom(pitch1_name) <- name(pitch1),
          pitch2_name when is_atom(pitch2_name) <- name(pitch2),
          pitch1_position                       <- position(pitch1_name),
@@ -550,7 +611,17 @@ defmodule Harmonex.Pitch do
          semitones_simple                      <- min(abs(positions_diff),
                                                       abs(positions_diff_inverse)) do
       if is_nil(pitch1_octave) || is_nil(pitch2_octave) do
-        min semitones_simple, (12 - semitones_simple)
+        semitones_simple_inverse = 12 - semitones_simple
+        semitones = min(semitones_simple, semitones_simple_inverse)
+        comparison = cond do
+          pitch1_position < pitch2_position ->
+            :lt
+          pitch2_position < pitch1_position ->
+            :gt
+          :else ->
+            :eq
+        end
+        %{comparison: comparison, semitones: semitones}
       else
         octaves_diff_naive = pitch2_octave - pitch1_octave
         octaves_diff = if (natural_name(pitch1) < :c) &&
@@ -559,19 +630,22 @@ defmodule Harmonex.Pitch do
                        else
                          octaves_diff_naive
                        end
-        (semitones_simple + (octaves_diff * 12)) |> abs
+        comparison = cond do
+                       octaves_diff < 0 ->
+                         :gt
+                       0 < octaves_diff ->
+                         :lt
+                       :else ->
+                         cond do
+                           pitch1_position < pitch2_position -> :lt
+                           pitch2_position < pitch1_position -> :gt
+                           :else                             -> :eq
+                         end
+                     end
+        semitones = (semitones_simple + (octaves_diff * 12)) |> abs
+        %{comparison: comparison, semitones: semitones}
       end
     end
-  end
-
-  @doc false
-  @spec staff_positions(t, t) :: 0..3
-  def staff_positions(pitch1, pitch2) do
-    pitch1_position = pitch1 |> natural_name |> staff_position
-    pitch2_position = pitch2 |> natural_name |> staff_position
-    diff_simple = abs(pitch1_position - pitch2_position) |> Integer.mod(@natural_names_count)
-    diff_simple_inverse = @natural_names_count - diff_simple
-    min diff_simple, diff_simple_inverse
   end
 
   @spec complexity_score(t_atom) :: 0..2

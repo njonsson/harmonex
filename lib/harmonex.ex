@@ -4,6 +4,13 @@ defmodule Harmonex do
   """
 
   @typedoc """
+  The result of comparing two values.
+
+  See `Harmonex.Pitch.compare/2`.
+  """
+  @type comparison :: :lt | :gt | :eq
+
+  @typedoc """
   A failure result.
   """
   @type error :: {:error, binary}
