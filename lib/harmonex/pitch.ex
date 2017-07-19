@@ -88,7 +88,7 @@ defmodule Harmonex.Pitch do
   end
 
   @doc """
-  **DEPRECATED** Computes a pitch that is the sum of the specified `pitch` and
+  **(DEPRECATED)** Computes a pitch that is the sum of the specified `pitch` and
   the specified `adjustment` in semitones.
 
   ## Examples
