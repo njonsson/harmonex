@@ -12,34 +12,38 @@ This is a collection of tools for music theory called _Harmonex_ (pronounced
 
 ## Usage
 
-**Pitches** and **intervals** are the two main constructs available in Harmonex
-at present. You can refer to a pitch using any of the following styles of
-expressions:
+Pitches and intervals are the two main constructs available in _Harmonex_ at
+present.
 
-* An atom representing a pitch class, for example, A♮:
+You can refer to a **pitch** using any of the following styles of expressions:
+
+* An **atom** representing a pitch class (A♮ in an unspecified octave), for
+  example:
   - `:a`, or
   - `:a_natural`
-* A map representing a pitch class (A𝄫) or a pitch (A𝄫₄), for example:
+* A **map** representing a pitch class (A𝄫 in an unspecified octave) or a pitch
+  (A𝄫₄), for example:
   - `%{natural_name: :a, accidental: :double_flat}`, or
   - `%{natural_name: :a, accidental: :double_flat, octave: 4}`
-* A struct representing a pitch class (A♯) or a pitch (A♯₋₁), constructed using
-  `Harmonex.Pitch.new`, for example:
+* A **struct** representing a pitch class (A♯ in an unspecified octave) or a
+  pitch (A♯₋₁) — constructed using `Harmonex.Pitch.new` — for example:
   - `Harmonex.Pitch.new(:a_sharp)`, or
   - `Harmonex.Pitch.new(:a, :sharp)`, or
   - `Harmonex.Pitch.new(:a_sharp, -1)`, or
   - `Harmonex.Pitch.new(:a, :sharp, -1)`, or
   - `Harmonex.Pitch.new(%{natural_name: :a, accidental: :sharp, octave: -1})`
 
-You can refer to an interval using either of the following styles of expressions:
+You can refer to an **interval** using either of the following styles of
+expressions:
 
-* A map representing an interval, for example, a doubly-diminished ninth:
+* A **map** representing an interval (a doubly-diminished ninth), for example:
   `%{quality: :doubly_diminished, size: 9}`
-* A struct representing an interval, constructed using `Harmonex.Interval.new`,
-  for example, a perfect unison:
+* A **struct** representing an interval (a perfect unison) — constructed using
+  `Harmonex.Interval.new` — for example:
   - `Harmonex.Interval.new(:perfect, 1)`, or
   - `Harmonex.Interval.new(%{quality: :perfect, size: 1})`
 
-### What can you do with Harmonex?
+### What can you do with _Harmonex_?
 
 Its functions can answer elementary textbook music theory questions such as:
 
@@ -95,7 +99,8 @@ Its functions can answer elementary textbook music theory questions such as:
   **of the chord described by B, D♯, E, and G♯ in E major?**  
   _Answer:_ I<sup>4</sup><span style="position: relative; left: -1ex;"><sub>3</sub>.
 
-Harmonex also will have functions for exploring compositional questions such as:
+_Harmonex_ also will have functions for exploring compositional questions such
+as:
 
 * **What is the set of triads and seventh chords, including enharmonic
   equivalents, that the keys of B Mixolydian and D Lydian have in common?**
