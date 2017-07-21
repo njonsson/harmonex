@@ -69,6 +69,11 @@ Its functions can answer elementary textbook music theory questions such as:
   _Answer:_
   `Harmonex.Interval.from_pitches(:f, :b_double_flat) ==
   %Harmonex.Interval{quality: :diminished, size: 4}`
+* **Is a minor ninth enharmonically narrower or wider than a
+  doubly-augmented octave?**  
+  _Answer:_
+  `Harmonex.Interval.compare(Harmonex.Interval.new(:minor, 9),
+  Harmonex.Interval.new(:doubly_augmented, 8)) == :lt`
 
 ### Functionality still under development
 

@@ -150,6 +150,43 @@ defmodule Harmonex.Interval do
   @invalid_interval "Invalid interval"
 
   @doc """
+  Enharmonically compares the specified `interval1` and `interval2`.
+
+  Enharmonic comparison is made on the basis of `semitones/1`.
+
+  It returns:
+
+  * `:eq` if they are identical or enharmonically equivalent
+  * `:lt` if `interval1` is enharmonically narrower
+  * `:gt` if `interval1` is enharmonically wider
+
+  ## Examples
+
+      iex> Harmonex.Interval.compare %{quality: :perfect, size: 4}, %{quality: :perfect, size: 4}
+      :eq
+
+      iex> Harmonex.Interval.compare %{quality: :major, size: 3}, %{quality: :diminished, size: 4}
+      :eq
+
+      iex> Harmonex.Interval.compare %{quality: :doubly_diminished, size: 6}, %{quality: :doubly_augmented, size: 4}
+      :lt
+
+      iex> Harmonex.Interval.compare %{quality: :minor, size: 10}, %{quality: :major, size: 9}
+      :gt
+  """
+  @spec compare(t, t) :: Harmonex.comparison | Harmonex.error
+  def compare(interval1, interval2) do
+    with semitones1 when is_integer(semitones1) <- interval1 |> semitones,
+         semitones2 when is_integer(semitones2) <- interval2 |> semitones do
+      cond do
+        semitones1 < semitones2 -> :lt
+        semitones2 < semitones1 -> :gt
+        :else                   -> :eq
+      end
+    end
+  end
+
+  @doc """
   Computes the interval between the specified `pitch1` and `pitch2`.
 
   ## Examples

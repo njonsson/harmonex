@@ -81,6 +81,134 @@ defmodule Harmonex.IntervalTest do
   @invalid_pitch_name "Invalid pitch name -- must be in #{inspect @pitch_natural_names}"
   @invalid_pitch_accidental "Invalid accidental -- must be in #{inspect @pitch_accidentals}"
 
+  describe ".compare/1" do
+    test "accepts valid arguments" do
+      expected = :eq
+      for {quality, size} <- @intervals do
+        actual = Interval.compare(%{quality: quality, size: size},
+                                  %{quality: quality, size: size})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid quality in the first argument" do
+      expected = {:error, @invalid_quality}
+
+      actual = Interval.compare(%{quality: :foo,     size: 1},
+                                %{quality: :perfect, size: 1})
+      assert actual == expected
+
+      actual = Interval.compare(%{                   size: 1},
+                                %{quality: :perfect, size: 1})
+      assert actual == expected
+    end
+
+    test "rejects an invalid quality in the second argument" do
+      expected = {:error, @invalid_quality}
+
+      actual = Interval.compare(%{quality: :perfect, size: 1},
+                                %{quality: :foo,     size: 1})
+      assert actual == expected
+
+      actual = Interval.compare(%{quality: :perfect, size: 1},
+                                %{                   size: 1})
+      assert actual == expected
+    end
+
+    test "rejects an invalid size in the first argument" do
+      expected = {:error, @invalid_size}
+
+      for {quality, size} <- @intervals do
+        actual = Interval.compare(%{quality: quality, size: 0},
+                                  %{quality: quality, size: size})
+        assert actual == expected
+
+        actual = Interval.compare(%{quality: quality, size: -3},
+                                  %{quality: quality, size: size})
+        assert actual == expected
+
+        actual = Interval.compare(%{quality: quality},
+                                  %{quality: quality, size: size})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid size in the second argument" do
+      expected = {:error, @invalid_size}
+
+      for {quality, size} <- @intervals do
+        actual = Interval.compare(%{quality: quality, size: size},
+                                  %{quality: quality, size: 0})
+        assert actual == expected
+
+        actual = Interval.compare(%{quality: quality, size: size},
+                                  %{quality: quality, size: -3})
+        assert actual == expected
+
+        actual = Interval.compare(%{quality: quality, size: size},
+                                  %{quality: quality})
+        assert actual == expected
+      end
+    end
+
+    test "rejects an invalid interval in the first argument" do
+      for {quality1, size1} <- @intervals_invalid,
+          {quality2, size2} <- @intervals do
+        if {quality1, size1} in [{:doubly_diminished, 1},
+                                 {:diminished,        1},
+                                 {:doubly_diminished, 2}] do
+          expected = {:error, @invalid_interval}
+
+          actual = Interval.compare(%{quality: quality1, size: size2},
+                                    %{quality: quality2, size: size2})
+          assert actual == expected
+        else
+          {:error, reason} = Interval.compare(%{quality: quality1, size: size1},
+                                              %{quality: quality2, size: size2})
+          assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
+        end
+      end
+
+      expected = {:error,
+                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.compare(%{quality: :perfect, size: 300},
+                                %{quality: :perfect, size:   1})
+      assert actual == expected
+    end
+
+    test "rejects an invalid interval in the second argument" do
+      for {quality1, size1} <- @intervals,
+          {quality2, size2} <- @intervals_invalid do
+        if {quality2, size2} in [{:doubly_diminished, 1},
+                                 {:diminished,        1},
+                                 {:doubly_diminished, 2}] do
+          expected = {:error, @invalid_interval}
+
+          actual = Interval.compare(%{quality: quality1, size: size2},
+                                    %{quality: quality2, size: size2})
+          assert actual == expected
+        else
+          {:error, reason} = Interval.compare(%{quality: quality1, size: size1},
+                                              %{quality: quality2, size: size2})
+          assert reason |> String.match?(~r/^Quality of \w+ must be in \[.+\]$/)
+        end
+      end
+
+      expected = {:error,
+                  "Quality of 300th must be in [:minor, :major, :diminished, :augmented, :doubly_diminished, :doubly_augmented]"}
+      actual = Interval.compare(%{quality: :perfect, size:   1},
+                                %{quality: :perfect, size: 300})
+      assert actual == expected
+    end
+
+    test "correctly handles a minor seventh and a major seventh" do
+      expected = :lt
+      actual = Interval.compare(%{quality: :minor, size: 7},
+                                %{quality: :major, size: 7})
+      assert actual == expected
+    end
+  end
+
   describe ".from_pitches/2" do
     test "correctly handles pitches" do
       expected = %Interval{quality: :diminished, size: 10}
