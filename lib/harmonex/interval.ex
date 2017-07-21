@@ -36,7 +36,7 @@ defmodule Harmonex.Interval do
                 doubly_augmented)a
 
   @typedoc """
-  The unqualified size of an interval.
+  The number of staff lines and spaces spanned by an interval.
   """
   @type size :: pos_integer
 
