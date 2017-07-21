@@ -566,13 +566,13 @@ defmodule Harmonex.IntervalTest do
       expected = {:error, @invalid_size}
 
       for quality <- @qualities do
-        actual = Interval.semitones(%{quality: quality})
-        assert actual == expected
-
         actual = Interval.semitones(%{quality: quality, size: 0})
         assert actual == expected
 
         actual = Interval.semitones(%{quality: quality, size: -3})
+        assert actual == expected
+
+        actual = Interval.semitones(%{quality: quality})
         assert actual == expected
       end
     end
@@ -633,13 +633,13 @@ defmodule Harmonex.IntervalTest do
       expected = {:error, @invalid_size}
 
       for quality <- @qualities do
-        actual = Interval.simple?(%{quality: quality})
-        assert actual == expected
-
         actual = Interval.simple?(%{quality: quality, size: 0})
         assert actual == expected
 
         actual = Interval.simple?(%{quality: quality, size: -3})
+        assert actual == expected
+
+        actual = Interval.simple?(%{quality: quality})
         assert actual == expected
       end
     end
@@ -705,13 +705,13 @@ defmodule Harmonex.IntervalTest do
       expected = {:error, @invalid_size}
 
       for quality <- @qualities do
-        actual = Interval.simplify(%{quality: quality})
-        assert actual == expected
-
         actual = Interval.simplify(%{quality: quality, size: 0})
         assert actual == expected
 
         actual = Interval.simplify(%{quality: quality, size: -3})
+        assert actual == expected
+
+        actual = Interval.simplify(%{quality: quality})
         assert actual == expected
       end
     end
