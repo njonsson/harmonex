@@ -305,7 +305,7 @@ defmodule Harmonex.Pitch do
   @spec enharmonics(t_atom) :: [t_atom] | Harmonex.error
   def enharmonics(pitch) do
     with pitch_struct when is_map(pitch_struct) <- new(pitch) do
-      pitch_struct |> enharmonics |> Enum.map(&(name(&1)))
+      pitch_struct |> enharmonics |> Enum.map(&name/1)
     end
   end
 
