@@ -1714,35 +1714,35 @@ defmodule Harmonex.PitchTest do
 
     test "correctly handles pitches" do
       expected = 17
-      actual = Harmonex.Pitch.semitones(%{natural_name: :a, accidental: :flat,  octave: 4},
-                                        %{natural_name: :c, accidental: :sharp, octave: 6})
+      actual = Pitch.semitones(%{natural_name: :a, accidental: :flat,  octave: 4},
+                               %{natural_name: :c, accidental: :sharp, octave: 6})
       assert actual == expected
-      actual = Harmonex.Pitch.semitones(%{natural_name: :c, accidental: :sharp, octave: 6},
-                                        %{natural_name: :a, accidental: :flat,  octave: 4})
+      actual = Pitch.semitones(%{natural_name: :c, accidental: :sharp, octave: 6},
+                               %{natural_name: :a, accidental: :flat,  octave: 4})
       assert actual == expected
 
       expected = 14
-      actual = Harmonex.Pitch.semitones(%{natural_name: :g, octave: 4},
-                                        %{natural_name: :a, octave: 5})
+      actual = Pitch.semitones(%{natural_name: :g, octave: 4},
+                               %{natural_name: :a, octave: 5})
       assert actual == expected
-      actual = Harmonex.Pitch.semitones(%{natural_name: :a, octave: 5},
-                                        %{natural_name: :g, octave: 4})
-      assert actual == expected
-
-      expected = 2
-      actual = Harmonex.Pitch.semitones(:g, :a)
+      actual = Pitch.semitones(%{natural_name: :a, octave: 5},
+                               %{natural_name: :g, octave: 4})
       assert actual == expected
 
       expected = 2
-      actual = Harmonex.Pitch.semitones(:b_flat, :a_flat)
+      actual = Pitch.semitones(:g, :a)
+      assert actual == expected
+
+      expected = 2
+      actual = Pitch.semitones(:b_flat, :a_flat)
       assert actual == expected
 
       expected = 3
-      actual = Harmonex.Pitch.semitones(:d_double_sharp, :b_double_sharp)
+      actual = Pitch.semitones(:d_double_sharp, :b_double_sharp)
       assert actual == expected
 
       expected = 0
-      actual = Harmonex.Pitch.semitones(:c, :c)
+      actual = Pitch.semitones(:c, :c)
       assert actual == expected
     end
   end
