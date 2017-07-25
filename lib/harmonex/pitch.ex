@@ -37,8 +37,8 @@ defmodule Harmonex.Pitch do
   @typedoc """
   The name of a pitch whose accidental is ♮ (natural).
   """
-  @type     natural_name :: :a  | :b  | :c  | :d  | :e  | :f  | :g
-  @position_by_natural_name [a: 0, b: 2, c: 3, d: 5, e: 7, f: 8, g: 10]
+  @type     natural_name :: :c  | :d  | :e  | :f  | :g  | :a  | :b
+  @position_by_natural_name [c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11]
   @natural_names @position_by_natural_name |> Keyword.keys
   @natural_names_count @natural_names |> length
 
@@ -58,7 +58,7 @@ defmodule Harmonex.Pitch do
   """
   @type octave :: integer | nil
 
-  @invalid_name "Invalid pitch name -- must be in #{inspect @natural_names}"
+  @invalid_name "Invalid pitch name -- must be in #{inspect Enum.sort(@natural_names)}"
   @invalid_accidental_or_octave "Invalid accidental or octave -- must be in #{inspect @accidentals} or be an integer"
   @invalid_accidental "Invalid accidental -- must be in #{inspect @accidentals}"
   @invalid_octave "Invalid octave -- must be an integer"
@@ -181,8 +181,8 @@ defmodule Harmonex.Pitch do
   * `:lt` if `pitch1` is enharmonically lower
   * `:gt` if `pitch1` is enharmonically higher
 
-  If either specified pitch has an octave (see `Harmonex.Pitch.octave/1`) of
-  `nil` then the pitches are assumed to be in the same octave.
+  If either specified pitch is missing an octave (see `octave/1`) then octaves
+  are ignored and the smaller of the two intervals between them is measured.
 
   ## Examples
 
@@ -203,15 +203,23 @@ defmodule Harmonex.Pitch do
 
       iex> Harmonex.Pitch.compare :a, :a_sharp
       :lt
+#{ # TODO: Make this pass using `Interval.invert/1`
+   # iex> Harmonex.Pitch.compare :a, :d_sharp
+   # :lt
+
+}
+      iex> Harmonex.Pitch.compare :a, :d_double_sharp
+      :gt
 
       iex> Harmonex.Pitch.compare :a, :a
       :eq
   """
   @spec compare(t, t) :: Harmonex.comparison | Harmonex.error
   def compare(pitch1, pitch2) do
-    case compare_with_semitones(pitch1, pitch2) do
-      %{comparison: comparison} -> comparison
-      other                     -> other
+    with pitch1_struct when is_map(pitch1_struct) <- new(pitch1),
+         pitch2_struct when is_map(pitch2_struct) <- new(pitch2) do
+      {comparison, _} = compare_with_semitones(pitch1, pitch2)
+      comparison
     end
   end
 
@@ -219,8 +227,8 @@ defmodule Harmonex.Pitch do
   Determines whether the specified `pitch1` and `pitch2` are enharmonically
   equivalent.
 
-  If either specified pitch has an octave (see `Harmonex.Pitch.octave/1`) of
-  `nil` then the pitches are assumed to be in the same octave.
+  If either specified pitch is missing an octave (see `octave/1`) then octaves
+  are ignored.
 
   ## Examples
 
@@ -272,16 +280,18 @@ defmodule Harmonex.Pitch do
   @spec enharmonics(t_map) :: [pitch] | Harmonex.error
   def enharmonics(pitch) when is_map(pitch) do
     with pitch_name when is_atom(pitch_name) <- name(pitch) do
+      pitch_octave  = octave(pitch)
+      pitch_natural_name = natural_name(pitch)
       pitch_name |> position
+                 |> Integer.mod(12)
                  |> names_at
                  |> Enum.reject(&(&1 == pitch_name))
                  |> Enum.map(fn enharmonic_name ->
-                      pitch_octave = pitch |> octave
                       if pitch_octave |> is_nil do
                         enharmonic_name |> new
                       else
-                        octave = if (natural_name(pitch) < :c) &&
-                                    (:c <= natural_name(enharmonic_name)) do
+                        octave = if (pitch_natural_name in [:a, :b]) &&
+                                    (natural_name(enharmonic_name) in [:c, :d]) do
                                    pitch_octave + 1
                                  else
                                    pitch_octave
@@ -302,6 +312,9 @@ defmodule Harmonex.Pitch do
   @doc """
   Computes the interval between the specified `pitch1` and `pitch2`. Equivalent
   to `Harmonex.Interval.from_pitches/2`.
+
+  If either specified pitch is missing an octave (see `octave/1`) then octaves
+  are ignored and the smaller of the two intervals between them is computed.
 
   ## Examples
 
@@ -568,22 +581,29 @@ defmodule Harmonex.Pitch do
   Computes the distance in half steps between the specified `pitch1` and
   `pitch2`.
 
+  If either specified pitch is missing an octave (see `octave/1`) then octaves
+  are ignored and the smaller of the two intervals between them is measured.
+
   ## Examples
 
       iex> Harmonex.Pitch.semitones %{natural_name: :a, accidental: :flat, octave: 4}, %{natural_name: :c, accidental: :sharp, octave: 6}
       17
 
-      iex> Harmonex.Pitch.semitones :b_flat, :a_flat
-      2
+      iex> Harmonex.Pitch.semitones %{natural_name: :a, octave: 5}, :d_sharp
+      6
+
+      iex> Harmonex.Pitch.semitones :a, :d_double_sharp
+      5
 
       iex> Harmonex.Pitch.semitones :c, :c
       0
   """
   @spec semitones(t, t) :: Interval.semitones | Harmonex.error
   def semitones(pitch1, pitch2) do
-    case compare_with_semitones(pitch1, pitch2) do
-      %{semitones: semitones} -> semitones
-      other                   -> other
+    with pitch1_struct when is_map(pitch1_struct) <- new(pitch1),
+         pitch2_struct when is_map(pitch2_struct) <- new(pitch2) do
+      {_, semitones} = compare_with_semitones(pitch1, pitch2)
+      semitones
     end
   end
 
@@ -599,52 +619,27 @@ defmodule Harmonex.Pitch do
 
   @spec compare_with_semitones(t, t) :: {Harmonex.comparison, Interval.semitones} | Harmonex.error
   defp compare_with_semitones(pitch1, pitch2) do
-    with pitch1_name when is_atom(pitch1_name) <- name(pitch1),
-         pitch2_name when is_atom(pitch2_name) <- name(pitch2),
-         pitch1_position                       <- position(pitch1_name),
-         pitch1_octave                         <- octave(pitch1),
-         pitch2_position                       <- position(pitch2_name),
-         pitch2_octave                         <- octave(pitch2),
-         positions_diff                        <- pitch1_position -
-                                                  pitch2_position,
-         positions_diff_inverse                <- 12 - positions_diff,
-         semitones_simple                      <- min(abs(positions_diff),
-                                                      abs(positions_diff_inverse)) do
-      if is_nil(pitch1_octave) || is_nil(pitch2_octave) do
-        semitones_simple_inverse = 12 - semitones_simple
-        semitones = min(semitones_simple, semitones_simple_inverse)
-        comparison = cond do
-          pitch1_position < pitch2_position ->
-            :lt
-          pitch2_position < pitch1_position ->
-            :gt
-          :else ->
-            :eq
-        end
-        %{comparison: comparison, semitones: semitones}
-      else
-        octaves_diff_naive = pitch2_octave - pitch1_octave
-        octaves_diff = if (natural_name(pitch1) < :c) &&
-                          (:c <= natural_name(pitch2)) do
-                         octaves_diff_naive - 1
-                       else
-                         octaves_diff_naive
-                       end
-        comparison = cond do
-                       octaves_diff < 0 ->
-                         :gt
-                       0 < octaves_diff ->
-                         :lt
-                       :else ->
-                         cond do
-                           pitch1_position < pitch2_position -> :lt
-                           pitch2_position < pitch1_position -> :gt
-                           :else                             -> :eq
-                         end
-                     end
-        semitones = (semitones_simple + (octaves_diff * 12)) |> abs
-        %{comparison: comparison, semitones: semitones}
-      end
+    pitch1_position = position(pitch1)
+    pitch2_position = position(pitch2)
+    if is_nil(octave(pitch1)) || is_nil(octave(pitch2)) do
+      pitch1_position_simple = pitch1_position |> Integer.mod(12)
+      pitch2_position_simple = pitch2_position |> Integer.mod(12)
+      positions_diff = abs(pitch1_position_simple - pitch2_position_simple)
+      semitones = min(positions_diff, 12 - positions_diff)
+      comparison = cond do
+                     pitch1_position_simple < pitch2_position_simple -> :lt
+                     pitch2_position_simple < pitch1_position_simple -> :gt
+                     :else                                           -> :eq
+                   end
+      {comparison, semitones}
+    else
+      comparison = cond do
+                     pitch1_position < pitch2_position -> :lt
+                     pitch2_position < pitch1_position -> :gt
+                     :else                             -> :eq
+                   end
+      semitones = abs(pitch1_position - pitch2_position)
+      {comparison, semitones}
     end
   end
 
@@ -668,23 +663,27 @@ defmodule Harmonex.Pitch do
                                          fn({accidental, offset}, inner_acc) ->
       name = :"#{natural_name}_#{accidental}"
       altered_position = Integer.mod(position + offset, 12)
-
-      # Tweak the order of enharmonic groups that wrap around G-A.
-      insert_at = case name do
-                    :g_natural      ->  1
-                    :g_sharp        -> -1
-                    :f_double_sharp -> -1
-                    :g_double_sharp -> -1
-                    _               ->  0
-                  end
-
       inner_acc |> Map.put_new(altered_position, [])
-                |> Map.update!(altered_position,
-                               &(&1 |> List.insert_at(insert_at, name)))
+                |> Map.update!(altered_position, &([name | &1]))
     end)
   end)
   for {position, names} <- name_list_by_position do
-    defp names_at(unquote(position)), do: unquote(Enum.reverse(names))
+    # Tweak the order of enharmonic groups that wrap around G-A.
+    sorted_names = names |> Enum.sort(fn(name1, name2) ->
+      natural_name1 = name1 |> Atom.to_string |> String.at(0)
+      natural_name2 = name2 |> Atom.to_string |> String.at(0)
+      cond do
+        (natural_name1 == "f" && natural_name2 == "a") ||
+        (natural_name1 == "g" && natural_name2 in ~w( a b )) ->
+          true
+        (natural_name2 == "f" && natural_name1 == "a") ||
+        (natural_name2 == "g" && natural_name1 in ~w( a b )) ->
+          false
+        :else ->
+          name1 <= name2
+      end
+    end)
+    defp names_at(unquote(position)), do: unquote(sorted_names)
   end
 
   @spec position(t_atom) :: 0..11
@@ -695,8 +694,15 @@ defmodule Harmonex.Pitch do
   for {natural_name, position} <- @position_by_natural_name,
       {accidental, offset} <- @accidental_by_offset do
     name = :"#{natural_name}_#{accidental}"
-    defp position(unquote(name)) do
-      unquote(position + offset) |> Integer.mod(12)
+    defp position(unquote(name)), do: unquote(position + offset)
+  end
+
+  @spec position(t_map) :: integer | Harmonex.error
+  defp position(pitch) do
+    pitch_position_simple = pitch |> name |> position
+    case octave(pitch) do
+      nil          -> pitch_position_simple
+      pitch_octave -> pitch_position_simple + (pitch_octave * 12)
     end
   end
 

@@ -72,13 +72,13 @@ defmodule Harmonex.IntervalTest do
                       perfect: 6,
                       perfect: 7]
 
-  @pitch_natural_names ~w(a b c d e f g)a
+  @pitch_natural_names ~w(c d e f g a b)a
   @pitch_accidentals ~w(double_flat flat natural sharp double_sharp)a
 
   @invalid_quality "Invalid quality -- must be in #{inspect @qualities}"
   @invalid_size "Size must be a positive integer"
   @invalid_interval "Invalid interval"
-  @invalid_pitch_name "Invalid pitch name -- must be in #{inspect @pitch_natural_names}"
+  @invalid_pitch_name "Invalid pitch name -- must be in #{inspect Enum.sort(@pitch_natural_names)}"
   @invalid_pitch_accidental "Invalid accidental -- must be in #{inspect @pitch_accidentals}"
 
   describe ".compare/1" do

@@ -189,6 +189,10 @@ defmodule Harmonex.Interval do
   @doc """
   Computes the interval between the specified `pitch1` and `pitch2`.
 
+  If either specified pitch is missing an octave (see `Harmonex.Pitch.octave/1`)
+  then octaves are ignored and the smaller of the two intervals between them is
+  computed.
+
   ## Examples
 
       iex> Harmonex.Interval.from_pitches %{natural_name: :a, accidental: :sharp, octave: 4}, %{natural_name: :c, octave: 6}

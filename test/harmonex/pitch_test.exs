@@ -5,11 +5,11 @@ defmodule Harmonex.PitchTest do
 
   doctest Pitch
 
-  @natural_names ~w(a b c d e f g)a
+  @natural_names ~w(c d e f g a b)a
   @accidentals ~w(double_flat flat natural sharp double_sharp)a
   @octaves [-100, -1, 0, 1, 100]
 
-  @invalid_name "Invalid pitch name -- must be in #{inspect @natural_names}"
+  @invalid_name "Invalid pitch name -- must be in #{inspect Enum.sort(@natural_names)}"
   @invalid_accidental_or_octave "Invalid accidental or octave -- must be in #{inspect @accidentals} or be an integer"
   @invalid_accidental "Invalid accidental -- must be in #{inspect @accidentals}"
   @invalid_octave "Invalid octave -- must be an integer"
@@ -580,27 +580,63 @@ defmodule Harmonex.PitchTest do
       assert actual == expected
     end
 
-    test "correctly handles G-sharp and A-flat" do
-      expected = :eq
-
-      actual = Pitch.compare(%{natural_name: :g, accidental: :sharp, octave: 5},
-                             %{natural_name: :a, accidental: :flat,  octave: 5})
-      assert actual == expected
-
-      actual = Pitch.compare(%{natural_name: :g, accidental: :sharp, octave: 5},
-                             %{natural_name: :a, accidental: :flat})
-      assert actual == expected
-
-      actual = Pitch.compare(:g_sharp,
-                             %{natural_name: :a, accidental: :flat, octave: 5})
-      assert actual == expected
-
-      actual = Pitch.compare(:g_sharp, :a_flat)
-      assert actual == expected
-
+    test "correctly handles G-sharp and A-natural" do
       expected = :lt
+
       actual = Pitch.compare(%{natural_name: :g, accidental: :sharp, octave: 5},
-                             %{natural_name: :a, accidental: :flat,  octave: 6})
+                             %{natural_name: :a,                     octave: 5})
+      assert actual == expected
+
+      actual = Pitch.compare(%{natural_name: :g, accidental: :sharp, octave: 5},
+                             %{natural_name: :a})
+      assert actual == expected
+
+      actual = Pitch.compare(:g_sharp, %{natural_name: :a, octave: 5})
+      assert actual == expected
+
+      actual = Pitch.compare(:g_sharp, :a)
+      assert actual == expected
+    end
+
+    test "correctly handles A-natural and D-sharp" do
+      expected = :lt
+
+      actual = Pitch.compare(%{natural_name: :a,                     octave: 5},
+                             %{natural_name: :d, accidental: :sharp, octave: 6})
+      assert actual == expected
+
+      # TODO: Make this pass using `Interval.invert/1`
+      # actual = Pitch.compare(%{natural_name: :a,                     octave: 5},
+      #                        %{natural_name: :d, accidental: :sharp})
+      # assert actual == expected
+
+      # TODO: Make this pass using `Interval.invert/1`
+      # actual = Pitch.compare(:a,
+      #                        %{natural_name: :d, accidental: :sharp, octave: 6})
+      # assert actual == expected
+
+      # TODO: Make this pass using `Interval.invert/1`
+      # actual = Pitch.compare(:a, :d_sharp)
+      # assert actual == expected
+    end
+
+    test "correctly handles A-natural and D-double-sharp" do
+      expected = :lt
+      actual = Pitch.compare(%{natural_name: :a,                            octave: 5},
+                             %{natural_name: :d, accidental: :double_sharp, octave: 6})
+      assert actual == expected
+
+      expected = :gt
+
+      actual = Pitch.compare(%{natural_name: :a,                            octave: 5},
+                             %{natural_name: :d, accidental: :double_sharp})
+      assert actual == expected
+
+      actual = Pitch.compare(:a,
+                             %{natural_name: :d, accidental: :double_sharp, octave: 6})
+      assert actual == expected
+
+      actual = Pitch.compare(:a, :d_double_sharp)
       assert actual == expected
     end
   end
@@ -1084,6 +1120,17 @@ defmodule Harmonex.PitchTest do
 
       expected = [:a_flat]
       actual = Pitch.enharmonics(:g_sharp)
+      assert actual == expected
+    end
+
+    test "correctly handles A-natural" do
+      expected = [%Pitch{natural_name: :g, accidental: :double_sharp, octave: 4},
+                  %Pitch{natural_name: :b, accidental: :double_flat,  octave: 4}]
+      actual = Pitch.enharmonics(%{natural_name: :a, octave: 4})
+      assert actual == expected
+
+      expected = [:g_double_sharp, :b_double_flat]
+      actual = Pitch.enharmonics(:a)
       assert actual == expected
     end
   end
@@ -1680,6 +1727,10 @@ defmodule Harmonex.PitchTest do
       assert actual == expected
       actual = Harmonex.Pitch.semitones(%{natural_name: :a, octave: 5},
                                         %{natural_name: :g, octave: 4})
+      assert actual == expected
+
+      expected = 2
+      actual = Harmonex.Pitch.semitones(:g, :a)
       assert actual == expected
 
       expected = 2
