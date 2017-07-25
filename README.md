@@ -130,7 +130,7 @@ dependencies in your project’s _mix.exs_ file:
 
 # ...
 def deps do
-  [{:harmonex, "~> 0.6.0"}]
+  [{:harmonex, "~> 0.6.1"}]
 end
 # ...
 ```
