@@ -1,5 +1,9 @@
 # Version history for the _Harmonex_ project
 
+## <a name="v0.6.1"></a>v0.6.1, Mon 7/24/2017
+
+* Fix a defect in Pitch.compare/2, .enharmonics/1, and .semitones/2
+
 ## <a name="v0.6.0"></a>v0.6.0, Thu 7/20/2017
 
 * Enhance _Pitch_ to let it represent both pitch classes and pitches by adding a
