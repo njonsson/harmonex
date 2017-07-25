@@ -2,7 +2,7 @@
 
 ## <a name="v0.6.1"></a>v0.6.1, Mon 7/24/2017
 
-* Fix a defect in Pitch.compare/2, .enharmonics/1, and .semitones/2
+* Fix a defect in _Pitch.compare/2_, _.enharmonics/1_, and _.semitones/2_
 
 ## <a name="v0.6.0"></a>v0.6.0, Thu 7/20/2017
 
