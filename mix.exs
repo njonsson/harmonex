@@ -48,7 +48,7 @@ defmodule Harmonex.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:dialyxir,    "~> 0.5",  only: :dev,  runtime: false},
+    [{:dialyxir,    "~> 1.0",  only: :dev,  runtime: false},
      {:excoveralls, "~> 0.7",  only: :test, runtime: false},
      {:ex_doc,      "~> 0.16", only: :dev,  runtime: false}]
   end
